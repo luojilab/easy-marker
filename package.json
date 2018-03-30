@@ -1,5 +1,5 @@
 {
-  "name": "@luojilab/easy-mark",
+  "name": "@luojilab/easy-marker",
   "version": "0.1.0",
   "description": "Easy marker",
   "main": "dist/easy-marker.esm.js",
