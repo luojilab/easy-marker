@@ -35,5 +35,5 @@
     "rollup-plugin-commonjs": "^8.3.0",
     "rollup-plugin-node-resolve": "^3.0.2",
     "rollup-plugin-uglify": "^3.0.0"
-  },
+  }
 }
