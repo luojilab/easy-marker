@@ -4,10 +4,16 @@
   "description": "",
   "main": "dist/easy-marker.esm.js",
   "scripts": {
-    "build": "rollup -f es -o dist/easy-marker.esm.js -i lib/easy_marker.js -n EasyMarker && rollup -c build/rollup.config.js",
+    "build": "rollup -c build/esm.rollup.config.js && rollup -c build/rollup.config.js",
     "test": "rollup -f iife -o dist/test.js -i test.js -n test",
     "doc":"rm -f api.md && jsdoc2md  lib/easy_marker.js >> api.md"
   },
+  "files":[
+    "dist",
+    "lib",
+    "api.md",
+    "build"
+  ],
   "author": "",
   "license": "ISC",
   "devDependencies": {
