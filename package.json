@@ -1,14 +1,14 @@
 {
   "name": "@luojilab/easy-marker",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Easy marker",
   "main": "dist/easy-marker.esm.js",
   "scripts": {
     "build": "rollup -c build/esm.rollup.config.js && rollup -c build/rollup.config.js",
     "test": "rollup -f iife -o dist/test.js -i test.js -n test",
-    "doc":"rm -f api.md && jsdoc2md  lib/easy_marker.js >> api.md"
+    "doc": "rm -f api.md && jsdoc2md  lib/easy_marker.js >> api.md"
   },
-  "files":[
+  "files": [
     "dist",
     "lib",
     "api.md",
