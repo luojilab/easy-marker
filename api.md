@@ -15,6 +15,7 @@ A simple article  marker library
         * [.highlightLines(lines)](#EasyMarker+highlightLines)
         * [.cancelHighlightLine(id)](#EasyMarker+cancelHighlightLine) ⇒ <code>boolean</code>
         * [.onHighlightLineClick(cb)](#EasyMarker+onHighlightLineClick)
+        * [.destroy()](#EasyMarker+destroy)
     * _static_
         * [.create(containerElement, [scrollContainerElement], [excludeElements])](#EasyMarker.create) ⇒ [<code>EasyMarker</code>](#EasyMarker)
     * _inner_
@@ -162,6 +163,12 @@ Highlight line click handler
 | --- | --- |
 | cb | [<code>highlightLineClickHandler</code>](#EasyMarker..highlightLineClickHandler) | 
 
+<a name="EasyMarker+destroy"></a>
+
+### easyMarker.destroy()
+Destroy instance
+
+**Kind**: instance method of [<code>EasyMarker</code>](#EasyMarker)  
 <a name="EasyMarker.create"></a>
 
 ### EasyMarker.create(containerElement, [scrollContainerElement], [excludeElements]) ⇒ [<code>EasyMarker</code>](#EasyMarker)
@@ -199,11 +206,11 @@ Menu item click handler
 
 | Param | Type | Description |
 | --- | --- | --- |
+| id | <code>\*</code> | line ID |
+| meta | <code>\*</code> | meta information |
 | selection | <code>Object</code> | selection |
 | selection.anchorNode | <code>Node</code> | start node |
 | selection.anchorOffset | <code>number</code> | start node's text offset |
 | selection.focusNode | <code>Node</code> | end node |
 | selection.focusOffset | <code>number</code> | start node's text offset |
-| id | <code>\*</code> | line ID |
-| meta | <code>\*</code> | meta information |
 
