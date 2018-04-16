@@ -6,7 +6,7 @@
   "scripts": {
     "build": "rollup -c build/esm.rollup.config.js && rollup -c build/rollup.config.js",
     "test": "rollup -f iife -o dist/test.js -i test.js -n test",
-    "doc": "rm -f api.md && jsdoc2md  lib/easy_marker.js >> api.md"
+    "doc": "jsdoc2md  lib/easy_marker.js > api.md"
   },
   "files": [
     "dist",
