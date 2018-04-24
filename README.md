@@ -3,13 +3,13 @@ easy-marker
 
 ## Install 
 ```bash
-npm i @luojilab/easy-marker
+npm i easy-marker
 ```
 
 ## Usage
 
 ```js
-import EasyMarker from '@luojilab/easy-marker'
+import EasyMarker from 'easy-marker'
 
 const easyMarker = new EasyMarker
 const container = document.querySelector('xxxx')
