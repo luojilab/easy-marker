@@ -15,6 +15,7 @@ A simple article  marker library
         * [.highlightLines(lines)](#EasyMarker+highlightLines)
         * [.cancelHighlightLine(id)](#EasyMarker+cancelHighlightLine) ⇒ <code>boolean</code>
         * [.onHighlightLineClick(cb)](#EasyMarker+onHighlightLineClick)
+        * [.registerEventHook(cb)](#EasyMarker+registerEventHook)
         * [.destroy()](#EasyMarker+destroy)
     * _static_
         * [.create(containerElement, [scrollContainerElement], [excludeElements])](#EasyMarker.create) ⇒ [<code>EasyMarker</code>](#EasyMarker)
@@ -162,6 +163,17 @@ Highlight line click handler
 | Param | Type |
 | --- | --- |
 | cb | [<code>highlightLineClickHandler</code>](#EasyMarker..highlightLineClickHandler) | 
+
+<a name="EasyMarker+registerEventHook"></a>
+
+### easyMarker.registerEventHook(cb)
+Register event hook
+
+**Kind**: instance method of [<code>EasyMarker</code>](#EasyMarker)  
+
+| Param | Type |
+| --- | --- |
+| cb | <code>\*</code> | 
 
 <a name="EasyMarker+destroy"></a>
 
