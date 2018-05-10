@@ -17,20 +17,22 @@ export default {
       jsnext: true,
     }),
     commonjs({
-      include: 'node_modules/@babel/runtime/**',
+      include: 'node_modules/babel-runtime/**',
     }),
     babel({
       runtimeHelpers: true,
       presets: [
         [
-          '@babel/preset-env', {
-            targets: { browsers: ['android>=4', 'ios>=7'] },
+          'env', {
+            targets: { browsers: ['android>=4', 'ios>=8'] },
             modules: false,
           },
         ],
       ],
       plugins: [
-        ['@babel/plugin-transform-runtime', { useBuiltIns: true }],
+        ['transform-runtime', {
+          polyfill: true,
+        }],
       ],
     }),
   ],
