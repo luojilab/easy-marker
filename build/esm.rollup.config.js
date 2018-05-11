@@ -33,6 +33,7 @@ export default {
       plugins: [
         ['transform-runtime'],
       ],
+      exclude: 'node_modules/**',
     }),
   ],
 }
