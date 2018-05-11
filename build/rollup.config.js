@@ -17,7 +17,7 @@ export default {
       jsnext: true,
     }),
     commonjs({
-      include: 'node_modules/babel-runtime/**',
+      include: 'node_modules/**',
     }),
     babel({
       runtimeHelpers: true,
@@ -30,9 +30,7 @@ export default {
         ],
       ],
       plugins: [
-        ['transform-runtime', {
-          polyfill: true,
-        }],
+        ['transform-runtime'],
       ],
     }),
   ],
