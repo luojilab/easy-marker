@@ -36,6 +36,10 @@ Creates an instance of EasyMarker.
 | options.menuItems[].text | <code>string</code> | menu text |
 | options.menuItems[].handler | [<code>menuClickHandler</code>](#EasyMarker..menuClickHandler) | menu item click handler |
 | options.menuTopOffset | <code>number</code> \| <code>string</code> | the offset from the top of the menu relative screen, default 0. |
+| options.menuStyle | <code>Object</code> | the menu style |
+| options.menuStyle.menu | <code>Object</code> | the menu style |
+| options.menuStyle.triangle | <code>Object</code> | the triangle style |
+| options.menuStyle.item | <code>Object</code> | the sub menu style |
 
 **Example**  
 ```js
