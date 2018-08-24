@@ -29,6 +29,8 @@ easyMarker.create(container)
         * [.highlightLines(lines)](#EasyMarker+highlightLines)
         * [.cancelHighlightLine(id)](#EasyMarker+cancelHighlightLine) ⇒ <code>boolean</code>
         * [.onHighlightLineClick(cb)](#EasyMarker+onHighlightLineClick)
+        * [.onSelectStatusChange(cb)](#EasyMarker+onSelectStatusChange)
+        * [.registerEventHook(cb)](#EasyMarker+registerEventHook)
         * [.destroy()](#EasyMarker+destroy)
     * _static_
         * [.create(containerElement, [scrollContainerElement], [excludeElements])](#EasyMarker.create) ⇒ [<code>EasyMarker</code>](#EasyMarker)
@@ -49,6 +51,13 @@ Creates an instance of EasyMarker.
 | options.menuItems[].text | <code>string</code> | menu text |
 | options.menuItems[].handler | [<code>menuClickHandler</code>](#EasyMarker..menuClickHandler) | menu item click handler |
 | options.menuTopOffset | <code>number</code> \| <code>string</code> | the offset from the top of the menu relative screen, default 0. |
+| options.menuStyle | <code>Object</code> | the menu style |
+| options.menuStyle.menu | <code>Object</code> | the menu style |
+| options.menuStyle.triangle | <code>Object</code> | the triangle style |
+| options.menuStyle.item | <code>Object</code> | the sub menu style |
+| options.disableTapHighlight | <code>Object</code> | disable highlight when tap |
+| options.cursor | <code>Object</code> | cursor config |
+| options.cursor.same | <code>Object</code> | whether the cursor is in the same direction |
 
 **Example**  
 ```js
@@ -176,6 +185,28 @@ Highlight line click handler
 | Param | Type |
 | --- | --- |
 | cb | [<code>highlightLineClickHandler</code>](#EasyMarker..highlightLineClickHandler) | 
+
+<a name="EasyMarker+onSelectStatusChange"></a>
+
+### easyMarker.onSelectStatusChange(cb)
+Select status changing callback
+
+**Kind**: instance method of [<code>EasyMarker</code>](#EasyMarker)  
+
+| Param | Type |
+| --- | --- |
+| cb | <code>function</code> | 
+
+<a name="EasyMarker+registerEventHook"></a>
+
+### easyMarker.registerEventHook(cb)
+Register event hook
+
+**Kind**: instance method of [<code>EasyMarker</code>](#EasyMarker)  
+
+| Param | Type |
+| --- | --- |
+| cb | <code>\*</code> | 
 
 <a name="EasyMarker+destroy"></a>
 

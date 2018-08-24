@@ -15,6 +15,7 @@ A simple article  marker library
         * [.highlightLines(lines)](#EasyMarker+highlightLines)
         * [.cancelHighlightLine(id)](#EasyMarker+cancelHighlightLine) ⇒ <code>boolean</code>
         * [.onHighlightLineClick(cb)](#EasyMarker+onHighlightLineClick)
+        * [.onSelectStatusChange(cb)](#EasyMarker+onSelectStatusChange)
         * [.registerEventHook(cb)](#EasyMarker+registerEventHook)
         * [.destroy()](#EasyMarker+destroy)
     * _static_
@@ -40,6 +41,9 @@ Creates an instance of EasyMarker.
 | options.menuStyle.menu | <code>Object</code> | the menu style |
 | options.menuStyle.triangle | <code>Object</code> | the triangle style |
 | options.menuStyle.item | <code>Object</code> | the sub menu style |
+| options.disableTapHighlight | <code>Object</code> | disable highlight when tap |
+| options.cursor | <code>Object</code> | cursor config |
+| options.cursor.same | <code>Object</code> | whether the cursor is in the same direction |
 
 **Example**  
 ```js
@@ -167,6 +171,17 @@ Highlight line click handler
 | Param | Type |
 | --- | --- |
 | cb | [<code>highlightLineClickHandler</code>](#EasyMarker..highlightLineClickHandler) | 
+
+<a name="EasyMarker+onSelectStatusChange"></a>
+
+### easyMarker.onSelectStatusChange(cb)
+Select status changing callback
+
+**Kind**: instance method of [<code>EasyMarker</code>](#EasyMarker)  
+
+| Param | Type |
+| --- | --- |
+| cb | <code>function</code> | 
 
 <a name="EasyMarker+registerEventHook"></a>
 
