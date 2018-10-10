@@ -62,7 +62,7 @@ Creates an instance of EasyMarker.
 | options.scrollOffsetBottom | <code>number|string</code> | The distance from the bottom when triggering scrolling，default 100 |
 | options.markdownOption | <code>Object</code> | markdown option |
 | options.markdownOption.isReplaceAllOptions | <code>Boolean</code> | Whether to directly replace the default configuration, default false |
-| options.markdownOption.generalWrapMarkdown | <code>Function</code> | Universal method for handling Markdown |
+| options.markdownOption.generalWrapMarkdown | [<code>Function</code>](#EasyMarker..generalWrapMarkdown) | Universal method for handling Markdown |
 | options.markdownOption.options | <code>Object</code> | Mapping relations between HTML and Markdown |
 
 **Example**  
@@ -309,3 +309,16 @@ Menu item click handler
 | selection.focusNode | <code>Node</code> | end node |
 | selection.focusOffset | <code>number</code> | start node's text offset |
 
+<a name="EasyMarker..generalWrapMarkdown"></a>
+
+### EasyMarker~generalWrapMarkdown : <code>function</code>
+Universal method for handling Markdown 
+
+**Kind**: inner typedef of [<code>EasyMarker</code>](#EasyMarker)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| node | <code>Node</code> | current node |
+| options | <code>Object</code> | Mapping relations between HTML and Markdown |
+| container | <code>Node</code> | container node |
+| positionType | <code>Node</code> | current position of the node, 'start' or 'end' |
