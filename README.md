@@ -311,14 +311,14 @@ Menu item click handler
 
 <a name="EasyMarker..generalWrapMarkdown"></a>
 
-### EasyMarker~generalWrapMarkdown : <code>function</code>
+### EasyMarker~markdownOption~generalWrapMarkdown : <code>function</code>
 Universal method for handling Markdown 
 
-**Kind**: inner typedef of [<code>EasyMarker</code>](#EasyMarker)  
+**Kind**: inner typedef of [<code>EasyMarker.markdownOption</code>](#EasyMarker)  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | node | <code>Node</code> | current node |
 | options | <code>Object</code> | Mapping relations between HTML and Markdown |
 | container | <code>Node</code> | container node |
-| positionType | <code>Node</code> | current position of the node, 'start' or 'end' |
+| positionType | <code>string</code> | current position of the node, 'start' || 'end' |
