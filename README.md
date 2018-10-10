@@ -59,7 +59,7 @@ Creates an instance of EasyMarker.
 | options.cursor | <code>Object</code> | cursor config |
 | options.cursor.same | <code>Object</code> | whether the cursor is in the same direction |
 | options.scrollSpeedLevel | <code>number</code> | The speed of scrolling when touching bottom, default 4 |
-| options.scrollOffsetBottom | <code>number|string</code> | The distance from the bottom when triggering scrolling，default 100 |
+| options.scrollOffsetBottom | <code>number</code> \| <code>string</code> | The distance from the bottom when triggering scrolling，default 100 |
 | options.markdownOption | <code>Object</code> | markdown option |
 | options.markdownOption.isReplaceAllOptions | <code>Boolean</code> | Whether to directly replace the default configuration, default false |
 | options.markdownOption.generalWrapMarkdown | [<code>Function</code>](#EasyMarker..generalWrapMarkdown) | Universal method for handling Markdown |
