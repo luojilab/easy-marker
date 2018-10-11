@@ -60,13 +60,11 @@ Creates an instance of EasyMarker.
 | options.cursor.same | <code>Object</code> | whether the cursor is in the same direction |
 | options.scrollSpeedLevel | <code>number</code> | The speed of scrolling when touching bottom, default 4 |
 | options.scrollOffsetBottom | <code>number</code> \| <code>string</code> | The distance from the bottom when triggering scrolling，default 100 |
-| options.markdownOption | <code>Object</code> | markdown option |
-| options.markdownOption.isReplaceAllOptions | <code>Boolean</code> | Whether to directly replace the default configuration, default false |
-| options.markdownOption.generalWrapMarkdown | [<code>Function</code>](#EasyMarker..generalWrapMarkdown) | Universal method for handling Markdown |
-| options.markdownOption.options | <code>Object</code> | Mapping relations between HTML and Markdown |
+| options.markdownOptions | <code>Array.&lt;Object&gt;</code> | Customize options about the mapping relations between HTML and Markdown |
 
 **Example**  
 ```js
+// A simple example
 const em = new EasyMarker({
   menuTopOffset:'2rem',
   menuItems: [
@@ -83,7 +81,7 @@ const em = new EasyMarker({
     },
     {
       text: '复制',
-      handler: (data) => {console.log('复制',data)}
+      handler: (data) => {console.log('分享',data)}
     }
   ]
  )
@@ -91,51 +89,38 @@ const em = new EasyMarker({
  em.create(document.querySelector('.article-body'),
    document.body,
    document.querySelectorAll('.article-body>:not(.text)')
-```
 
-**Complex Example**  
-```js
- const em = new EasyMarker({
-  menuTopOffset:'2rem',
-  scrollSpeedLevel: 6,
-  scrollOffsetBottom: '1.5rem',
-  menuItems: [
-    {
-      text: '划线笔记',
-      handler: function (data) {
-        console.log('划线笔记', data)
-        this.highlightLine(data,1)
-      }
-    },
-    {
-      text: '分享',
-      handler: (data) => { console.log(data.toMarkdown())}
-    },
-    {
-      text: '复制',
-      handler: (data) => {
-        console.log('复制',data.toString())
-      }
-    }
-  ],
-  markdownOption: {
-    isReplaceAllOptions: false,
-    generalWrapMarkdown: (node, options, positionType) => {
-      return ''
-    },
-    options: {
-      IMG: {
-        wrapMarkdown: (node, positionType) => {
-          return `![${node.alt}](${node.src}?size=${node.width}x${node.height})\n\n`
-        },
-      }
-    }
-  }
+// a markdown example
+const em = new EasyMarker({
+menuTopOffset:'2rem',
+scrollSpeedLevel: 6,
+scrollOffsetBottom: '1.5rem',
+menuItems: [
+   {
+     text: '划线笔记',
+     handler: function (data) {
+       console.log('划线笔记', data)
+       this.highlightLine(data,1)
+     }
+   },
+   {
+     text: '分享',
+     handler: (data) => { console.log(data.toMarkdown())}
+   },
+   {
+     text: '复制',
+     handler: (data) => {
+       console.log('复制',data.toString())
+     }
+   }
+ ],
+ markdownOptions: {
+   H2: text => `\n## ${text}\n\n`,
+ }
 })
 
 em.create(document.querySelector('.article-body'), document.body)
 ```
-
 <a name="EasyMarker+create"></a>
 
 ### easyMarker.create(containerElement, [scrollContainerElement], [excludeElements])
@@ -309,16 +294,3 @@ Menu item click handler
 | selection.focusNode | <code>Node</code> | end node |
 | selection.focusOffset | <code>number</code> | start node's text offset |
 
-<a name="EasyMarker..generalWrapMarkdown"></a>
-
-### EasyMarker~markdownOption~generalWrapMarkdown : <code>function</code>
-Universal method for handling Markdown 
-
-**Kind**: inner typedef of [<code>EasyMarker.markdownOption</code>](#EasyMarker)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| node | <code>Node</code> | current node |
-| options | <code>Object</code> | Mapping relations between HTML and Markdown |
-| container | <code>Node</code> | container node |
-| positionType | <code>string</code> | current position of the node, 'start' || 'end' |
