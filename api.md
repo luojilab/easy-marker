@@ -46,7 +46,7 @@ Creates an instance of EasyMarker.
 | options.cursor.same | <code>Object</code> | whether the cursor is in the same direction |
 | options.scrollSpeedLevel | <code>number</code> | The speed of scrolling when touching bottom, default 4 |
 | options.scrollOffsetBottom | <code>number</code> \| <code>string</code> | The distance from the bottom when triggering scrolling，default 100 |
-| options.markdownOptions | <code>Array.&lt;Object&gt;</code> | Customize options about the mapping relations between HTML and Markdown |
+| options.markdownOptions | <code>Object</code> | Customize options about the mapping relations between HTML and Markdown |
 
 **Example**  
 ```js
@@ -100,8 +100,60 @@ menuItems: [
      }
    }
  ],
+// Not required
  markdownOptions: {
-   H2: text => `\n## ${text}\n\n`,
+  H1: text => `\n# ${text}\n\n`,
+  H2: text => `\n## ${text}\n\n`,
+  H3: text => `\n### ${text}\n\n`,
+  H4: text => `\n#### ${text}\n\n`,
+  H5: text => `\n##### ${text}\n\n`,
+  H6: text => `\n###### ${text}\n\n`,
+  P: text => `${text}\n\n`,
+  FIGCAPTION: text => `${text}\n\n`,
+  STRONG: text => `**${text}**`,
+  B: text => `**${text}**`,
+  EM: text => `*${text}*`,
+  I: text => `*${text}*`,
+  S: text => `~~${text}~~`,
+  INS: text => `++${text}++`,
+  // IMG
+  // option.alt: IMG alt
+  // option.src: IMG src
+  // option.width: IMG width
+  // option.height: IMG height
+  IMG: option => `![${option.alt}](${option.src}?size=${option.width}x${option.height})\n`,
+  // UL
+  // option.listLevel: List nesting level
+  UL: (text, option) => {
+    if (option.listLevel > 1) {
+      return `\n${text}`
+    }
+    return `\n${text}\n`
+  },
+  // OL
+  // option.listLevel: List nesting level
+  OL: (text, option) => {
+    if (option.listLevel > 1) {
+      return `\n${text}`
+    }
+    return `\n${text}\n`
+  },
+  // LI
+  // option.type: parentNode nodeName,
+  // option.isLastOne: Whether the last item in the list
+  // option.itemLevel: List nesting level
+  // option.hasChild: Is the node has child node
+  // option.index: The index in the list
+  LI: (text, option) => {
+    let spaceString = ''
+    for (let i = 1; i < option.itemLevel; i++) { spaceString += '    ' }
+    let endString = '\n'
+    if (option.hasChild || option.isLastOne) {
+      endString = ''
+    }
+    if (option.type === 'UL') { return `${spaceString}- ${text}${endString}` }
+    return `${spaceString}${option.index}. ${text}${endString}`
+  },
  }
 })
 
