@@ -1,5 +1,6 @@
 .vscode
 dist
 test.js
+customizeCursor.js
 .DS_Store
 node_modules
