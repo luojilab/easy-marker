@@ -35,6 +35,7 @@ Creates an instance of EasyMarker.
 | options | <code>Object</code> | options |
 | options.menuItems | <code>Array.&lt;Object&gt;</code> | menu item option |
 | options.menuItems[].text | <code>string</code> | menu text |
+| options.menuItems[].style | <code>string</code> | menu item style |
 | options.menuItems[].handler | [<code>menuClickHandler</code>](#EasyMarker..menuClickHandler) | menu item click handler |
 | options.menuTopOffset | <code>number</code> \| <code>string</code> | the offset from the top of the menu relative screen, default 0. |
 | options.menuStyle | <code>Object</code> | the menu style |
@@ -57,7 +58,7 @@ Creates an instance of EasyMarker.
 ```js
 // A simple example
 const em = new EasyMarker({
-  menuTopOffset:'2rem',
+  menuTopOffset: '2rem',
   menuItems: [
     {
       text: '划线笔记',
@@ -68,6 +69,10 @@ const em = new EasyMarker({
     },
     {
       text: '分享',
+      style: {
+        backgroundColor: '#407ff2',
+        paddingLeft: '0.5rem'
+      },
       handler: (data) => {console.log('分享',data)}
     },
     {
@@ -96,7 +101,11 @@ menuItems: [
    },
    {
      text: '分享',
-     handler: (data) => { console.log(data.toMarkdown())}
+       style: {
+        backgroundColor: '#407ff2',
+        paddingLeft: '0.5rem'
+      },
+      handler: (data) => { console.log(data.toMarkdown())}
    },
    {
      text: '复制',
