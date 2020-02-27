@@ -43,14 +43,14 @@ Creates an instance of EasyMarker.
 | options.menuStyle.menu | <code>Object</code> | the menu style |
 | options.menuStyle.triangle | <code>Object</code> | the triangle style |
 | options.menuStyle.item | <code>Object</code> | the sub menu style |
-| options.disableTapHighlight | <code>Object</code> | disable highlight when tap |
+| options.disableTapHighlight | <code>boolean</code> | disable highlight when tap |
 | options.cursor | <code>Object</code> | cursor config |
-| options.cursor.color | <code>Object</code> | cursor color |
-| options.cursor.same | <code>Object</code> | whether the cursor is in the same direction |
+| options.cursor.color | <code>string</code> | cursor color |
+| options.cursor.same | <code>boolean</code> | whether the cursor is in the same direction |
 | options.mask | <code>Object</code> | mask config |
-| options.mask.color | <code>Object</code> | mask color |
+| options.mask.color | <code>string</code> | mask color |
 | options.highlight | <code>Object</code> | highlight config |
-| options.highlight.color | <code>Object</code> | highlight color |
+| options.highlight.color | <code>string</code> | highlight color |
 | options.scrollSpeedLevel | <code>number</code> | The speed of scrolling when touching bottom, default 4 |
 | options.scrollOffsetBottom | <code>number</code> \| <code>string</code> | The distance from the bottom when triggering scrolling，default 100 |
 | options.markdownOptions | <code>Object</code> | Customize options about the mapping relations between HTML and Markdown |
