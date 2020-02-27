@@ -49,8 +49,9 @@ Creates an instance of EasyMarker.
 | options | <code>Object</code> | options |
 | options.menuItems | <code>Array.&lt;Object&gt;</code> | menu item option |
 | options.menuItems[].text | <code>string</code> | menu text |
+| options.menuItems[].iconClassList | <code>Array.&lt;string&gt;</code> | menu icon class list |
 | options.menuItems[].style | <code>string</code> | menu item style |
-| options.menuItems[].handler | [<code>menuClickHandler</code>](#EasyMarker..menuClickHandler) | menu item click handler |
+| options.menuHandler | [<code>menuClickHandler</code>](#EasyMarker..menuClickHandler) | menu item click handler |
 | options.menuTopOffset | <code>number</code> \| <code>string</code> | the offset from the top of the menu relative screen, default 0. |
 | options.menuStyle | <code>Object</code> | the menu style |
 | options.menuStyle.menu | <code>Object</code> | the menu style |
@@ -76,10 +77,7 @@ const em = new EasyMarker({
   menuItems: [
     {
       text: '划线笔记',
-      handler: function (data) {
-        console.log('划线笔记', data, this)
-        this.highlightLine(data,1)
-      }
+      id: 1
     },
     {
       text: '分享',
@@ -87,13 +85,17 @@ const em = new EasyMarker({
         backgroundColor: '#407ff2',
         paddingLeft: '0.5rem'
       },
-      handler: (data) => {console.log('分享',data)}
+      id: 2
     },
     {
       text: '复制',
-      handler: (data) => {console.log('分享',data)}
+      id: 3
     }
-  ]
+  ],
+  menuHandler: (id, data) => {
+     console.log('You click the menu!');
+     console.log(id, data);
+  },
  )
 
  em.create(document.querySelector('.article-body'),
@@ -105,29 +107,28 @@ const em = new EasyMarker({
 menuTopOffset:'2rem',
 scrollSpeedLevel: 6,
 scrollOffsetBottom: '1.5rem',
-menuItems: [
-   {
-     text: '划线笔记',
-     handler: function (data) {
-       console.log('划线笔记', data)
-       this.highlightLine(data,1)
-     }
-   },
-   {
-     text: '分享',
-       style: {
+  menuItems: [
+    {
+      text: '划线笔记',
+      id: 1
+    },
+    {
+      text: '分享',
+      style: {
         backgroundColor: '#407ff2',
         paddingLeft: '0.5rem'
       },
-      handler: (data) => { console.log(data.toMarkdown())}
-   },
-   {
-     text: '复制',
-     handler: (data) => {
-       console.log('复制',data.toString())
-     }
-   }
- ],
+      id: 2
+    },
+    {
+      text: '复制',
+      id: 3
+    }
+  ],
+  menuHandler: (id, data) => {
+     console.log('You click the menu!');
+     console.log(id, data);
+  },
 // Not required
  markdownOptions: {
   H1: text => `\n# ${text}\n\n`,
@@ -337,6 +338,7 @@ Menu item click handler
 
 | Param | Type | Description |
 | --- | --- | --- |
+| id | <code>\*</code> | menu ID |
 | selection | <code>Object</code> | selection |
 | selection.anchorNode | <code>Node</code> | start node |
 | selection.anchorOffset | <code>number</code> | start node's text offset |
