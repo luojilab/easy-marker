@@ -96,7 +96,8 @@ scrollOffsetBottom: '1.5rem',
   menuItems: [
     {
       text: '划线笔记',
-      id: 1
+      id: 1,
+      iconClassList:['iconfont', 'icon-mark']
     },
     {
       text: '分享',
@@ -104,11 +105,13 @@ scrollOffsetBottom: '1.5rem',
         backgroundColor: '#407ff2',
         paddingLeft: '0.5rem'
       },
-      id: 2
+      id: 2,
+      iconClassList:['iconfont', 'icon-share']
     },
     {
       text: '复制',
-      id: 3
+      id: 3,
+      iconClassList:['iconfont', 'icon-copy'],
     }
   ],
   menuHandler: (id, data) => {
