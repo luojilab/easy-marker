@@ -17,7 +17,9 @@ declare class EasyMarker {
     cb: (id: unknown, meta: unknown, selection: EasyMarkerSelection) => void,
   ): void;
   public onSelectStatusChange(cb: () => void): void;
-  public onMenuClick(cb: (id: unknown, selection: EasyMarkerSelection) => void);
+  public onMenuClick(
+    cb: (id: unknown, selection: EasyMarkerSelection) => void,
+  ): void;
   public registerEventHook(cb: () => void): void;
   public destroy(): void;
   public static create(
@@ -43,7 +45,7 @@ export interface EasyMarkerOptions {
 export interface MenuItem {
   text: string;
   iconClassList?: string[];
-  style?: record<string, string>;
+  style?: Record<string, string>;
   handler?: (selection: EasyMarkerSelection) => void;
 }
 
@@ -55,9 +57,9 @@ export interface EasyMarkerSelection {
 }
 
 export interface MenuStyle {
-  menu?: record<string, string>;
-  triangle?: record<string, string>;
-  item?: record<string, string>;
+  menu?: Record<string, string>;
+  triangle?: Record<string, string>;
+  item?: Record<string, string>;
 }
 
 export interface CursorOptions {
