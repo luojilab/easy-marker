@@ -14,7 +14,8 @@
     "dist",
     "lib",
     "api.md",
-    "build"
+    "build",
+    "index.d.ts"
   ],
   "author": "jiangq.leaves@gmail.com",
   "repository": {
