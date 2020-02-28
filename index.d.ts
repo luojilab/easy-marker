@@ -43,12 +43,8 @@ export interface EasyMarkerOptions {
 export interface MenuItem {
   text: string;
   iconClassList?: string[];
-  style?: NodeStyle;
+  style?: record<string, string>;
   handler?: (selection: EasyMarkerSelection) => void;
-}
-
-export interface NodeStyle {
-  [k: string]: string;
 }
 
 export interface EasyMarkerSelection {
@@ -59,9 +55,9 @@ export interface EasyMarkerSelection {
 }
 
 export interface MenuStyle {
-  menu?: NodeStyle;
-  triangle?: NodeStyle;
-  item?: NodeStyle;
+  menu?: record<string, string>;
+  triangle?: record<string, string>;
+  item?: record<string, string>;
 }
 
 export interface CursorOptions {
