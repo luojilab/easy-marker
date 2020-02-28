@@ -16,6 +16,7 @@ A simple article  marker library
         * [.cancelHighlightLine(id)](#EasyMarker+cancelHighlightLine) ⇒ <code>boolean</code>
         * [.onHighlightLineClick(cb)](#EasyMarker+onHighlightLineClick)
         * [.onSelectStatusChange(cb)](#EasyMarker+onSelectStatusChange)
+        * [.onMenuClick(cb)](#EasyMarker+onMenuClick)
         * [.registerEventHook(cb)](#EasyMarker+registerEventHook)
         * [.destroy()](#EasyMarker+destroy)
     * _static_
@@ -37,7 +38,6 @@ Creates an instance of EasyMarker.
 | options.menuItems[].text | <code>string</code> | menu text |
 | options.menuItems[].iconClassList | <code>Array.&lt;string&gt;</code> | menu icon class list |
 | options.menuItems[].style | <code>string</code> | menu item style |
-| options.menuHandler | [<code>menuClickHandler</code>](#EasyMarker..menuClickHandler) | menu item click handler |
 | options.menuTopOffset | <code>number</code> \| <code>string</code> | the offset from the top of the menu relative screen, default 0. |
 | options.menuStyle | <code>Object</code> | the menu style |
 | options.menuStyle.menu | <code>Object</code> | the menu style |
@@ -287,6 +287,17 @@ Select status changing callback
 | Param | Type |
 | --- | --- |
 | cb | <code>function</code> | 
+
+<a name="EasyMarker+onMenuClick"></a>
+
+### easyMarker.onMenuClick(cb)
+menu item click handler
+
+**Kind**: instance method of [<code>EasyMarker</code>](#EasyMarker)  
+
+| Param | Type |
+| --- | --- |
+| cb | [<code>menuClickHandler</code>](#EasyMarker..menuClickHandler) | 
 
 <a name="EasyMarker+registerEventHook"></a>
 
