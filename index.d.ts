@@ -48,7 +48,7 @@ export interface EasyMarkerOptions {
 
 export interface MenuItem {
   text: string;
-  iconClassList?: string[];
+  iconName?: string;
   style?: Record<string, string>;
   handler?: (selection: SelectionContent) => void;
 }
