@@ -8,17 +8,21 @@ declare class EasyMarker {
   public getSelectText(): string;
   public highlightLine(
     selection: EasyMarkerSelection,
-    id?: unknown,
+    id?: string | number,
     meta?: unknown,
   ): void;
   public highlightLines(HighlightLines: HighlightLine[]): void;
-  public cancelHighlightLine(id: unknown): boolean;
+  public cancelHighlightLine(id: string | number): boolean;
   public onHighlightLineClick(
-    cb: (id: unknown, meta: unknown, selection: EasyMarkerSelection) => void,
+    cb: (
+      id: string | number,
+      meta: unknown,
+      selection: HandlerSelection,
+    ) => void,
   ): void;
   public onSelectStatusChange(cb: () => void): void;
   public onMenuClick(
-    cb: (id: unknown, selection: EasyMarkerSelection) => void,
+    cb: (id: string | number, selection: HandlerSelection) => void,
   ): void;
   public registerEventHook(cb: () => void): void;
   public destroy(): void;
@@ -46,7 +50,12 @@ export interface MenuItem {
   text: string;
   iconClassList?: string[];
   style?: Record<string, string>;
-  handler?: (selection: EasyMarkerSelection) => void;
+  handler?: (selection: HandlerSelection) => void;
+}
+
+export interface HandlerSelection extends EasyMarkerSelection {
+  toString: () => string;
+  toMarkdown: () => string;
 }
 
 export interface EasyMarkerSelection {
@@ -81,9 +90,9 @@ export interface MarkdownOptions {
 }
 
 export interface HighlightLine {
-  id?: unknown;
+  selection: EasyMarkerSelection;
+  id?: string | number;
   meta?: unknown;
-  selection?: EasyMarkerSelection;
 }
 
 export default EasyMarker;
