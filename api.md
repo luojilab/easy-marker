@@ -4,7 +4,6 @@
 A simple article  marker library
 
 **Kind**: global class  
-**Export**:   
 
 * [EasyMarker](#EasyMarker)
     * [new EasyMarker(options)](#new_EasyMarker_new)
@@ -36,13 +35,15 @@ Creates an instance of EasyMarker.
 | options | <code>Object</code> | options |
 | options.menuItems | <code>Array.&lt;Object&gt;</code> | menu item option |
 | options.menuItems[].text | <code>string</code> | menu text |
-| options.menuItems[].iconClassList | <code>Array.&lt;string&gt;</code> | menu icon class list |
-| options.menuItems[].style | <code>string</code> | menu item style |
+| options.menuItems[].iconName | <code>Array.&lt;string&gt;</code> | menu icon class |
+| options.menuItems[].style | <code>Object</code> | menu item style |
+| options.menuItems[].iconStyle | <code>Object</code> | menu item icon style |
 | options.menuTopOffset | <code>number</code> \| <code>string</code> | the offset from the top of the menu relative screen, default 0. |
 | options.menuStyle | <code>Object</code> | the menu style |
 | options.menuStyle.menu | <code>Object</code> | the menu style |
 | options.menuStyle.triangle | <code>Object</code> | the triangle style |
 | options.menuStyle.item | <code>Object</code> | the sub menu style |
+| options.menuStyle.icon | <code>Object</code> | the sub menu icon style |
 | options.disableTapHighlight | <code>boolean</code> | disable highlight when tap |
 | options.cursor | <code>Object</code> | cursor config |
 | options.cursor.color | <code>string</code> | cursor color |
@@ -78,10 +79,6 @@ const em = new EasyMarker({
       id: 3
     }
   ],
-  menuHandler: (id, data) => {
-     console.log('You click the menu!');
-     console.log(id, data);
-  },
  )
 
  em.create(document.querySelector('.article-body'),
@@ -97,7 +94,7 @@ scrollOffsetBottom: '1.5rem',
     {
       text: '划线笔记',
       id: 1,
-      iconClassList:['iconfont', 'icon-mark']
+      iconName:'iconfont icon-mark'
     },
     {
       text: '分享',
@@ -106,18 +103,14 @@ scrollOffsetBottom: '1.5rem',
         paddingLeft: '0.5rem'
       },
       id: 2,
-      iconClassList:['iconfont', 'icon-share']
+      iconName:'iconfont icon-share'
     },
     {
       text: '复制',
       id: 3,
-      iconClassList:['iconfont', 'icon-copy'],
+      iconName:'iconfont icon-copy'
     }
   ],
-  menuHandler: (id, data) => {
-     console.log('You click the menu!');
-     console.log(id, data);
-  },
 // Not required
  markdownOptions: {
   H1: text => `\n# ${text}\n\n`,
@@ -176,6 +169,10 @@ scrollOffsetBottom: '1.5rem',
 })
 
 em.create(document.querySelector('.article-body'), document.body)
+em.onMenuClick((id, data) => {
+  console.log('You click the menu!');
+  console.log(id, data);
+});
 ```
 <a name="EasyMarker+create"></a>
 
