@@ -7,18 +7,22 @@ declare class EasyMarker {
   ): void;
   public getSelectText(): string;
   public highlightLine(
-    selection: EasyMarkerSelection,
-    id?: unknown,
+    selection: SelectionIdentifier,
+    id?: string | number,
     meta?: unknown,
   ): void;
   public highlightLines(HighlightLines: HighlightLine[]): void;
-  public cancelHighlightLine(id: unknown): boolean;
+  public cancelHighlightLine(id: string | number): boolean;
   public onHighlightLineClick(
-    cb: (id: unknown, meta: unknown, selection: EasyMarkerSelection) => void,
+    cb: (
+      id: string | number,
+      meta: unknown,
+      selection: SelectionContent,
+    ) => void,
   ): void;
   public onSelectStatusChange(cb: () => void): void;
   public onMenuClick(
-    cb: (id: unknown, selection: EasyMarkerSelection) => void,
+    cb: (id: string | number, selection: SelectionContent) => void,
   ): void;
   public registerEventHook(cb: () => void): void;
   public destroy(): void;
@@ -44,12 +48,17 @@ export interface EasyMarkerOptions {
 
 export interface MenuItem {
   text: string;
-  iconClassList?: string[];
+  iconName?: string;
   style?: Record<string, string>;
-  handler?: (selection: EasyMarkerSelection) => void;
+  handler?: (selection: SelectionContent) => void;
 }
 
-export interface EasyMarkerSelection {
+export interface SelectionContent extends SelectionIdentifier {
+  toString: () => string;
+  toMarkdown: () => string;
+}
+
+export interface SelectionIdentifier {
   anchorNode: Text;
   anchorOffset: number;
   focusNode: Text;
@@ -81,9 +90,9 @@ export interface MarkdownOptions {
 }
 
 export interface HighlightLine {
-  id?: unknown;
+  selection: SelectionIdentifier;
+  id?: string | number;
   meta?: unknown;
-  selection?: EasyMarkerSelection;
 }
 
 export default EasyMarker;
