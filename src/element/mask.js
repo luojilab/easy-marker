@@ -1,5 +1,5 @@
 import BaseElement from './base'
-import Position from '../position'
+import Position from '../lib/position'
 
 export default class Mask extends BaseElement {
   constructor(container, option) {

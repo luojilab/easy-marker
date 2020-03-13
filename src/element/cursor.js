@@ -1,5 +1,5 @@
 import BaseElement from './base'
-import { getDistance } from '../helpers'
+import { getDistance } from '../lib/helpers'
 
 export const CursorType = {
   START: 'start',

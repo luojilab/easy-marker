@@ -4,7 +4,7 @@ import resolve from 'rollup-plugin-node-resolve'
 import uglify from 'rollup-plugin-uglify'
 
 export default {
-  input: 'lib/easy_marker.js',
+  input: 'src/easy_marker.js',
   output: {
     file: 'dist/easy-marker.dist.js',
     format: 'iife',

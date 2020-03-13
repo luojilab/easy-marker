@@ -1,6 +1,6 @@
 import BaseElement from './base'
-import TextNode from '../text_node'
-import { getTouchPosition, inRectangle, anyToPx } from '../helpers'
+import TextNode from '../lib/text_node'
+import { getTouchPosition, inRectangle, anyToPx } from '../lib/helpers'
 /**
  * Highlight
  *

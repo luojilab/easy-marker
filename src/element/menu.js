@@ -1,5 +1,5 @@
 import BaseElement from './base'
-import { anyToPx } from '../helpers'
+import { anyToPx } from '../lib/helpers'
 
 /**
  *

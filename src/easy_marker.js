@@ -2,9 +2,9 @@ import Cursor, { CursorType } from './element/cursor'
 import Menu from './element/menu'
 import Mask from './element/mask'
 import Highlight from './element/highlight'
-import TextNode from './text_node'
-import Markdown from './markdown'
-import TouchEvent, { EventType } from './touch_event'
+import TextNode from './lib/text_node'
+import Markdown from './lib/markdown'
+import TouchEvent, { EventType } from './lib/touch_event'
 
 import {
   getClickWordsPosition,
@@ -14,7 +14,7 @@ import {
   matchSubString,
   screenRelativeToContainerRelative,
   anyToPx,
-} from './helpers'
+} from './lib/helpers'
 
 const SelectStatus = {
   NONE: 'none',
