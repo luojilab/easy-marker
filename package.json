@@ -6,7 +6,7 @@
   "scripts": {
     "build": "rollup -c build/esm.rollup.config.js && rollup -c build/rollup.config.js",
     "test": "rollup -f iife -o test/dist.js -i test/test.js -n test -w",
-    "doc": "jsdoc2md  src/easy_marker.js > api.md",
+    "doc": "jsdoc2md  src/base_easy_marker.js > api.md",
     "preversion": "npm run build",
     "postversion": "git push && git push --tags"
   },

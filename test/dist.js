@@ -1836,6 +1836,11 @@ var test = (function () {
     FINISH: 'finish',
   };
 
+  const EasyMarkerMode = {
+    NODE: 'node',
+    REGION: 'region',
+  };
+
   const defaultOptions$2 = {
     menuItems: [],
     menuTopOffset: 0,
@@ -1844,6 +1849,7 @@ var test = (function () {
     },
     scrollOffsetBottom: 100,
     scrollSpeedLevel: 4,
+    mode: EasyMarkerMode.Node,
   };
 
   const preventDefaultCb = e => e.preventDefault();
@@ -1992,7 +1998,7 @@ var test = (function () {
      * @param {Object} options.highlight highlight config
      * @param {string} options.highlight.color highlight color
      * @param {number} options.scrollSpeedLevel The speed of scrolling when touching bottom, default 4
-     * @param {number|string} options.scrollOffsetBottom The distance from the bottom when triggering scrolling，default 100
+     * @param {number|string} options.scrollOffsetBottom triggering scrolling, distance from the bottom, default 100
      * @param {Object} options.markdownOptions Customize options about the mapping relations between HTML and Markdown
      */
     constructor(options) {
@@ -2010,19 +2016,15 @@ var test = (function () {
         start: null,
         end: null,
       };
-      this.textNode = {
-        start: null,
-        end: null,
-      };
+
       this.mask = null;
       this.menu = null;
-      this.markdown = null;
       this.scrollOffsetBottom = null;
       this.scrollSpeedLevel = null;
+      this.containerScroll = null;
       this.selectStatusChangeHandler = () => {};
       this.menuOnClick = () => {};
       this.highlightLineClick = () => {};
-      this.containerScroll = null;
     }
 
     get selectStatus() {
@@ -2167,29 +2169,6 @@ var test = (function () {
     }
 
     /**
-     * Get the selected text
-     *
-     * @memberof EasyMarker
-     * @returns {string}
-     */
-    getSelectText() {
-      const text =
-        TextNode.getSelectText(this.textNode.start, this.textNode.end) || '';
-      return matchSubString(this.container.innerText, text) || text
-    }
-
-    getSelectMarkdown() {
-      return (
-        this.markdown.getSelectMarkdown(
-          this.textNode.start.node,
-          this.textNode.end.node,
-          this.textNode.start.offset,
-          this.textNode.end.offset,
-        ).markdown || ''
-      )
-    }
-
-    /**
      * Highlight the lines between the specified nodes
      * @example
      * const id = 2;
@@ -2328,6 +2307,7 @@ var test = (function () {
         start: null,
         end: null,
       };
+      // TODO base的destroy去触发各自的destroy
       this.textNode = {
         start: null,
         end: null,
@@ -2340,6 +2320,7 @@ var test = (function () {
       this.selectStatus = SelectStatus.NONE;
       this.cursor.start.hide();
       this.cursor.end.hide();
+      // TODO base的reset去触发各自的reset
       this.textNode = {
         start: null,
         end: null,
@@ -2414,132 +2395,6 @@ var test = (function () {
     }
 
     /**
-     * Swap the start and end cursors
-     *
-     * @private
-     * @param {any} clickPosition
-     * @param {any} currentPosition
-     * @memberof EasyMarker
-     */
-    swapCursor(clickPosition, currentPosition) {
-      const { x, y } = currentPosition;
-      if (this.movingCursor === this.cursor.start) {
-        const endPosition = this.cursor.end.position;
-        if (y > endPosition.y || (y === endPosition.y && x >= endPosition.x)) {
-          this.cursor.start.position = this.cursor.end.position;
-          this.movingCursor = this.cursor.end;
-          this.textNode.start = new TextNode(
-            this.textNode.end.node,
-            this.textNode.end.offset,
-          );
-          this.textNode.end = new TextNode(
-            clickPosition.node,
-            clickPosition.index,
-          );
-        } else {
-          this.textNode.start = new TextNode(
-            clickPosition.node,
-            clickPosition.index,
-          );
-        }
-      } else {
-        const startPosition = this.cursor.start.position;
-        if (
-          y < startPosition.y ||
-          (y === startPosition.y && x <= startPosition.x)
-        ) {
-          this.cursor.end.position = this.cursor.start.position;
-          this.movingCursor = this.cursor.start;
-          this.textNode.end = new TextNode(
-            this.textNode.start.node,
-            this.textNode.start.offset,
-          );
-          this.textNode.start = new TextNode(
-            clickPosition.node,
-            clickPosition.index,
-          );
-        } else {
-          this.textNode.end = new TextNode(
-            clickPosition.node,
-            clickPosition.index,
-          );
-        }
-      }
-    }
-
-    /**
-     * Start text selection
-     *
-     * @private
-     * @param {any} element
-     * @param {any} x
-     * @param {any} y
-     * @memberof EasyMarker
-     */
-    selectWords(element, x, y) {
-      const separators = [
-        '\u3002\u201D',
-        '\uFF1F\u201D',
-        '\uFF01\u201D',
-        '\u3002',
-        '\uFF1F',
-        '\uFF01',
-      ];
-      const {
-        rects, node, index, wordsLength,
-      } =
-        getClickWordsPosition(element, x, y, separators) || {};
-      if (!rects || (rects && rects.length === 0)) return
-
-      const startRect = rects[0];
-      const endRect = rects[rects.length - 1];
-      // start
-      const startLeft = startRect.left - this.screenRelativeOffset.x;
-      const startTop = startRect.top - this.screenRelativeOffset.y;
-      this.textNode.start = new TextNode(node, index);
-      this.cursor.start.height = startRect.height;
-      this.cursor.start.position = { x: startLeft, y: startTop };
-
-      // end
-      const endLeft = endRect.left - this.screenRelativeOffset.x;
-      const endTop = endRect.top - this.screenRelativeOffset.y;
-      this.textNode.end = new TextNode(node, index + wordsLength);
-      this.cursor.end.height = endRect.height;
-      this.cursor.end.position = { x: endLeft + endRect.width, y: endTop };
-
-      this.cursor.start.show();
-      this.cursor.end.show();
-
-      this.renderMask();
-      this.selectStatus = SelectStatus.FINISH;
-    }
-
-    /**
-     * Renders the selected mask layer
-     * @private
-     * @memberof EasyMarker
-     */
-    renderMask() {
-      const { header, body, footer } = TextNode.getSelectRects(
-        this.textNode.start,
-        this.textNode.end,
-      );
-      const relativeHeader = screenRelativeToContainerRelative(
-        header,
-        this.screenRelativeOffset,
-      );
-      const relativeBody = screenRelativeToContainerRelative(
-        body,
-        this.screenRelativeOffset,
-      );
-      const relativeFooter = screenRelativeToContainerRelative(
-        footer,
-        this.screenRelativeOffset,
-      );
-      this.mask.render(relativeHeader, relativeBody, relativeFooter);
-    }
-
-    /**
      *
      * @private
      * @param {HTMLElement} element
@@ -2550,39 +2405,6 @@ var test = (function () {
         this.container.contains(element) &&
         this.excludeElements.findIndex(el => el.contains(element)) === -1
       )
-    }
-
-    /**
-     * Tap event
-     *
-     * @private
-     * @param {TouchEvent} e
-     * @memberof EasyMarker
-     */
-    handleTap(e) {
-      if (this.selectStatus === SelectStatus.FINISH) {
-        this.menu.handleTap(e, {
-          start: this.textNode.start,
-          end: this.textNode.end,
-          content: this.getSelectText(),
-          markdown: this.getSelectMarkdown(),
-        });
-        const position = this.getTouchRelativePosition(e);
-        const startCursorRegion = this.cursor.start.inRegion(position);
-        const endCursorRegion = this.cursor.end.inRegion(position);
-        if (startCursorRegion.inRegion || endCursorRegion.inRegion) return
-        this.reset();
-      } else if (this.selectStatus === SelectStatus.NONE) {
-        const inHighlightLine = this.highlight.handleTap(e);
-        if (
-          !inHighlightLine &&
-          !this.options.disableTapHighlight &&
-          this.isContains(e.target)
-        ) {
-          const { x, y } = getTouchPosition(e);
-          this.selectWords(e.target, x, y);
-        }
-      }
     }
 
     /**
@@ -2741,7 +2563,200 @@ var test = (function () {
    * @param {number} selection.focusOffset start node's text offset
    */
 
-  const em = new EasyMarker({
+  class NodeEasyMarker extends EasyMarker {
+    constructor(options) {
+      super(options);
+      this.textNode = {
+        start: null,
+        end: null,
+      };
+      this.markdown = null;
+    }
+
+    /**
+     * Get the selected text
+     *
+     * @memberof EasyMarker
+     * @returns {string}
+     */
+    getSelectText() {
+      const text =
+        TextNode.getSelectText(this.textNode.start, this.textNode.end) || '';
+      return matchSubString(this.container.innerText, text) || text
+    }
+
+    getSelectMarkdown() {
+      return (
+        this.markdown.getSelectMarkdown(
+          this.textNode.start.node,
+          this.textNode.end.node,
+          this.textNode.start.offset,
+          this.textNode.end.offset,
+        ).markdown || ''
+      )
+    }
+
+    /**
+     * Swap the start and end cursors
+     *
+     * @private
+     * @param {any} clickPosition
+     * @param {any} currentPosition
+     * @memberof EasyMarker
+     */
+    swapCursor(clickPosition, currentPosition) {
+      const { x, y } = currentPosition;
+      if (this.movingCursor === this.cursor.start) {
+        const endPosition = this.cursor.end.position;
+        if (y > endPosition.y || (y === endPosition.y && x >= endPosition.x)) {
+          this.cursor.start.position = this.cursor.end.position;
+          this.movingCursor = this.cursor.end;
+          this.textNode.start = new TextNode(
+            this.textNode.end.node,
+            this.textNode.end.offset,
+          );
+          this.textNode.end = new TextNode(
+            clickPosition.node,
+            clickPosition.index,
+          );
+        } else {
+          this.textNode.start = new TextNode(
+            clickPosition.node,
+            clickPosition.index,
+          );
+        }
+      } else {
+        const startPosition = this.cursor.start.position;
+        if (
+          y < startPosition.y ||
+          (y === startPosition.y && x <= startPosition.x)
+        ) {
+          this.cursor.end.position = this.cursor.start.position;
+          this.movingCursor = this.cursor.start;
+          this.textNode.end = new TextNode(
+            this.textNode.start.node,
+            this.textNode.start.offset,
+          );
+          this.textNode.start = new TextNode(
+            clickPosition.node,
+            clickPosition.index,
+          );
+        } else {
+          this.textNode.end = new TextNode(
+            clickPosition.node,
+            clickPosition.index,
+          );
+        }
+      }
+    }
+
+    /**
+     * Start text selection
+     *
+     * @private
+     * @param {any} element
+     * @param {any} x
+     * @param {any} y
+     * @memberof EasyMarker
+     */
+    selectWords(element, x, y) {
+      const separators = [
+        '\u3002\u201D',
+        '\uFF1F\u201D',
+        '\uFF01\u201D',
+        '\u3002',
+        '\uFF1F',
+        '\uFF01',
+      ];
+      const {
+        rects, node, index, wordsLength,
+      } =
+        getClickWordsPosition(element, x, y, separators) || {};
+      if (!rects || (rects && rects.length === 0)) return
+
+      const startRect = rects[0];
+      const endRect = rects[rects.length - 1];
+      // start
+      const startLeft = startRect.left - this.screenRelativeOffset.x;
+      const startTop = startRect.top - this.screenRelativeOffset.y;
+      this.textNode.start = new TextNode(node, index);
+      this.cursor.start.height = startRect.height;
+      this.cursor.start.position = { x: startLeft, y: startTop };
+
+      // end
+      const endLeft = endRect.left - this.screenRelativeOffset.x;
+      const endTop = endRect.top - this.screenRelativeOffset.y;
+      this.textNode.end = new TextNode(node, index + wordsLength);
+      this.cursor.end.height = endRect.height;
+      this.cursor.end.position = { x: endLeft + endRect.width, y: endTop };
+
+      this.cursor.start.show();
+      this.cursor.end.show();
+
+      this.renderMask();
+      this.selectStatus = SelectStatus.FINISH;
+    }
+
+    /**
+     * Renders the selected mask layer
+     * @private
+     * @memberof EasyMarker
+     */
+    renderMask() {
+      const { header, body, footer } = TextNode.getSelectRects(
+        this.textNode.start,
+        this.textNode.end,
+      );
+      const relativeHeader = screenRelativeToContainerRelative(
+        header,
+        this.screenRelativeOffset,
+      );
+      const relativeBody = screenRelativeToContainerRelative(
+        body,
+        this.screenRelativeOffset,
+      );
+      const relativeFooter = screenRelativeToContainerRelative(
+        footer,
+        this.screenRelativeOffset,
+      );
+      this.mask.render(relativeHeader, relativeBody, relativeFooter);
+    }
+
+    /**
+     * Tap event
+     *
+     * @private
+     * @param {TouchEvent} e
+     * @memberof EasyMarker
+     */
+    handleTap(e) {
+      if (this.selectStatus === SelectStatus.FINISH) {
+        this.menu.handleTap(e, {
+          start: this.textNode.start,
+          end: this.textNode.end,
+          content: this.getSelectText(),
+          markdown: this.getSelectMarkdown(),
+        });
+        const position = this.getTouchRelativePosition(e);
+        const startCursorRegion = this.cursor.start.inRegion(position);
+        const endCursorRegion = this.cursor.end.inRegion(position);
+        if (startCursorRegion.inRegion || endCursorRegion.inRegion) return
+        this.reset();
+      } else if (this.selectStatus === SelectStatus.NONE) {
+        const inHighlightLine = this.highlight.handleTap(e);
+        if (
+          !inHighlightLine &&
+          !this.options.disableTapHighlight &&
+          this.isContains(e.target)
+        ) {
+          const { x, y } = getTouchPosition(e);
+          this.selectWords(e.target, x, y);
+        }
+      }
+    }
+  }
+
+  const em = new NodeEasyMarker({
     menuTopOffset: '2rem',
     scrollSpeedLevel: 6,
     scrollOffsetBottom: '1.5rem',
@@ -2829,6 +2844,9 @@ var test = (function () {
   em.onMenuClick(function(id, data) {
     console.log('You click the menu!', this);
     console.log(id, data);
+  });
+  em.onSelectStatusChange((val)=>{
+    console.log('onSelectStatusChange', val);
   });
 
   em.create(
