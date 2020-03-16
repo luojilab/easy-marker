@@ -7,13 +7,10 @@ import Markdown from './lib/markdown'
 import TouchEvent, { EventType } from './lib/touch_event'
 
 import {
-  // getClickWordsPosition,
   getClickPosition,
   getTouchPosition,
-  // getElementAbsolutePosition,
-  // matchSubString,
-  // screenRelativeToContainerRelative,
   anyToPx,
+  getTouch,
 } from './lib/helpers'
 import { SelectStatus } from './lib/types'
 
@@ -650,7 +647,8 @@ class EasyMarker {
         x: 0,
         y: -this.movingCursor.height / 2,
       }
-      const targetY = e.clientY || e.changedTouches[0].clientY
+      const touch = getTouch(e)
+      const targetY = e.clientY || touch.clientY
       if (targetY >= this.windowHeight - this.scrollOffsetBottom) {
         if (this.scrollInterval !== null) clearInterval(this.scrollInterval)
         const rate =

@@ -169,9 +169,10 @@ export function getClickPosition(pElement, x, y, isStart) {
  * @returns
  */
 export function getTouchPosition(e, offset = { x: 0, y: 0 }) {
+  const touch = getTouch(e)
   return {
-    x: (e.clientX || e.changedTouches[0].clientX) + offset.x,
-    y: (e.clientY || e.changedTouches[0].clientY) + offset.y,
+    x: (touch.clientX) + offset.x,
+    y: (touch.clientY) + offset.y,
   }
 }
 
@@ -364,4 +365,24 @@ export function matchSubString(originStr = '', subStr = '') {
     }
   }
   return matchSubstr
+}
+
+export function isMobile() {
+  if (typeof navigator !== 'undefined' && navigator.userAgent) {
+    const ua = navigator.userAgent
+    if (ua.indexOf('Tablet') > -1 || ua.indexOf('Pad') > -1 || ua.indexOf('Nexus 7') > -1) return true
+    if (ua.indexOf('Mobi') > -1 || ua.indexOf('iPh') > -1) return true
+    return false
+  }
+  return true
+}
+
+export function getTouch(e) {
+  if (isMobile()) {
+    return e.changedTouches[0]
+  }
+  return {
+    clientX: e.clientX,
+    clientY: e.clientY,
+  }
 }

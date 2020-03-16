@@ -1,4 +1,4 @@
-import { getDistance, getTouchPosition } from './helpers'
+import { getDistance, getTouchPosition, isMobile, getTouch } from './helpers'
 
 export const EventType = {
   TOUCH_START: 'touchstart',
@@ -41,9 +41,12 @@ export default class TouchEvent {
     this.onTouchStart = this.onTouchStart.bind(this)
     this.onTouchMove = this.onTouchMove.bind(this)
     this.onTouchEnd = this.onTouchEnd.bind(this)
-    this.element.addEventListener('touchstart', this.onTouchStart)
-    this.element.addEventListener('touchmove', this.onTouchMove)
-    this.element.addEventListener('touchend', this.onTouchEnd)
+    this.startEventName = isMobile() ? 'touchstart' : 'mousedown'
+    this.moveEventName = isMobile() ? 'touchmove' : 'mousemove'
+    this.endEventName = isMobile() ? 'touchend' : 'mouseup'
+    this.element.addEventListener(this.startEventName, this.onTouchStart)
+    this.element.addEventListener(this.moveEventName, this.onTouchMove)
+    this.element.addEventListener(this.endEventName, this.onTouchEnd)
   }
 
   /**
@@ -152,13 +155,13 @@ export default class TouchEvent {
   }
 
   destroy() {
-    this.element.removeEventListener('touchstart', this.onTouchStart)
-    this.element.removeEventListener('touchmove', this.onTouchMove)
-    this.element.removeEventListener('touchend', this.onTouchEnd)
+    this.element.removeEventListener(this.startEventName, this.onTouchStart)
+    this.element.removeEventListener(this.moveEventName, this.onTouchMove)
+    this.element.removeEventListener(this.endEventName, this.onTouchEnd)
   }
 
   static createMouseEvent(type, e) {
-    const touch = e.changedTouches[0]
+    const touch = getTouch(e)
     const event = new MouseEvent(type)
     event.initMouseEvent(
       type,
