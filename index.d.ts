@@ -20,7 +20,7 @@ declare class EasyMarker {
       selection: SelectionContent,
     ) => void,
   ): void;
-  public onSelectStatusChange(cb: () => void): void;
+  public onSelectStatusChange(cb: (status: SelectStatus) => void): void;
   public onMenuClick(
     cb: (id: string | number, selection: SelectionContent) => void,
   ): void;
@@ -31,6 +31,12 @@ declare class EasyMarker {
     scrollContainerElement?: HTMLElement,
     excludeElements?: HTMLElement[],
   ): EasyMarker;
+}
+
+export enum SelectStatus {
+  NONE = 'none',
+  SELECTING = 'selecting',
+  FINISH = 'finish',
 }
 
 export interface EasyMarkerOptions {
