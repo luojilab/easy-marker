@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  
+</body>
+<script>
+  function BSearchUpperBound(arr, target) {
+    let start = 0
+    let end = arr.length - 1
+    let mid = Math.floor((start + end) / 2)
+    console.log(`start: ${start} end: ${end} mid: ${mid}`)
+    if (target >= arr[end]) {
+        return end
+      } else if (target < arr[start]) {
+        console.log(target, arr[start])
+        return -1
+      }
+    while (start<=end) {
+      if (start === mid || end === mid) {
+        return mid
+      }
+      if (arr[mid] > target) {
+        end = mid
+      } else {
+        start = mid
+      }
+      mid = Math.floor((start + end) / 2)
+      console.log(`start: ${start} end: ${end} mid: ${mid}`)
+    }
+    return mid
+  }
+//   function BSearchUpperBound(array,low,high,target)
+// {
+//     // if(low > high || target >= array[high]) return -1;
+    
+//     var mid = Math.ceil((low + high) / 2)
+//     while (high > low)
+//     {
+//         if (array[mid] > target){
+//             high = mid;
+//        } else{
+//             low = mid + 1; 
+//        }
+//         mid = Math.ceil((low + high) / 2)
+//     }
+
+//     return mid;
+// }
+  var arr = [1,3,5,7,9,10,11,23,56,77]
+  console.log(BSearchUpperBound(arr, 6),2)
+  console.log(BSearchUpperBound(arr, 7),3)
+  console.log(BSearchUpperBound(arr, 8),3)
+  console.log(BSearchUpperBound(arr, 9),4)
+  console.log(BSearchUpperBound(arr, 10),5)
+  console.log(BSearchUpperBound(arr, 11),6)
+  console.log(BSearchUpperBound(arr, 12),6)
+  console.log(BSearchUpperBound(arr, 20.888),6)
+  console.log(BSearchUpperBound(arr, 55),7)
+  console.log(BSearchUpperBound(arr, 77),9)
+  console.log(BSearchUpperBound(arr, 78),9)
+  console.log(BSearchUpperBound(arr, 688),9)
+  console.log(BSearchUpperBound(arr, 6))
+  console.log(BSearchUpperBound(arr, 6))
+  console.log(BSearchUpperBound(arr, 6))
+  console.log(BSearchUpperBound(arr, 6))
+  console.log(BSearchUpperBound(arr, 6))
+  console.log(BSearchUpperBound(arr, 6))
+</script>
+</html>

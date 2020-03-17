@@ -28,6 +28,9 @@ class NodeEasyMarker extends BaseEasyMarker {
   getSelectText() {
     const text =
       TextNode.getSelectText(this.textNode.start, this.textNode.end) || ''
+    console.log(777, this.container.innerText, text)
+    console.log(888, matchSubString(this.container.innerText, text))
+    console.log(999, text)
     return matchSubString(this.container.innerText, text) || text
   }
 

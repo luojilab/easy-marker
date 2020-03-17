@@ -350,6 +350,7 @@ export function matchSubString(originStr = '', subStr = '') {
   const formatSubStr = subStr.replace(/\s+/g, '')
   for (let i = 0, j = 0; i < originStr.length; i++) {
     if (j >= formatSubStr.length) {
+      console.log(222, '直接return')
       return matchSubstr
     }
     if (originStr[i] === formatSubStr[j]) {
@@ -360,10 +361,12 @@ export function matchSubString(originStr = '', subStr = '') {
         matchSubstr += originStr[i]
       }
     } else {
+      console.log(111, originStr[i], j, formatSubStr[j])
       j = 0
       matchSubstr = ''
     }
   }
+  console.log('~~~~~~~~~', matchSubstr)
   return matchSubstr
 }
 
@@ -386,3 +389,25 @@ export function getTouch(e) {
     clientY: e.clientY,
   }
 }
+
+// export function BSearchUpperBound(arr, target, key) {
+//   let start = 0
+//   let end = arr.length - 1
+//   let mid = Math.floor((start + end) / 2)
+//   alert(`start: ${start} end: ${end} mid: ${mid}`)
+//   // while (end > start) {
+//   while (mid !== end && mid !== start) {
+//     if (arr[mid] > target) {
+//       end = mid
+//     } else {
+//       start = mid
+//     }
+//     //  else {
+//     //   start = mid
+//     //   end = mid
+//     // }
+//     mid = Math.floor((start + end) / 2)
+//     alert(`start: ${start} end: ${end} mid: ${mid}`)
+//   }
+//   return arr[mid]
+// }
