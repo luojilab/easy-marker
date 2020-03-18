@@ -8,7 +8,7 @@ A simple article  marker library
 * [EasyMarker](#EasyMarker)
     * [new EasyMarker(options)](#new_EasyMarker_new)
     * _instance_
-        * [.create(containerElement, [scrollContainerElement], [excludeElements])](#EasyMarker+create)
+        * [.create(containerElement, [scrollContainerElement], options)](#EasyMarker+create)
         * [.getSelectText()](#EasyMarker+getSelectText) ⇒ <code>string</code>
         * [.highlightLine(selection, [id], [meta])](#EasyMarker+highlightLine)
         * [.highlightLines(lines)](#EasyMarker+highlightLines)
@@ -19,7 +19,7 @@ A simple article  marker library
         * [.registerEventHook(cb)](#EasyMarker+registerEventHook)
         * [.destroy()](#EasyMarker+destroy)
     * _static_
-        * [.create(containerElement, [scrollContainerElement], [excludeElements])](#EasyMarker.create) ⇒ [<code>EasyMarker</code>](#EasyMarker)
+        * [.create(containerElement, [scrollContainerElement], options)](#EasyMarker.create) ⇒ [<code>EasyMarker</code>](#EasyMarker)
     * _inner_
         * [~menuClickHandler](#EasyMarker..menuClickHandler) : <code>function</code>
         * [~highlightLineClickHandler](#EasyMarker..highlightLineClickHandler) : <code>function</code>
@@ -176,7 +176,7 @@ em.onMenuClick((id, data) => {
 ```
 <a name="EasyMarker+create"></a>
 
-### easyMarker.create(containerElement, [scrollContainerElement], [excludeElements])
+### easyMarker.create(containerElement, [scrollContainerElement], options)
 Initialization
 
 **Kind**: instance method of [<code>EasyMarker</code>](#EasyMarker)  
@@ -185,7 +185,9 @@ Initialization
 | --- | --- | --- |
 | containerElement | <code>HTMLElement</code> | container element |
 | [scrollContainerElement] | <code>HTMLElement</code> | scroll container element |
-| [excludeElements] | <code>Array.&lt;HTMLElement&gt;</code> | not included elements |
+| options | <code>Object</code> | options |
+| options.includeElements | <code>Object</code> | included elements |
+| options.excludeElements | <code>Object</code> | not included elements, Higher priority |
 
 <a name="EasyMarker+getSelectText"></a>
 
@@ -315,7 +317,7 @@ Destroy instance
 **Kind**: instance method of [<code>EasyMarker</code>](#EasyMarker)  
 <a name="EasyMarker.create"></a>
 
-### EasyMarker.create(containerElement, [scrollContainerElement], [excludeElements]) ⇒ [<code>EasyMarker</code>](#EasyMarker)
+### EasyMarker.create(containerElement, [scrollContainerElement], options) ⇒ [<code>EasyMarker</code>](#EasyMarker)
 Initialization factory
 
 **Kind**: static method of [<code>EasyMarker</code>](#EasyMarker)  
@@ -324,7 +326,9 @@ Initialization factory
 | --- | --- | --- |
 | containerElement | <code>HTMLElement</code> | container element |
 | [scrollContainerElement] | <code>HTMLElement</code> | scroll container element |
-| [excludeElements] | <code>Array.&lt;HTMLElement&gt;</code> | not included elements |
+| options | <code>Object</code> | options |
+| options.includeElements | <code>Object</code> | included elements |
+| options.excludeElements | <code>Object</code> | not included elements, Higher priority |
 
 <a name="EasyMarker..menuClickHandler"></a>
 
