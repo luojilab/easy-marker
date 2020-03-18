@@ -388,24 +388,26 @@ export function getTouch(e) {
   }
 }
 
-// export function BSearchUpperBound(arr, target, key) {
-//   let start = 0
-//   let end = arr.length - 1
-//   let mid = Math.floor((start + end) / 2)
-//   alert(`start: ${start} end: ${end} mid: ${mid}`)
-//   // while (end > start) {
-//   while (mid !== end && mid !== start) {
-//     if (arr[mid] > target) {
-//       end = mid
-//     } else {
-//       start = mid
-//     }
-//     //  else {
-//     //   start = mid
-//     //   end = mid
-//     // }
-//     mid = Math.floor((start + end) / 2)
-//     alert(`start: ${start} end: ${end} mid: ${mid}`)
-//   }
-//   return arr[mid]
-// }
+export function BSearchUpperBound(arr, target, key) {
+  let start = 0
+  let end = arr.length - 1
+  let mid = Math.floor((start + end) / 2)
+  const targetValue = (key ? target[key] : target)
+  if (targetValue >= (key ? arr[end][key] : arr[end])) {
+    return end
+  } else if (targetValue < (key ? arr[start][key] : arr[start])) {
+    return -1
+  }
+  while (start <= end) {
+    if (start === mid || end === mid) {
+      return mid
+    }
+    if ((key ? arr[mid][key] : arr[mid]) > targetValue) {
+      end = mid
+    } else {
+      start = mid
+    }
+    mid = Math.floor((start + end) / 2)
+  }
+  return mid
+}

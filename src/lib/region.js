@@ -1,8 +1,9 @@
+import { BSearchUpperBound } from './helpers'
+
 export default class Region {
-  constructor(regionList) {
-    this.regionList = regionList
-    console.log(111, this.regionList)
-    this.lineRegionList = []
+  constructor(list) {
+    this.originalRegionList = list
+    this.lineRectRegionList = []
     // region demo
     // {
     //   text: '',
@@ -10,61 +11,119 @@ export default class Region {
     //   height: '',
     //   left: '',
     //   top: '',
-    //   offset: 0,
-    //   phase: 0,
+    //   offset: 0,  没用
+    //   phase: 0,  没用
     // }
 
-    this.regionsSliceByline()
+    this.initRectRegion()
   }
   // 预处理数据
-  regionsSliceByline() {
-    const lineRegion = {
+  initRectRegion() {
+    const lineRectRegion = {
       top: 0,
       bottom: 0,
+      left: 0,
+      height: 0,
+      width: 0,
       regions: [],
     }
-    this.regionList.forEach((region, index) => {
-      const { top, height } = region
+    let lineIndex = 0
+    let columnIndex = 0
+    this.originalRegionList.forEach((region, index) => {
+      const {
+        top, height, left,
+      } = region
 
-      if (lineRegion.regions.length === 0) {
-        lineRegion.top = top
-        lineRegion.bottom = top + height
-        lineRegion.regions.push(Object.assign({}, region))
-      } else if (Region.isSameLine({ top: lineRegion.top, height: lineRegion.bottom - lineRegion.top }, region)) {
-        lineRegion.regions.push(Object.assign({}, region))
-        lineRegion.top = Math.min(lineRegion.top, top)
-        lineRegion.bottom = Math.max(lineRegion.bottom, top + height)
+      if (lineRectRegion.regions.length === 0) {
+        columnIndex = 0
+        lineRectRegion.top = top
+        lineRectRegion.bottom = top + height
+        lineRectRegion.left = left
+        lineRectRegion.height = height
+        lineRectRegion.regions.push(Object.assign({ originalIndex: index, lineIndex, columnIndex }, region))
+      } else if (
+        Region.isSameLine({ top: lineRectRegion.top, height: lineRectRegion.bottom - lineRectRegion.top }, region)
+      ) {
+        columnIndex++
+        lineRectRegion.regions.push(Object.assign({ originalIndex: index, lineIndex, columnIndex }, region))
+        lineRectRegion.top = Math.min(lineRectRegion.top, top)
+        lineRectRegion.bottom = Math.max(lineRectRegion.bottom, top + height)
+        lineRectRegion.height = Math.max(lineRectRegion.height, lineRectRegion.bottom - lineRectRegion.top)
       } else {
-        this.lineRegionList.push(Object.assign({}, lineRegion))
-        lineRegion.top = top
-        lineRegion.bottom = top + height
-        lineRegion.regions = []
-        lineRegion.regions.push(Object.assign({}, region))
+        lineIndex++
+        columnIndex = 0
+        const lastItem = lineRectRegion.regions[lineRectRegion.regions.length - 1]
+        const lastWidth = lastItem.width
+        const lastLeft = lastItem.left
+        lineRectRegion.width = (lastLeft + lastWidth) - lineRectRegion.left
+        this.lineRectRegionList.push(Object.assign({}, lineRectRegion))
+        lineRectRegion.top = top
+        lineRectRegion.bottom = top + height
+        lineRectRegion.left = left
+        lineRectRegion.height = height
+        lineRectRegion.regions = []
+        lineRectRegion.regions.push(Object.assign({ originalIndex: index, lineIndex, columnIndex }, region))
       }
-      if (index === this.regionList.length - 1) {
-        this.lineRegionList.push(Object.assign({}, lineRegion))
+      if (index === this.originalRegionList.length - 1) {
+        const lastItem = lineRectRegion.regions[lineRectRegion.regions.length - 1]
+        const lastWidth = lastItem.width
+        const lastLeft = lastItem.left
+        lineRectRegion.width = (lastLeft + lastWidth) - lineRectRegion.left
+        this.lineRectRegionList.push(Object.assign({}, lineRectRegion))
       }
     })
-    console.log(223, this.lineRegionList)
+    console.log(111, this.lineRectRegionList)
   }
   // 获取选择text
+  getText(startRegion, endRegion) {
+    const startIndex = startRegion.originalIndex
+    const endIndex = endRegion.originalIndex
+    const resultRegions = this.originalRegionList.slice(startIndex, endIndex + 1)
+    let text = ''
+    resultRegions.forEach((item) => {
+      text += item.text
+    })
+    return text
+  }
   // 获取选择rects
+  getRects(startRegion, endRegion) {
+    const startLineIndex = startRegion.lineIndex
+    const endLineIndex = endRegion.lineIndex
+    const startColumnIndex = startRegion.columnIndex
+    const endColumnIndex = endRegion.columnIndex
+
+    const resultLineRegionList = this.lineRectRegionList.slice(startLineIndex, endLineIndex + 1)
+    const rects = []
+    resultLineRegionList.forEach((lineRectRegion, index) => {
+      if (index === 0) {
+        // DOMRect x y width height
+        const region = lineRectRegion.regions[startColumnIndex]
+        rects.push(new DOMRect(region.left, lineRectRegion.top, lineRectRegion.top - region.left, lineRectRegion.height))
+        // lineRectRegion
+      } else if (index === resultLineRegionList.length - 1) {
+        const region = lineRectRegion.regions[endColumnIndex]
+        rects.push(new DOMRect(lineRectRegion.left, lineRectRegion.top, region.left + region.width, lineRectRegion.height))
+      } else {
+        rects.push(new DOMRect(lineRectRegion.left, lineRectRegion.top, lineRectRegion.width, lineRectRegion.height))
+      }
+    })
+    return rects
+  }
   // 获取选择text和rects
 
   // 通过位置确定触摸元素
-  // getRegionByPoint(point) {
-  //   const lineRegions = this.getLineByPosition(point)
-  //   console.log(lineRegions, this.regionList)
-  // }
-  // 确定行 只比较y 确定minX maxX
-  // static getLineByPoint(point, regionList) {
-  //   const midIndex = Math.ceil((regionList.length - 1) / 2)
-  //   const midItem = regionList[midIndex]
-  //   const nextItem = regionList[midIndex + 1]
-  //   // 找行的最后一项
-  // }
-
-  // 已确定行再确定列
+  getRegionByPoint(point) {
+    const pointPosition = {
+      top: point.y,
+      left: point.x,
+    }
+    const lineRegions = BSearchUpperBound(this.lineRectRegionList, pointPosition, 'top')
+    if (lineRegions === -1) return
+    const touchLine = this.lineRectRegionList[lineRegions]
+    const regionIndex = BSearchUpperBound(touchLine.regions, pointPosition, 'left')
+    if (regionIndex === -1) return
+    console.log(touchLine.regions[regionIndex])
+  }
 
   // 包含下边界和右边界不包括左边界和上边界
   static pointInRect(targetPoint, leftTopPoint, rightBottomPoint) {
@@ -80,9 +139,4 @@ export default class Region {
   static isSameLine(region1, region2) {
     return (region1.top - (region2.top + region2.height)) * (region2.top - (region1.top + region1.height)) > 0
   }
-
-  // static getPositionByRegion(region) {
-  //   const {x,y,width,height} = region
-  //   return {x}
-  // }
 }
