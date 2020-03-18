@@ -3,7 +3,7 @@ declare class EasyMarker {
   public create(
     containerElement: HTMLElement,
     scrollContainerElement?: HTMLElement,
-    excludeElements?: HTMLElement[],
+    options?: HTMLElement[] | InitOptions,
   ): void;
   public getSelectText(): string;
   public highlightLine(
