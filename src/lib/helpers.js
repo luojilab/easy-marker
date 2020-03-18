@@ -360,6 +360,7 @@ export function matchSubString(originStr = '', subStr = '') {
         matchSubstr += originStr[i]
       }
     } else {
+      i -= matchSubstr.length
       j = 0
       matchSubstr = ''
     }
