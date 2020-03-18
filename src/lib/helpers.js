@@ -350,7 +350,6 @@ export function matchSubString(originStr = '', subStr = '') {
   const formatSubStr = subStr.replace(/\s+/g, '')
   for (let i = 0, j = 0; i < originStr.length; i++) {
     if (j >= formatSubStr.length) {
-      console.log(222, '直接return')
       return matchSubstr
     }
     if (originStr[i] === formatSubStr[j]) {
@@ -361,12 +360,10 @@ export function matchSubString(originStr = '', subStr = '') {
         matchSubstr += originStr[i]
       }
     } else {
-      console.log(111, originStr[i], j, formatSubStr[j])
       j = 0
       matchSubstr = ''
     }
   }
-  console.log('~~~~~~~~~', matchSubstr)
   return matchSubstr
 }
 
