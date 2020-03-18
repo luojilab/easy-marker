@@ -1,6 +1,6 @@
 {
   "name": "easy-marker",
-  "version": "0.12.6",
+  "version": "0.12.7",
   "description": "Easy marker",
   "main": "dist/easy-marker.esm.js",
   "scripts": {
