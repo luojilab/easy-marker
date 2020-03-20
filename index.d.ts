@@ -3,7 +3,7 @@ declare class EasyMarker {
   public create(
     containerElement: HTMLElement,
     scrollContainerElement?: HTMLElement,
-    excludeElements?: HTMLElement[],
+    options?: HTMLElement[] | InitOptions,
   ): void;
   public getSelectText(): string;
   public highlightLine(
@@ -29,7 +29,7 @@ declare class EasyMarker {
   public static create(
     containerElement: HTMLElement,
     scrollContainerElement?: HTMLElement,
-    excludeElements?: HTMLElement[],
+    options?: HTMLElement[] | InitOptions,
   ): EasyMarker;
 }
 
@@ -37,6 +37,11 @@ export enum SelectStatus {
   NONE = 'none',
   SELECTING = 'selecting',
   FINISH = 'finish',
+}
+
+export interface InitOptions {
+  excludeElements?: HTMLElement[];
+  includeElements?: HTMLElement[];
 }
 
 export interface EasyMarkerOptions {

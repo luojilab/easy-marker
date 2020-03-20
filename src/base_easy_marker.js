@@ -180,6 +180,7 @@ class EasyMarker {
     this.container = null
     this.scrollContainer = null
     this.excludeElements = []
+    this.includeElements = []
     this.highlight = null
     this.movingCursor = null
     this.touchEvent = null
@@ -224,20 +225,22 @@ class EasyMarker {
    * @static
    * @param {HTMLElement} containerElement container element
    * @param {HTMLElement} [scrollContainerElement] scroll container element
-   * @param {Array<HTMLElement>} [excludeElements] not included elements
+   * @param {Object} options options
+   * @param {Object} options.includeElements included elements
+   * @param {Object} options.excludeElements not included elements, Higher priority
    * @returns {EasyMarker}
    * @memberof EasyMarker
    */
   static create(
     containerElement,
     scrollContainerElement,
-    excludeElements = [],
+    options = [],
   ) {
     const easyMarker = new this()
     easyMarker.create(
       containerElement,
       scrollContainerElement,
-      excludeElements,
+      options,
     )
     return easyMarker
   }
@@ -247,10 +250,12 @@ class EasyMarker {
    *
    * @param {HTMLElement} containerElement container element
    * @param {HTMLElement} [scrollContainerElement] scroll container element
-   * @param {Array<HTMLElement>} [excludeElements] not included elements
+   * @param {Object} options options
+   * @param {Object} options.includeElements included elements
+   * @param {Object} options.excludeElements not included elements, Higher priority
    * @memberof EasyMarker
    */
-  create(containerElement, scrollContainerElement, excludeElements = []) {
+  create(containerElement, scrollContainerElement, options = []) {
     this.container = containerElement
     this.adjustTextStyle()
     this.container.oncontextmenu = (event) => {
@@ -258,7 +263,15 @@ class EasyMarker {
     }
 
     this.windowHeight = document.documentElement.clientHeight
-    this.excludeElements = [...excludeElements]
+    if (options.constructor === Object) {
+      this.excludeElements = options.excludeElements ? [...options.excludeElements] : []
+      this.includeElements = options.includeElements ? [...options.includeElements] : [containerElement]
+    } else {
+      // deprecated
+      // Compatible with older versions,options equivalent to excludeElements
+      this.excludeElements = [...options]
+      this.includeElements = [containerElement]
+    }
     this.scrollContainer = scrollContainerElement || document.body
     this.container.addEventListener('contextmenu', preventDefaultCb)
     if (this.scrollContainer === document.body) {
@@ -573,8 +586,9 @@ class EasyMarker {
    * @memberof EasyMarker
    */
   isContains(element) {
+    // exclude > include
     return (
-      this.container.contains(element) &&
+      this.includeElements.findIndex(el => el.contains(element)) !== -1 &&
       this.excludeElements.findIndex(el => el.contains(element)) === -1
     )
   }
