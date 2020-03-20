@@ -72,8 +72,14 @@ export default class Region {
         this.lineRectRegionList.push(Object.assign({}, lineRectRegion))
       }
     })
-    console.log(111, this.lineRectRegionList)
   }
+
+  setRegions(list) {
+    this.originalRegionList = list
+    this.lineRectRegionList = []
+    this.initRectRegion()
+  }
+
   // 获取选择text
   getText(startRegion, endRegion) {
     const startIndex = startRegion.originalIndex
@@ -135,7 +141,6 @@ export default class Region {
     const touchLine = this.lineRectRegionList[lineRegions]
     const regionIndex = BSearchUpperBound(touchLine.regions, pointPosition, 'left')
     if (regionIndex === -1) return null
-    console.log(touchLine.regions[regionIndex])
     return touchLine.regions[regionIndex]
   }
 

@@ -48,16 +48,12 @@ class RegionEasyMarker extends BaseEasyMarker {
         const { height: lineHeight } = this.region.getLineInfoByRegion(this.selectRegion.start)
         this.cursor.start.height = lineHeight
         this.cursor.start.position = { x: this.selectRegion.start.left, y: this.selectRegion.start.top }
-        this.selectStatus = SelectStatus.SELECTING
       }
     }
-    // 在none状态 按下同时记录开始点 move更新点 end的时候 如果没有end点又恢复none状态 有的话用finish状态
   }
   handleTouchMoveThrottle(e) {
     super.handleTouchMoveThrottle(e)
-    if (this.selectStatus === SelectStatus.SELECTING) {
-      // 这个走的应该是直接划的逻辑 不是拖动cursor的逻辑
-      // 还是需要走cursor的逻辑呀 因为存在交换cursor的问题 拖start 和 end 的逻辑应该不同
+    if (this.selectStatus === SelectStatus.NONE && this.selectRegion.start) {
       const position = this.getTouchRelativePosition(e)
       this.selectRegion.end = this.region.getRegionByPoint(position)
       if (this.selectRegion.end) {
@@ -67,10 +63,7 @@ class RegionEasyMarker extends BaseEasyMarker {
           x: this.selectRegion.end.left + this.selectRegion.end.width,
           y: this.selectRegion.end.top,
         }
-        this.cursor.start.show()
-        this.cursor.end.show()
-
-        this.renderMask()
+        this.selectStatus = SelectStatus.SELECTING
       }
     }
   }
@@ -78,12 +71,10 @@ class RegionEasyMarker extends BaseEasyMarker {
   handleTouchEnd(e) {
     super.handleTouchEnd(e)
     if (this.selectStatus === SelectStatus.SELECTING) {
-      if (this.selectRegion.end) {
-        this.selectStatus = SelectStatus.FINISH
-      } else {
-        this.selectStatus = SelectStatus.NONE
-        this.reset()
-      }
+      this.selectStatus = SelectStatus.FINISH
+    } else {
+      this.selectStatus = SelectStatus.NONE
+      this.reset()
     }
   }
 
@@ -130,35 +121,81 @@ class RegionEasyMarker extends BaseEasyMarker {
    * @param {number} y Relative to the screen positioning Y
    * @memberof EasyMarker
    */
-  // eslint-disable-next-line class-methods-use-this
   moveCursor(element, x, y) {
-    console.log('moveCursor', element, x, y)
-  //   const clickRegion = getClickPosition(
-  //     element,
-  //     x,
-  //     y,
-  //     this.movingCursor === this.cursor.start,
-  //   )
-  //   if (clickRegion === null) return
-  //   const relativeX = clickRegion.x - this.screenRelativeOffset.x
-  //   const relativeY = clickRegion.y - this.screenRelativeOffset.y
-  //   const unmovingCursor =
-  //     this.movingCursor === this.cursor.start
-  //       ? this.cursor.end
-  //       : this.cursor.start
-  //   if (
-  //     unmovingCursor.position.x === relativeX &&
-  //     unmovingCursor.position.y === relativeY
-  //   ) { return }
+    const relativeX = x - this.screenRelativeOffset.x
+    const relativeY = y - this.screenRelativeOffset.y
+    // const relativePosition = this.getTouchRelativePosition({ x, y })
+    const clickRegion = this.region.getRegionByPoint({ x: relativeX, y: relativeY })
+    if (!clickRegion) return
+    const unmovingCursor =
+      this.movingCursor === this.cursor.start
+        ? this.cursor.end
+        : this.cursor.start
+    if (
+      unmovingCursor.position.x === relativeX &&
+      unmovingCursor.position.y === relativeY
+    ) { return }
 
-  //   this.swapCursor(clickRegion, { x: relativeX, y: relativeY })
+    this.swapCursor(clickRegion, { x: relativeX, y: relativeY })
+    const { height: lineHeight } = this.region.getLineInfoByRegion(clickRegion)
+    if (this.movingCursor === this.cursor.start) {
+      this.movingCursor.height = lineHeight
+      this.movingCursor.position = {
+        x: clickRegion.left,
+        y: clickRegion.top,
+      }
+    } else {
+      this.movingCursor.height = lineHeight
+      this.movingCursor.position = {
+        x: clickRegion.left + clickRegion.width,
+        y: clickRegion.top,
+      }
+    }
 
-  //   this.movingCursor.height = clickRegion.height
-  //   this.movingCursor.position = { x: relativeX, y: relativeY }
-  //   this.renderMask()
+    this.cursor.start.show()
+    this.cursor.end.show()
+    this.renderMask()
   }
+
+  /**
+   * Swap the start and end cursors
+   *
+   * @private
+   * @param {any} clickRegion
+   * @param {any} currentPosition
+   * @memberof EasyMarker
+   */
+  swapCursor(clickRegion, currentPosition) {
+    const { x, y } = currentPosition
+    if (this.movingCursor === this.cursor.start) {
+      const endPosition = this.cursor.end.position
+      if (y > endPosition.y || (y === endPosition.y && x >= endPosition.x)) {
+        this.cursor.start.position = this.cursor.end.position
+        this.movingCursor = this.cursor.end
+        this.selectRegion.start = this.selectRegion.end
+        this.selectRegion.end = clickRegion
+      } else {
+        this.selectRegion.start = clickRegion
+      }
+    } else {
+      const startPosition = this.cursor.start.position
+      if (
+        y < startPosition.y ||
+        (y === startPosition.y && x <= startPosition.x)
+      ) {
+        this.cursor.end.position = this.cursor.start.position
+        this.movingCursor = this.cursor.start
+        this.selectRegion.end = this.selectRegion.start
+        this.selectRegion.start = clickRegion
+      } else {
+        this.selectRegion.end = clickRegion
+      }
+    }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
   renderMask() {
-    console.log('render mask', this.selectRegion)
+    console.log('render mask')
   }
   reset() {
     super.reset()

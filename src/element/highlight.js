@@ -58,7 +58,6 @@ export default class Highlight extends BaseElement {
         startTextNode.offset,
         endTextNode.offset
       ))
-      console.log(888, rects)
     } catch (error) {
       console.error('EasyMarkerError:', error) // eslint-disable-line no-console
       rects = []

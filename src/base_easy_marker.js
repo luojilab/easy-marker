@@ -10,6 +10,7 @@ import {
   getTouchPosition,
   anyToPx,
   getTouch,
+  isMobile,
 } from './lib/helpers'
 import { SelectStatus } from './lib/types'
 
@@ -194,6 +195,7 @@ class EasyMarker {
     this.scrollOffsetBottom = null
     this.scrollSpeedLevel = null
     this.containerScroll = null
+    this.isMobile = isMobile()
     this.selectStatusChangeHandler = () => {}
     this.menuOnClick = () => {}
     this.highlightLineClick = () => {}
@@ -209,7 +211,8 @@ class EasyMarker {
     }
     this.$selectStatus = val
     if (val === SelectStatus.FINISH) {
-      const top = this.mask.top - this.movingCursor.height / 2 // TODO PC
+      const cursorOffset = this.isMobile ? this.movingCursor.height / 2 : 0
+      const top = this.mask.top - cursorOffset
       const { left } = this.mask
       this.menu.setPosition(top, this.mask.top + this.mask.height, left)
       this.menu.show()
@@ -623,9 +626,10 @@ class EasyMarker {
   handleTouchMoveThrottle(e) {
     // 拖着cursor走的逻辑
     if (this.selectStatus === SelectStatus.SELECTING) {
+      const cursorOffset = this.isMobile ? this.movingCursor.height / 2 : 0
       const offset = this.movingCursor.offset || {
         x: 0,
-        y: -this.movingCursor.height / 2, // TODO 根据是否是电脑判断是否需要这个偏移，电脑应该不需要这个偏移
+        y: -cursorOffset,
       }
       const touch = getTouch(e)
       const targetY = e.clientY || touch.clientY
@@ -679,9 +683,10 @@ class EasyMarker {
   }
 
   getTouchRelativePosition(e) {
+    const cursorOffset = this.isMobile ? this.movingCursor.height / 2 : 0
     const offset = {
       x: 0,
-      y: -this.movingCursor.height / 2, // TODO pc问题
+      y: -cursorOffset,
     }
     const position = getTouchPosition(e, offset)
     position.x -= this.screenRelativeOffset.x
