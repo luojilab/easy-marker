@@ -7,7 +7,6 @@ import Markdown from './lib/markdown'
 import TouchEvent, { EventType } from './lib/touch_event'
 
 import {
-  getClickPosition,
   getTouchPosition,
   anyToPx,
   getTouch,
@@ -210,7 +209,7 @@ class EasyMarker {
     }
     this.$selectStatus = val
     if (val === SelectStatus.FINISH) {
-      const top = this.mask.top - this.movingCursor.height / 2
+      const top = this.mask.top - this.movingCursor.height / 2 // TODO PC
       const { left } = this.mask
       this.menu.setPosition(top, this.mask.top + this.mask.height, left)
       this.menu.show()
@@ -505,11 +504,6 @@ class EasyMarker {
     this.selectStatus = SelectStatus.NONE
     this.cursor.start.hide()
     this.cursor.end.hide()
-    // TODO base的reset去触发各自的reset
-    this.textNode = {
-      start: null,
-      end: null,
-    }
     this.mask.reset()
   }
 
@@ -545,41 +539,6 @@ class EasyMarker {
   }
 
   /**
-   * Move the cursor to the specified location
-   *
-   * @private
-   * @param {HTMLElement} element
-   * @param {number} x Relative to the screen positioning x
-   * @param {number} y Relative to the screen positioning Y
-   * @memberof EasyMarker
-   */
-  moveCursor(element, x, y) {
-    const clickPosition = getClickPosition(
-      element,
-      x,
-      y,
-      this.movingCursor === this.cursor.start,
-    )
-    if (clickPosition === null) return
-    const relativeX = clickPosition.x - this.screenRelativeOffset.x
-    const relativeY = clickPosition.y - this.screenRelativeOffset.y
-    const unmovingCursor =
-      this.movingCursor === this.cursor.start
-        ? this.cursor.end
-        : this.cursor.start
-    if (
-      unmovingCursor.position.x === relativeX &&
-      unmovingCursor.position.y === relativeY
-    ) { return }
-
-    this.swapCursor(clickPosition, { x: relativeX, y: relativeY })
-
-    this.movingCursor.height = clickPosition.height
-    this.movingCursor.position = { x: relativeX, y: relativeY }
-    this.renderMask()
-  }
-
-  /**
    *
    * @private
    * @param {HTMLElement} element
@@ -600,11 +559,17 @@ class EasyMarker {
    * @param {TouchEvent} e
    * @memberof EasyMarker
    */
-  handleLongTap(e) {
-    if (this.isContains(e.target)) {
-      const { x, y } = getTouchPosition(e)
-      this.selectWords(e.target, x, y)
-    }
+  handleLongTap() { // eslint-disable-line class-methods-use-this
+  }
+
+  /**
+   * Tap event
+   *
+   * @private
+   * @param {TouchEvent} e
+   * @memberof EasyMarker
+   */
+  handleTap() { // eslint-disable-line class-methods-use-this
   }
 
   /**
@@ -656,10 +621,11 @@ class EasyMarker {
    * @memberof EasyMarker
    */
   handleTouchMoveThrottle(e) {
+    // 拖着cursor走的逻辑
     if (this.selectStatus === SelectStatus.SELECTING) {
       const offset = this.movingCursor.offset || {
         x: 0,
-        y: -this.movingCursor.height / 2,
+        y: -this.movingCursor.height / 2, // TODO 根据是否是电脑判断是否需要这个偏移，电脑应该不需要这个偏移
       }
       const touch = getTouch(e)
       const targetY = e.clientY || touch.clientY
@@ -697,7 +663,6 @@ class EasyMarker {
         clearInterval(this.scrollInterval)
         this.scrollInterval = null
       }
-      this.selectStatus = SelectStatus.FINISH
     }
   }
 
@@ -716,7 +681,7 @@ class EasyMarker {
   getTouchRelativePosition(e) {
     const offset = {
       x: 0,
-      y: -this.movingCursor.height / 2,
+      y: -this.movingCursor.height / 2, // TODO pc问题
     }
     const position = getTouchPosition(e, offset)
     position.x -= this.screenRelativeOffset.x

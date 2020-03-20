@@ -6,11 +6,11 @@ export default class Region {
     this.lineRectRegionList = []
     // region demo
     // {
-    //   text: '',
-    //   width: '',
-    //   height: '',
-    //   left: '',
-    //   top: '',
+    //   text: '', required
+    //   width: '', required
+    //   height: '', required
+    //   left: '', required
+    //   top: '', required
     //   offset: 0,  没用
     //   phase: 0,  没用
     // }
@@ -96,13 +96,17 @@ export default class Region {
     const rects = []
     resultLineRegionList.forEach((lineRectRegion, index) => {
       if (index === 0) {
-        // DOMRect x y width height
         const region = lineRectRegion.regions[startColumnIndex]
-        rects.push(new DOMRect(region.left, lineRectRegion.top, lineRectRegion.top - region.left, lineRectRegion.height))
-        // lineRectRegion
+        rects.push(new DOMRect(
+          region.left, lineRectRegion.top,
+          lineRectRegion.top - region.left, lineRectRegion.height
+        ))
       } else if (index === resultLineRegionList.length - 1) {
         const region = lineRectRegion.regions[endColumnIndex]
-        rects.push(new DOMRect(lineRectRegion.left, lineRectRegion.top, region.left + region.width, lineRectRegion.height))
+        rects.push(new DOMRect(
+          lineRectRegion.left, lineRectRegion.top,
+          region.left + region.width, lineRectRegion.height
+        ))
       } else {
         rects.push(new DOMRect(lineRectRegion.left, lineRectRegion.top, lineRectRegion.width, lineRectRegion.height))
       }
@@ -111,18 +115,46 @@ export default class Region {
   }
   // 获取选择text和rects
 
-  // 通过位置确定触摸元素
+  /**
+   * get Region By Point
+   *
+   * @public
+   * @param {object} point
+   * @param {number} point.x
+   * @param {number} point.y
+   * @returns {(Region | null)}
+   */
   getRegionByPoint(point) {
     const pointPosition = {
       top: point.y,
       left: point.x,
     }
     const lineRegions = BSearchUpperBound(this.lineRectRegionList, pointPosition, 'top')
-    if (lineRegions === -1) return
+    if (lineRegions === -1) return null
+
     const touchLine = this.lineRectRegionList[lineRegions]
     const regionIndex = BSearchUpperBound(touchLine.regions, pointPosition, 'left')
-    if (regionIndex === -1) return
+    if (regionIndex === -1) return null
     console.log(touchLine.regions[regionIndex])
+    return touchLine.regions[regionIndex]
+  }
+
+  getLineInfoByRegion(region) {
+    const regionIndex = region.lineIndex
+    const {
+      top,
+      bottom,
+      left,
+      height,
+      width,
+    } = this.lineRectRegionList[regionIndex]
+    return {
+      top,
+      bottom,
+      left,
+      height,
+      width,
+    }
   }
 
   // 包含下边界和右边界不包括左边界和上边界

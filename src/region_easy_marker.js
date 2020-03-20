@@ -1,22 +1,21 @@
 import BaseEasyMarker from './base_easy_marker'
-import TextNode from './lib/text_node'
-import {
-  getClickWordsPosition,
-  getTouchPosition,
-  matchSubString,
-  screenRelativeToContainerRelative,
-} from './lib/helpers'
+// import {
+// getClickWordsPosition,
+// getTouchPosition,
+// matchSubString,
+// screenRelativeToContainerRelative,
+// getTouch,
+// } from './lib/helpers'
 import { SelectStatus, EasyMarkerMode } from './lib/types'
 import Region from './lib/region'
 
-class NodeEasyMarker extends BaseEasyMarker {
+class RegionEasyMarker extends BaseEasyMarker {
   constructor(options) {
     super(options)
-    // this.textNode = {
-    //   start: null,
-    //   end: null,
-    // }
-    // this.markdown = null
+    this.selectRegion = {
+      start: null,
+      end: null,
+    }
     this.region = new Region(options.regions || [])
     this.mode = EasyMarkerMode.REGION
   }
@@ -29,146 +28,63 @@ class NodeEasyMarker extends BaseEasyMarker {
    * @returns {string}
    */
   getSelectText() {
-    const text =
-      TextNode.getSelectText(this.textNode.start, this.textNode.end) || ''
-    return matchSubString(this.container.innerText, text) || text
-  }
-
-  getSelectMarkdown() {
-    return (
-      this.markdown.getSelectMarkdown(
-        this.textNode.start.node,
-        this.textNode.end.node,
-        this.textNode.start.offset,
-        this.textNode.end.offset,
-      ).markdown || ''
-    )
+    const text = this.region.getText(this.selectRegion.start, this.selectRegion.end) || ''
+    return text
   }
 
   /**
-   * Swap the start and end cursors
+   * touchstart event handler
    *
    * @private
-   * @param {any} clickPosition
-   * @param {any} currentPosition
+   * @param {TouchEvent} e
    * @memberof EasyMarker
    */
-  swapCursor(clickPosition, currentPosition) {
-    const { x, y } = currentPosition
-    if (this.movingCursor === this.cursor.start) {
-      const endPosition = this.cursor.end.position
-      if (y > endPosition.y || (y === endPosition.y && x >= endPosition.x)) {
-        this.cursor.start.position = this.cursor.end.position
-        this.movingCursor = this.cursor.end
-        this.textNode.start = new TextNode(
-          this.textNode.end.node,
-          this.textNode.end.offset,
-        )
-        this.textNode.end = new TextNode(
-          clickPosition.node,
-          clickPosition.index,
-        )
-      } else {
-        this.textNode.start = new TextNode(
-          clickPosition.node,
-          clickPosition.index,
-        )
+  handleTouchStart(e) {
+    super.handleTouchStart(e)
+    if (this.selectStatus === SelectStatus.NONE) {
+      const position = this.getTouchRelativePosition(e)
+      this.selectRegion.start = this.region.getRegionByPoint(position)
+      if (this.selectRegion.start) {
+        const { height: lineHeight } = this.region.getLineInfoByRegion(this.selectRegion.start)
+        this.cursor.start.height = lineHeight
+        this.cursor.start.position = { x: this.selectRegion.start.left, y: this.selectRegion.start.top }
+        this.selectStatus = SelectStatus.SELECTING
       }
-    } else {
-      const startPosition = this.cursor.start.position
-      if (
-        y < startPosition.y ||
-        (y === startPosition.y && x <= startPosition.x)
-      ) {
-        this.cursor.end.position = this.cursor.start.position
-        this.movingCursor = this.cursor.start
-        this.textNode.end = new TextNode(
-          this.textNode.start.node,
-          this.textNode.start.offset,
-        )
-        this.textNode.start = new TextNode(
-          clickPosition.node,
-          clickPosition.index,
-        )
-      } else {
-        this.textNode.end = new TextNode(
-          clickPosition.node,
-          clickPosition.index,
-        )
+    }
+    // 在none状态 按下同时记录开始点 move更新点 end的时候 如果没有end点又恢复none状态 有的话用finish状态
+  }
+  handleTouchMoveThrottle(e) {
+    super.handleTouchMoveThrottle(e)
+    if (this.selectStatus === SelectStatus.SELECTING) {
+      // 这个走的应该是直接划的逻辑 不是拖动cursor的逻辑
+      // 还是需要走cursor的逻辑呀 因为存在交换cursor的问题 拖start 和 end 的逻辑应该不同
+      const position = this.getTouchRelativePosition(e)
+      this.selectRegion.end = this.region.getRegionByPoint(position)
+      if (this.selectRegion.end) {
+        const { height: lineHeight } = this.region.getLineInfoByRegion(this.selectRegion.end)
+        this.cursor.end.height = lineHeight
+        this.cursor.end.position = {
+          x: this.selectRegion.end.left + this.selectRegion.end.width,
+          y: this.selectRegion.end.top,
+        }
+        this.cursor.start.show()
+        this.cursor.end.show()
+
+        this.renderMask()
       }
     }
   }
 
-  /**
-   * Start text selection
-   *
-   * @private
-   * @param {any} element
-   * @param {any} x
-   * @param {any} y
-   * @memberof EasyMarker
-   */
-  selectWords(element, x, y) {
-    const separators = [
-      '\u3002\u201D',
-      '\uFF1F\u201D',
-      '\uFF01\u201D',
-      '\u3002',
-      '\uFF1F',
-      '\uFF01',
-    ]
-    const {
-      rects, node, index, wordsLength,
-    } =
-      getClickWordsPosition(element, x, y, separators) || {}
-    if (!rects || (rects && rects.length === 0)) return
-
-    const startRect = rects[0]
-    const endRect = rects[rects.length - 1]
-    // start
-    const startLeft = startRect.left - this.screenRelativeOffset.x
-    const startTop = startRect.top - this.screenRelativeOffset.y
-    this.textNode.start = new TextNode(node, index)
-    this.cursor.start.height = startRect.height
-    this.cursor.start.position = { x: startLeft, y: startTop }
-
-    // end
-    const endLeft = endRect.left - this.screenRelativeOffset.x
-    const endTop = endRect.top - this.screenRelativeOffset.y
-    this.textNode.end = new TextNode(node, index + wordsLength)
-    this.cursor.end.height = endRect.height
-    this.cursor.end.position = { x: endLeft + endRect.width, y: endTop }
-
-    this.cursor.start.show()
-    this.cursor.end.show()
-
-    this.renderMask()
-    this.selectStatus = SelectStatus.FINISH
-  }
-
-  /**
-   * Renders the selected mask layer
-   * @private
-   * @memberof EasyMarker
-   */
-  renderMask() {
-    const { header, body, footer } = TextNode.getSelectRects(
-      this.textNode.start,
-      this.textNode.end,
-    )
-    const relativeHeader = screenRelativeToContainerRelative(
-      header,
-      this.screenRelativeOffset,
-    )
-    const relativeBody = screenRelativeToContainerRelative(
-      body,
-      this.screenRelativeOffset,
-    )
-    const relativeFooter = screenRelativeToContainerRelative(
-      footer,
-      this.screenRelativeOffset,
-    )
-    this.mask.render(relativeHeader, relativeBody, relativeFooter)
+  handleTouchEnd(e) {
+    super.handleTouchEnd(e)
+    if (this.selectStatus === SelectStatus.SELECTING) {
+      if (this.selectRegion.end) {
+        this.selectStatus = SelectStatus.FINISH
+      } else {
+        this.selectStatus = SelectStatus.NONE
+        this.reset()
+      }
+    }
   }
 
   /**
@@ -181,10 +97,10 @@ class NodeEasyMarker extends BaseEasyMarker {
   handleTap(e) {
     if (this.selectStatus === SelectStatus.FINISH) {
       this.menu.handleTap(e, {
-        start: this.textNode.start,
-        end: this.textNode.end,
+        start: this.selectRegion.start,
+        end: this.selectRegion.end,
         content: this.getSelectText(),
-        markdown: this.getSelectMarkdown(),
+        markdown: RegionEasyMarker.getSelectMarkdown(),
       })
       const position = this.getTouchRelativePosition(e)
       const startCursorRegion = this.cursor.start.inRegion(position)
@@ -192,16 +108,76 @@ class NodeEasyMarker extends BaseEasyMarker {
       if (startCursorRegion.inRegion || endCursorRegion.inRegion) return
       this.reset()
     } else if (this.selectStatus === SelectStatus.NONE) {
-      const inHighlightLine = this.highlight.handleTap(e)
-      if (
-        !inHighlightLine &&
-        !this.options.disableTapHighlight &&
-        this.isContains(e.target)
-      ) {
-        const { x, y } = getTouchPosition(e)
-        this.selectWords(e.target, x, y)
-      }
+      // TODO 点击highlight
+      // const inHighlightLine = this.highlight.handleTap(e)
+      // TODO 等同于长按 pc或许可以忽略
+      // if (
+      //   !inHighlightLine &&
+      //   !this.options.disableTapHighlight &&
+      //   this.isContains(e.target)
+      // ) {
+      //   const { x, y } = getTouchPosition(e)
+      //   this.selectWords(e.target, x, y)
+      // }
     }
   }
+  /**
+   * Move the cursor to the specified location
+   *
+   * @private
+   * @param {HTMLElement} element
+   * @param {number} x Relative to the screen positioning x
+   * @param {number} y Relative to the screen positioning Y
+   * @memberof EasyMarker
+   */
+  // eslint-disable-next-line class-methods-use-this
+  moveCursor(element, x, y) {
+    console.log('moveCursor', element, x, y)
+  //   const clickRegion = getClickPosition(
+  //     element,
+  //     x,
+  //     y,
+  //     this.movingCursor === this.cursor.start,
+  //   )
+  //   if (clickRegion === null) return
+  //   const relativeX = clickRegion.x - this.screenRelativeOffset.x
+  //   const relativeY = clickRegion.y - this.screenRelativeOffset.y
+  //   const unmovingCursor =
+  //     this.movingCursor === this.cursor.start
+  //       ? this.cursor.end
+  //       : this.cursor.start
+  //   if (
+  //     unmovingCursor.position.x === relativeX &&
+  //     unmovingCursor.position.y === relativeY
+  //   ) { return }
+
+  //   this.swapCursor(clickRegion, { x: relativeX, y: relativeY })
+
+  //   this.movingCursor.height = clickRegion.height
+  //   this.movingCursor.position = { x: relativeX, y: relativeY }
+  //   this.renderMask()
+  }
+  renderMask() {
+    console.log('render mask', this.selectRegion)
+  }
+  reset() {
+    super.reset()
+    this.selectRegion = {
+      start: null,
+      end: null,
+    }
+  }
+  // TODO: 需确认这个relative在pc中是否不需要
+  adjustTextStyle() {
+    const { children } = this.container
+    for (let i = 0; i < children.length; i++) {
+      children[i].style.zIndex = '5'
+      // children[i].style.position = 'relative'
+    }
+  }
+
+  static getSelectMarkdown() {
+    return 'Markdown is not supported in current mode.'
+  }
 }
-export default NodeEasyMarker
+export default RegionEasyMarker

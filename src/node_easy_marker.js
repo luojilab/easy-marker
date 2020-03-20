@@ -4,6 +4,7 @@ import {
   getClickWordsPosition,
   getTouchPosition,
   matchSubString,
+  getClickPosition,
   screenRelativeToContainerRelative,
 } from './lib/helpers'
 import { SelectStatus, EasyMarkerMode } from './lib/types'
@@ -169,6 +170,41 @@ class NodeEasyMarker extends BaseEasyMarker {
   }
 
   /**
+   * Move the cursor to the specified location
+   *
+   * @private
+   * @param {HTMLElement} element
+   * @param {number} x Relative to the screen positioning x
+   * @param {number} y Relative to the screen positioning Y
+   * @memberof EasyMarker
+   */
+  moveCursor(element, x, y) {
+    const clickPosition = getClickPosition(
+      element,
+      x,
+      y,
+      this.movingCursor === this.cursor.start,
+    )
+    if (clickPosition === null) return
+    const relativeX = clickPosition.x - this.screenRelativeOffset.x
+    const relativeY = clickPosition.y - this.screenRelativeOffset.y
+    const unmovingCursor =
+      this.movingCursor === this.cursor.start
+        ? this.cursor.end
+        : this.cursor.start
+    if (
+      unmovingCursor.position.x === relativeX &&
+      unmovingCursor.position.y === relativeY
+    ) { return }
+
+    this.swapCursor(clickPosition, { x: relativeX, y: relativeY })
+
+    this.movingCursor.height = clickPosition.height
+    this.movingCursor.position = { x: relativeX, y: relativeY }
+    this.renderMask()
+  }
+
+  /**
    * Tap event
    *
    * @private
@@ -198,6 +234,42 @@ class NodeEasyMarker extends BaseEasyMarker {
         const { x, y } = getTouchPosition(e)
         this.selectWords(e.target, x, y)
       }
+    }
+  }
+
+  /**
+   * Long press event
+   *
+   * @private
+   * @param {TouchEvent} e
+   * @memberof EasyMarker
+   */
+  handleLongTap(e) {
+    if (this.isContains(e.target)) {
+      const { x, y } = getTouchPosition(e)
+      this.selectWords(e.target, x, y)
+    }
+  }
+
+  /**
+   * touchmove event handler
+   *
+   * @private
+   * @param {TouchEvent} e
+   * @memberof EasyMarker
+   */
+  handleTouchEnd(e) {
+    super.handleTouchEnd(e)
+    if (this.selectStatus === SelectStatus.SELECTING) {
+      this.selectStatus = SelectStatus.FINISH
+    }
+  }
+
+  reset() {
+    super.reset()
+    this.textNode = {
+      start: null,
+      end: null,
     }
   }
 }

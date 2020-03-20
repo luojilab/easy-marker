@@ -227,7 +227,6 @@ export default class TextNode {
         throw new Error('Invalid end node')
       }
     }
-    console.log(999, result.rects)
     return result
   }
 }
