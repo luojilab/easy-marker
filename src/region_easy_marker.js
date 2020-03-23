@@ -172,7 +172,7 @@ class RegionEasyMarker extends BaseEasyMarker {
       if (y > endPosition.y || (y === endPosition.y && x >= endPosition.x)) {
         this.cursor.start.position = this.cursor.end.position
         this.movingCursor = this.cursor.end
-        this.selectRegion.start = this.selectRegion.end
+        this.selectRegion.start = this.region.getNextRegion(this.selectRegion.end)
         this.selectRegion.end = clickRegion
       } else {
         this.selectRegion.start = clickRegion
@@ -185,7 +185,7 @@ class RegionEasyMarker extends BaseEasyMarker {
       ) {
         this.cursor.end.position = this.cursor.start.position
         this.movingCursor = this.cursor.start
-        this.selectRegion.end = this.selectRegion.start
+        this.selectRegion.end = this.region.getPreviousRegion(this.selectRegion.start)
         this.selectRegion.start = clickRegion
       } else {
         this.selectRegion.end = clickRegion
@@ -193,9 +193,9 @@ class RegionEasyMarker extends BaseEasyMarker {
     }
   }
 
-  // eslint-disable-next-line class-methods-use-this
   renderMask() {
-    console.log('render mask')
+    const rects = this.region.getRects(this.selectRegion.start, this.selectRegion.end)
+    this.mask.renderRectsLine(rects)
   }
   reset() {
     super.reset()

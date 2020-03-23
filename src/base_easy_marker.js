@@ -338,7 +338,7 @@ class EasyMarker {
     )
     this.movingCursor = this.cursor.end
 
-    this.mask = new Mask(this.container, this.options.mask || {})
+    this.mask = new Mask(this.container, Object.assign({ mode: this.mode }, this.options.mask || {}))
     this.highlight = new Highlight(
       this.container,
       this.options.highlight || {},

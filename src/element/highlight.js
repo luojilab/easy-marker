@@ -1,6 +1,6 @@
 import BaseElement from './base'
 import TextNode from '../lib/text_node'
-import { getTouchPosition, inRectangle, anyToPx } from '../lib/helpers'
+import { getTouchPosition, inRectangle, anyToPx, rectToPointArray } from '../lib/helpers'
 /**
  * Highlight
  *
@@ -77,7 +77,7 @@ export default class Highlight extends BaseElement {
       relativeRects.push(relativeRect)
       lineHeight = lineHeight || rect.height
       const margin = this.option.margin || (lineHeight - rect.height) / 4
-      return this.constructor.rectToPointArray(rect, offset, margin)
+      return rectToPointArray(rect, offset, margin)
     })
     let markdown
     if (this.easyMarker && this.easyMarker.markdown) {
@@ -225,31 +225,6 @@ export default class Highlight extends BaseElement {
     while (this.element.firstChild) {
       this.element.removeChild(this.element.firstChild)
     }
-  }
-  /**
-   *
-   *
-   * @static
-   * @param {ClientRect} rect
-   * @param {Object} offset
-   * @param {number} offset.x
-   * @param {number} offset.y
-   * @memberof Highlight
-   */
-  static rectToPointArray(rect, offset, margin) {
-    const points = []
-    if (rect.width === 0) return points
-
-    points.push([rect.left - margin, rect.top - margin])
-    points.push([rect.right + margin, rect.top - margin])
-    points.push([rect.right + margin, rect.bottom + margin])
-    points.push([rect.left - margin, rect.bottom + margin])
-
-    points.forEach((point) => {
-      point[0] -= offset.x
-      point[1] -= offset.y
-    })
-    return points
   }
 }
 

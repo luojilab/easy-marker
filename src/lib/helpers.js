@@ -415,3 +415,29 @@ export function BSearchUpperBound(arr, target, key) {
   }
   return mid
 }
+
+/**
+   *
+   *
+   * @static
+   * @param {ClientRect} rect
+   * @param {Object} offset
+   * @param {number} offset.x
+   * @param {number} offset.y
+   * @memberof Highlight
+   */
+export function rectToPointArray(rect, offset, margin) {
+  const points = []
+  if (rect.width === 0) return points
+
+  points.push([rect.left - margin, rect.top - margin])
+  points.push([rect.right + margin, rect.top - margin])
+  points.push([rect.right + margin, rect.bottom + margin])
+  points.push([rect.left - margin, rect.bottom + margin])
+
+  points.forEach((point) => {
+    point[0] -= offset.x
+    point[1] -= offset.y
+  })
+  return points
+}

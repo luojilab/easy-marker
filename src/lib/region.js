@@ -105,7 +105,7 @@ export default class Region {
         const region = lineRectRegion.regions[startColumnIndex]
         rects.push(new DOMRect(
           region.left, lineRectRegion.top,
-          lineRectRegion.top - region.left, lineRectRegion.height
+          lineRectRegion.width - region.left, lineRectRegion.height
         ))
       } else if (index === resultLineRegionList.length - 1) {
         const region = lineRectRegion.regions[endColumnIndex]
@@ -161,7 +161,35 @@ export default class Region {
       width,
     }
   }
-
+  getPreviousRegion(region) {
+    const { lineIndex, columnIndex } = region
+    let previousRegion
+    if (columnIndex === 0) {
+      const lineRectRegion = this.lineRectRegionList[lineIndex - 1]
+      if (lineRectRegion) {
+        previousRegion = lineRectRegion.regions[lineRectRegion.length - 1]
+      }
+    } else {
+      previousRegion = this.lineRectRegionList[lineIndex].regions[columnIndex - 1]
+    }
+    return previousRegion || null
+  }
+  getNextRegion(region) {
+    const { lineIndex, columnIndex } = region
+    let nextRegion
+    const lineRectRegion = this.lineRectRegionList[lineIndex]
+    if (lineRectRegion) {
+      if (columnIndex === lineRectRegion.length - 1) {
+        const nextLineRectRegion = this.lineRectRegionList[lineIndex + 1]
+        if (nextLineRectRegion) {
+          [nextRegion] = nextLineRectRegion.regions
+        }
+      } else {
+        nextRegion = this.lineRectRegionList[lineIndex].regions[columnIndex + 1]
+      }
+    }
+    return nextRegion || null
+  }
   // 包含下边界和右边界不包括左边界和上边界
   static pointInRect(targetPoint, leftTopPoint, rightBottomPoint) {
     if (targetPoint.x > leftTopPoint.x
