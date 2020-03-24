@@ -341,7 +341,7 @@ class EasyMarker {
     this.mask = new Mask(this.container, Object.assign({ mode: this.mode }, this.options.mask || {}))
     this.highlight = new Highlight(
       this.container,
-      this.options.highlight || {},
+      Object.assign({ mode: this.mode }, this.options.highlight || {}),
     )
     this.menu = new Menu(this.container, {
       menuItems: this.options.menuItems,

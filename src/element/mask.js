@@ -69,7 +69,7 @@ export default class Mask extends BaseElement {
 
   createElement() {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-    // svg.style.zIndex = this.option.zIndex
+    svg.style.zIndex = 2
     svg.style.width = '100%'
     svg.style.height = '100%'
     svg.style.position = 'absolute'

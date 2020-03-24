@@ -100,16 +100,9 @@ class RegionEasyMarker extends BaseEasyMarker {
       this.reset()
     } else if (this.selectStatus === SelectStatus.NONE) {
       // TODO 点击highlight
+      this.highlight.handleTap(e)
       // const inHighlightLine = this.highlight.handleTap(e)
-      // TODO 等同于长按 pc或许可以忽略
-      // if (
-      //   !inHighlightLine &&
-      //   !this.options.disableTapHighlight &&
-      //   this.isContains(e.target)
-      // ) {
-      //   const { x, y } = getTouchPosition(e)
-      //   this.selectWords(e.target, x, y)
-      // }
+      // TODO mobile 还有后面逻辑
     }
   }
   /**

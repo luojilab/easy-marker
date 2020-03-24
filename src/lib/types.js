@@ -9,4 +9,10 @@ const EasyMarkerMode = {
   NODE: 'node',
   REGION: 'region',
 }
-export { SelectStatus, EasyMarkerMode }
+
+const NoteType = {
+  UNDERLINE: 'underline',
+  HIGHLIGHT: 'highlight',
+}
+
+export { SelectStatus, EasyMarkerMode, NoteType }
