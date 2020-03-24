@@ -1,11 +1,4 @@
 import BaseEasyMarker from './base_easy_marker'
-// import {
-// getClickWordsPosition,
-// getTouchPosition,
-// matchSubString,
-// screenRelativeToContainerRelative,
-// getTouch,
-// } from './lib/helpers'
 import { SelectStatus, EasyMarkerMode } from './lib/types'
 import Region from './lib/region'
 
@@ -18,6 +11,7 @@ class RegionEasyMarker extends BaseEasyMarker {
     }
     this.region = new Region(options.regions || [])
     this.mode = EasyMarkerMode.REGION
+    this.touchStartTime = 0
   }
   // TODO: update Region
 
@@ -42,6 +36,7 @@ class RegionEasyMarker extends BaseEasyMarker {
   handleTouchStart(e) {
     super.handleTouchStart(e)
     if (this.selectStatus === SelectStatus.NONE) {
+      this.touchStartTime = Date.now()
       const position = this.getTouchRelativePosition(e)
       this.selectRegion.start = this.region.getRegionByPoint(position)
       if (this.selectRegion.start) {
@@ -52,8 +47,8 @@ class RegionEasyMarker extends BaseEasyMarker {
     }
   }
   handleTouchMoveThrottle(e) {
-    super.handleTouchMoveThrottle(e)
     if (this.selectStatus === SelectStatus.NONE && this.selectRegion.start) {
+      if (Date.now() - this.touchStartTime < 100) return
       const position = this.getTouchRelativePosition(e)
       this.selectRegion.end = this.region.getRegionByPoint(position)
       if (this.selectRegion.end) {
@@ -66,6 +61,7 @@ class RegionEasyMarker extends BaseEasyMarker {
         this.selectStatus = SelectStatus.SELECTING
       }
     }
+    super.handleTouchMoveThrottle(e)
   }
 
   handleTouchEnd(e) {

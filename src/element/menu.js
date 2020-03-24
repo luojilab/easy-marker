@@ -51,6 +51,7 @@ export default class Menu extends BaseElement {
       },
     }
 
+    console.log(333, this.option)
     if (options.style) {
       Object.assign(this.option.style.menu, options.style.menu)
       Object.assign(this.option.style.triangle, options.style.triangle)

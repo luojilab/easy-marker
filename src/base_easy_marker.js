@@ -322,13 +322,13 @@ class EasyMarker {
       this.cursor.start = new CursorElement(
         this.container,
         CursorType.END,
-        this.options.cursor || {},
+        Object.assign({ mode: this.mode }, this.options.cursor || {})
       )
     } else {
       this.cursor.start = new CursorElement(
         this.container,
         CursorType.START,
-        this.options.cursor || {},
+        Object.assign({ mode: this.mode }, this.options.cursor || {})
       )
     }
     this.cursor.end = new CursorElement(

@@ -175,7 +175,7 @@ export default class Region {
     if (columnIndex === 0) {
       const lineRectRegion = this.lineRectRegionList[lineIndex - 1]
       if (lineRectRegion) {
-        previousRegion = lineRectRegion.regions[lineRectRegion.length - 1]
+        previousRegion = lineRectRegion.regions[lineRectRegion.regions.length - 1]
       }
     } else {
       previousRegion = this.lineRectRegionList[lineIndex].regions[columnIndex - 1]
@@ -187,13 +187,13 @@ export default class Region {
     let nextRegion
     const lineRectRegion = this.lineRectRegionList[lineIndex]
     if (lineRectRegion) {
-      if (columnIndex === lineRectRegion.length - 1) {
+      if (columnIndex === lineRectRegion.regions.length - 1) {
         const nextLineRectRegion = this.lineRectRegionList[lineIndex + 1]
         if (nextLineRectRegion) {
           [nextRegion] = nextLineRectRegion.regions
         }
       } else {
-        nextRegion = this.lineRectRegionList[lineIndex].regions[columnIndex + 1]
+        nextRegion = lineRectRegion.regions[columnIndex + 1]
       }
     }
     return nextRegion || null
