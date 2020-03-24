@@ -98,8 +98,16 @@ export default class Region {
     const startColumnIndex = startRegion.columnIndex
     const endColumnIndex = endRegion.columnIndex
 
-    const resultLineRegionList = this.lineRectRegionList.slice(startLineIndex, endLineIndex + 1)
     const rects = []
+    if (startLineIndex === endLineIndex) {
+      const lineRectRegion = this.lineRectRegionList[startLineIndex]
+      rects.push(new DOMRect(
+        startRegion.left, lineRectRegion.top,
+        (endRegion.left + endRegion.width) - startRegion.left, lineRectRegion.height
+      ))
+      return rects
+    }
+    const resultLineRegionList = this.lineRectRegionList.slice(startLineIndex, endLineIndex + 1)
     resultLineRegionList.forEach((lineRectRegion, index) => {
       if (index === 0) {
         const region = lineRectRegion.regions[startColumnIndex]

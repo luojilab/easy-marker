@@ -165,11 +165,9 @@ class RegionEasyMarker extends BaseEasyMarker {
    * @param {any} currentPosition
    * @memberof EasyMarker
    */
-  swapCursor(clickRegion, currentPosition) {
-    const { x, y } = currentPosition
+  swapCursor(clickRegion) {
     if (this.movingCursor === this.cursor.start) {
-      const endPosition = this.cursor.end.position
-      if (y > endPosition.y || (y === endPosition.y && x >= endPosition.x)) {
+      if (clickRegion.originalIndex > this.selectRegion.end.originalIndex) {
         this.cursor.start.position = this.cursor.end.position
         this.movingCursor = this.cursor.end
         this.selectRegion.start = this.region.getNextRegion(this.selectRegion.end)
@@ -178,11 +176,8 @@ class RegionEasyMarker extends BaseEasyMarker {
         this.selectRegion.start = clickRegion
       }
     } else {
-      const startPosition = this.cursor.start.position
-      if (
-        y < startPosition.y ||
-        (y === startPosition.y && x <= startPosition.x)
-      ) {
+      // eslint-disable-next-line no-lonely-if
+      if (clickRegion.originalIndex < this.selectRegion.start.originalIndex) {
         this.cursor.end.position = this.cursor.start.position
         this.movingCursor = this.cursor.start
         this.selectRegion.end = this.region.getPreviousRegion(this.selectRegion.start)
