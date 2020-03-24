@@ -4,20 +4,19 @@ export default class Region {
   constructor(list) {
     this.originalRegionList = list
     this.lineRectRegionList = []
-    // region demo
     // {
     //   text: '', required
     //   width: '', required
     //   height: '', required
     //   left: '', required
     //   top: '', required
-    //   offset: 0,  没用
-    //   phase: 0,  没用
+    //   offset: 0,
+    //   phase: 0,
     // }
 
     this.initRectRegion()
   }
-  // 预处理数据
+
   initRectRegion() {
     const lineRectRegion = {
       top: 0,
@@ -80,7 +79,49 @@ export default class Region {
     this.initRectRegion()
   }
 
-  // 获取选择text
+  getSentenceByPosition(point) {
+    let startRegion
+    let endRegion
+    const currentRegion = this.getRegionByPoint(point)
+    const separators = [
+      '\u3002\u201D',
+      '\uFF1F\u201D',
+      '\uFF01\u201D',
+      '\u3002',
+      '\uFF1F',
+      '\uFF01',
+    ]
+    const separatorRegStr = separators.reduce((acc, separator) => {
+      if (separator === '') return acc
+      if (acc === '') return `\\${separator}`
+      return `${acc}|\\${separator}`
+    }, '')
+    const separator = new RegExp(`(${separatorRegStr})`)
+    let tempEndRegion = currentRegion
+    while (!endRegion) {
+      const nextRegion = this.getNextRegion(tempEndRegion)
+      if (nextRegion === null) {
+        endRegion = tempEndRegion
+      } else if (separator.test(nextRegion.text)) {
+        endRegion = nextRegion
+      } else {
+        tempEndRegion = nextRegion
+      }
+    }
+    let tempStartRegion = currentRegion
+    while (!startRegion) {
+      const nextRegion = this.getPreviousRegion(tempStartRegion)
+      if (nextRegion === null) {
+        startRegion = tempStartRegion
+      } else if (separator.test(nextRegion.text)) {
+        startRegion = tempStartRegion
+      } else {
+        tempStartRegion = nextRegion
+      }
+    }
+    return { start: startRegion, end: endRegion }
+  }
+
   getText(startRegion, endRegion) {
     const startIndex = startRegion.originalIndex
     const endIndex = endRegion.originalIndex
@@ -91,7 +132,7 @@ export default class Region {
     })
     return text
   }
-  // 获取选择rects
+
   getRects(startRegion, endRegion) {
     const startLineIndex = startRegion.lineIndex
     const endLineIndex = endRegion.lineIndex
@@ -127,7 +168,6 @@ export default class Region {
     })
     return rects
   }
-  // 获取选择text和rects
 
   /**
    * get Region By Point
@@ -169,6 +209,7 @@ export default class Region {
       width,
     }
   }
+
   getPreviousRegion(region) {
     const { lineIndex, columnIndex } = region
     let previousRegion
@@ -182,6 +223,7 @@ export default class Region {
     }
     return previousRegion || null
   }
+
   getNextRegion(region) {
     const { lineIndex, columnIndex } = region
     let nextRegion
@@ -198,7 +240,7 @@ export default class Region {
     }
     return nextRegion || null
   }
-  // 包含下边界和右边界不包括左边界和上边界
+
   static pointInRect(targetPoint, leftTopPoint, rightBottomPoint) {
     if (targetPoint.x > leftTopPoint.x
       && targetPoint.x <= rightBottomPoint.x
@@ -211,5 +253,10 @@ export default class Region {
 
   static isSameLine(region1, region2) {
     return (region1.top - (region2.top + region2.height)) * (region2.top - (region1.top + region1.height)) > 0
+  }
+
+  destroy() {
+    this.originalRegionList = []
+    this.lineRectRegionList = []
   }
 }

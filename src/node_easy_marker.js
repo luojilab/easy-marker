@@ -265,6 +265,16 @@ class NodeEasyMarker extends BaseEasyMarker {
     }
   }
 
+  destroy() {
+    super.destroy()
+    this.textNode = {
+      start: null,
+      end: null,
+    }
+    this.markdown = null
+    this.mode = EasyMarkerMode.NODE
+  }
+
   reset() {
     super.reset()
     this.textNode = {

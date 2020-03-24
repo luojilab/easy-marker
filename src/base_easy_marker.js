@@ -495,13 +495,18 @@ class EasyMarker {
       start: null,
       end: null,
     }
-    // TODO base的destroy去触发各自的destroy
-    this.textNode = {
-      start: null,
-      end: null,
-    }
     this.mask = null
     this.menu = null
+
+    this.windowHeight = null
+    this.includeElements = []
+    this.scrollInterval = null
+    this.scrollOffsetBottom = null
+    this.scrollSpeedLevel = null
+    this.containerScroll = null
+    this.selectStatusChangeHandler = () => {}
+    this.menuOnClick = () => {}
+    this.highlightLineClick = () => {}
   }
 
   reset() {

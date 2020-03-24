@@ -141,7 +141,6 @@ export default class Highlight extends BaseElement {
     this.lineMap.forEach((line) => {
       const type = line.meta.type || this.type
       line.points.forEach((points) => {
-        // TODO根据不同line的type决定画哪种线
         if (type === NoteType.UNDERLINE) {
           this.element.appendChild(this.createLine(points))
         } else {

@@ -45,7 +45,7 @@ export default class TouchEvent {
     this.moveEventName = isMobile() ? 'touchmove' : 'mousemove'
     this.endEventName = isMobile() ? 'touchend' : 'mouseup'
     this.element.addEventListener(this.startEventName, this.onTouchStart)
-    this.element.addEventListener(this.moveEventName, this.onTouchMove)
+    this.element.addEventListener(this.moveEventName, this.onTouchMove, { passive: false })
     this.element.addEventListener(this.endEventName, this.onTouchEnd)
   }
 

@@ -13,7 +13,16 @@ class RegionEasyMarker extends BaseEasyMarker {
     this.mode = EasyMarkerMode.REGION
     this.touchStartTime = 0
   }
-  // TODO: update Region
+
+  /**
+   * Update Regions
+   *
+   * @memberof EasyMarker
+   * @returns {string}
+   */
+  setRegions(regions) {
+    this.region.setRegions(regions)
+  }
 
   /**
    * Get the selected text
@@ -35,30 +44,34 @@ class RegionEasyMarker extends BaseEasyMarker {
    */
   handleTouchStart(e) {
     super.handleTouchStart(e)
-    if (this.selectStatus === SelectStatus.NONE) {
-      this.touchStartTime = Date.now()
-      const position = this.getTouchRelativePosition(e)
-      this.selectRegion.start = this.region.getRegionByPoint(position)
-      if (this.selectRegion.start) {
-        const { height: lineHeight } = this.region.getLineInfoByRegion(this.selectRegion.start)
-        this.cursor.start.height = lineHeight
-        this.cursor.start.position = { x: this.selectRegion.start.left, y: this.selectRegion.start.top }
+    if (!this.isMobile) {
+      if (this.selectStatus === SelectStatus.NONE) {
+        this.touchStartTime = Date.now()
+        const position = this.getTouchRelativePosition(e)
+        this.selectRegion.start = this.region.getRegionByPoint(position)
+        if (this.selectRegion.start) {
+          const { height: lineHeight } = this.region.getLineInfoByRegion(this.selectRegion.start)
+          this.cursor.start.height = lineHeight
+          this.cursor.start.position = { x: this.selectRegion.start.left, y: this.selectRegion.start.top }
+        }
       }
     }
   }
   handleTouchMoveThrottle(e) {
-    if (this.selectStatus === SelectStatus.NONE && this.selectRegion.start) {
-      if (Date.now() - this.touchStartTime < 100) return
-      const position = this.getTouchRelativePosition(e)
-      this.selectRegion.end = this.region.getRegionByPoint(position)
-      if (this.selectRegion.end) {
-        const { height: lineHeight } = this.region.getLineInfoByRegion(this.selectRegion.end)
-        this.cursor.end.height = lineHeight
-        this.cursor.end.position = {
-          x: this.selectRegion.end.left + this.selectRegion.end.width,
-          y: this.selectRegion.end.top,
+    if (!this.isMobile) {
+      if (this.selectStatus === SelectStatus.NONE && this.selectRegion.start) {
+        if (Date.now() - this.touchStartTime < 100) return
+        const position = this.getTouchRelativePosition(e)
+        this.selectRegion.end = this.region.getRegionByPoint(position)
+        if (this.selectRegion.end) {
+          const { height: lineHeight } = this.region.getLineInfoByRegion(this.selectRegion.end)
+          this.cursor.end.height = lineHeight
+          this.cursor.end.position = {
+            x: this.selectRegion.end.left + this.selectRegion.end.width,
+            y: this.selectRegion.end.top,
+          }
+          this.selectStatus = SelectStatus.SELECTING
         }
-        this.selectStatus = SelectStatus.SELECTING
       }
     }
     super.handleTouchMoveThrottle(e)
@@ -69,8 +82,10 @@ class RegionEasyMarker extends BaseEasyMarker {
     if (this.selectStatus === SelectStatus.SELECTING) {
       this.selectStatus = SelectStatus.FINISH
     }
-    if (this.selectStatus === SelectStatus.NONE) {
-      this.reset()
+    if (!this.isMobile) {
+      if (this.selectStatus === SelectStatus.NONE) {
+        this.reset()
+      }
     }
   }
 
@@ -95,11 +110,52 @@ class RegionEasyMarker extends BaseEasyMarker {
       if (startCursorRegion.inRegion || endCursorRegion.inRegion) return
       this.reset()
     } else if (this.selectStatus === SelectStatus.NONE) {
-      // TODO 点击highlight
-      this.highlight.handleTap(e)
-      // const inHighlightLine = this.highlight.handleTap(e)
-      // TODO mobile 还有后面逻辑
+      const inHighlightLine = this.highlight.handleTap(e)
+      if (
+        !inHighlightLine &&
+        !this.options.disableTapHighlight &&
+        this.isContains(e.target) && this.isMobile
+      ) {
+        const position = this.getTouchRelativePosition(e)
+        this.selectThisSentence(position)
+      }
     }
+  }
+
+  /**
+   * Long press event
+   *
+   * @private
+   * @param {TouchEvent} e
+   * @memberof EasyMarker
+   */
+  handleLongTap(e) {
+    if (this.isMobile) {
+      if (this.isContains(e.target)) {
+        const position = this.getTouchRelativePosition(e)
+        this.selectThisSentence(position)
+      }
+    }
+  }
+  selectThisSentence(position) {
+    const { start, end } = this.region.getSentenceByPosition(position)
+    this.selectRegion = {
+      start,
+      end,
+    }
+    this.cursor.start.height = this.region.getLineInfoByRegion(this.selectRegion.start).height
+    this.cursor.start.position = { x: this.selectRegion.start.left, y: this.selectRegion.start.top }
+    // { height: lineHeight } = this.region.getLineInfoByRegion(this.selectRegion.end)
+    this.cursor.end.height = this.region.getLineInfoByRegion(this.selectRegion.end).height
+    this.cursor.end.position = {
+      x: this.selectRegion.end.left + this.selectRegion.end.width,
+      y: this.selectRegion.end.top,
+    }
+    this.cursor.start.show()
+    this.cursor.end.show()
+
+    this.renderMask()
+    this.selectStatus = SelectStatus.FINISH
   }
   /**
    * Move the cursor to the specified location
@@ -188,7 +244,19 @@ class RegionEasyMarker extends BaseEasyMarker {
       end: null,
     }
   }
-  // TODO: 需确认这个relative在pc中是否不需要
+
+  destroy() {
+    super.destroy()
+    this.selectRegion = {
+      start: null,
+      end: null,
+    }
+    this.region.destroy()
+    this.region = null
+    this.mode = EasyMarkerMode.REGION
+    this.touchStartTime = 0
+  }
+
   adjustTextStyle() {
     const { children } = this.container
     for (let i = 0; i < children.length; i++) {
