@@ -72,8 +72,8 @@ class RegionEasyMarker extends BaseEasyMarker {
     super.handleTouchEnd(e)
     if (this.selectStatus === SelectStatus.SELECTING) {
       this.selectStatus = SelectStatus.FINISH
-    } else {
-      this.selectStatus = SelectStatus.NONE
+    }
+    if (this.selectStatus === SelectStatus.NONE) {
       this.reset()
     }
   }

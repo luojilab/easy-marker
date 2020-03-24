@@ -1,5 +1,6 @@
 import BaseElement from './base'
 import { anyToPx } from '../lib/helpers'
+import { EasyMarkerMode } from '../lib/types'
 
 /**
  *
@@ -12,6 +13,7 @@ export default class Menu extends BaseElement {
     super()
     this.container = container
     this.handler = null
+    this.mode = options.mode
     this.option = {
       items: options.menuItems,
       topOffset: anyToPx(options.topOffset),
@@ -158,26 +160,49 @@ export default class Menu extends BaseElement {
     this.style.opacity = '1'
   }
 
-  handleTap(e, {
-    start,
-    end,
-    content,
-    markdown,
-  }) {
+  handleTap(e, options) {
     const tapTarget = this.getTapTarget(e.target)
     if (!this.itemMap.has(tapTarget)) return false
-    const selection = {
-      anchorNode: start.node,
-      anchorOffset: start.offset,
-      focusNode: end.node,
-      focusOffset: end.offset,
-      toString() {
-        return content
-      },
-      toMarkdown() {
-        return markdown
-      },
+    let selection
+    if (this.mode === EasyMarkerMode.NODE) {
+      const {
+        start,
+        end,
+        content,
+        markdown,
+      } = options
+      selection = {
+        anchorNode: start.node,
+        anchorOffset: start.offset,
+        focusNode: end.node,
+        focusOffset: end.offset,
+        toString() {
+          return content
+        },
+        toMarkdown() {
+          return markdown
+        },
+      }
+    } else {
+      const {
+        start,
+        end,
+        content,
+        markdown,
+      } = options
+      selection = {
+        start,
+        end,
+        toString() {
+          return content
+        },
+        toMarkdown() {
+          return markdown
+        },
+      }
     }
+
+
     const item = this.itemMap.get(tapTarget)
     if (item.id && this.easyMarker.menuOnClick) {
       this.easyMarker.menuOnClick(item.id, selection)

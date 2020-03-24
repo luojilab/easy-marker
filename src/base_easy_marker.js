@@ -347,6 +347,7 @@ class EasyMarker {
       menuItems: this.options.menuItems,
       topOffset: this.options.menuTopOffset,
       style: this.options.menuStyle,
+      mode: this.mode,
     })
     this.menu.easyMarker = this
     this.highlight.easyMarker = this
