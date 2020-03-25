@@ -1,7 +1,13 @@
 import BaseElement from './base'
 import Position from '../lib/position'
-import { rectToPointArray } from '../lib/helpers'
+import { rectToPointArray, screenRelativeToContainerRelative } from '../lib/helpers'
 import { EasyMarkerMode } from '../lib/types'
+import TextNode from '../lib/text_node'
+
+export const MaskType = {
+  BLOCK: 'block',
+  LINE: 'line',
+}
 
 export default class Mask extends BaseElement {
   constructor(container, option) {
@@ -12,11 +18,11 @@ export default class Mask extends BaseElement {
       animateDuration: 100,
     }
     this.mode = option.mode || EasyMarkerMode.NODE
-
+    this.maskType = option.maskType || (this.mode === EasyMarkerMode.NODE ? MaskType.BLOCK : MaskType.LINE)
     this.container = container
     this.option = Object.assign(defaultOptions, option)
 
-    if (this.mode === EasyMarkerMode.NODE) {
+    if (this.maskType === MaskType.BLOCK) {
       this.paths = []
       this.position = {
         header: new Position(),
@@ -31,33 +37,43 @@ export default class Mask extends BaseElement {
       this.rects = []
     }
     this.animating = false
-
+    this.easyMarker = null
     this.createElement()
     this.mount()
   }
 
+  get screenRelativeOffset() {
+    const { top, left } = this.container.getBoundingClientRect()
+    return {
+      x: left,
+      y: top,
+    }
+  }
+
   get top() {
-    if (this.mode === EasyMarkerMode.NODE) {
+    if (this.maskType === MaskType.BLOCK) {
       return this.position.header.y
     }
     if (this.rects[0]) {
-      return this.rects[0].top
+      return this.mode === EasyMarkerMode.NODE ?
+        this.rects[0].top - this.screenRelativeOffset.y : this.rects[0].top
     }
     return 0
   }
 
   get left() {
-    if (this.mode === EasyMarkerMode.NODE) {
+    if (this.maskType === MaskType.BLOCK) {
       return this.position.header.x
     }
     if (this.rects[0]) {
-      return this.rects[0].left
+      return this.mode === EasyMarkerMode.NODE ?
+        this.rects[0].left - this.screenRelativeOffset.x : this.rects[0].left
     }
     return 0
   }
 
   get height() {
-    if (this.mode === EasyMarkerMode.NODE) {
+    if (this.maskType === MaskType.BLOCK) {
       return this.position.header.height + this.position.body.height + this.position.footer.height
     }
     const lastRect = this.rects[this.rects.length - 1]
@@ -77,7 +93,7 @@ export default class Mask extends BaseElement {
     svg.style.left = '0'
     svg.style.overflow = 'visible'
 
-    if (this.mode === EasyMarkerMode.NODE) {
+    if (this.maskType === MaskType.BLOCK) {
       const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
       polygon.style.fill = this.option.color
       polygon.style.strokeWidth = 0
@@ -90,11 +106,80 @@ export default class Mask extends BaseElement {
     this.element = svg
   }
 
-  render(...args) {
+  render(start, end) {
     if (this.mode === EasyMarkerMode.NODE) {
-      this.renderBlock(...args)
-    } else {
-      this.renderRectsLine(...args)
+      if (this.maskType === 'line') {
+        let rects
+        try {
+          ({ rects } = TextNode.getSelectNodeRectAndText(
+            start.node,
+            end.node,
+            start.offset,
+            end.offset
+          ))
+        } catch (error) {
+          console.error('EasyMarkerError:', error) // eslint-disable-line no-console
+          rects = []
+        }
+        const lineHeight = Number(window.getComputedStyle(start.node.parentElement).lineHeight.replace('px', ''))
+        this.renderRectsLine(rects, lineHeight)
+      } else {
+        const { header, body, footer } = TextNode.getSelectRects(
+          start,
+          end,
+        )
+        const relativeHeader = screenRelativeToContainerRelative(
+          header,
+          this.screenRelativeOffset,
+        )
+        const relativeBody = screenRelativeToContainerRelative(
+          body,
+          this.screenRelativeOffset,
+        )
+        const relativeFooter = screenRelativeToContainerRelative(
+          footer,
+          this.screenRelativeOffset,
+        )
+        this.renderBlock(relativeHeader, relativeBody, relativeFooter)
+      }
+    }
+
+    if (this.mode === EasyMarkerMode.REGION) {
+      const rects = this.easyMarker.region.getRects(start, end)
+      if (this.maskType === 'line') {
+        this.renderRectsLine(rects)
+      } else {
+        let header
+        let footer
+        let body
+        rects.forEach((rect, index) => {
+          if (index === 0) {
+            header = new Position()
+            body = new Position()
+            footer = new Position()
+            header.setAll(rect)
+            body.setAll(rect)
+            footer.setAll(rect)
+            body.y = rect.y + rect.height
+            body.height = 0
+            footer.height = 0
+            footer.y = rect.y + rect.height
+          } else if (index === rects.length - 1) {
+            footer.setAll(rect)
+            body.height = rect.y - (header.y + header.height)
+          } else {
+            const right = body.x + body.width
+            const left = body.x
+            if (rect.x < left) {
+              body.x = rect.x
+            }
+            if (rect.x + rect.width >= right) {
+              body.width = rect.x + rect.width - body.x
+            }
+          }
+        })
+        this.renderBlock(header, body, footer)
+      }
     }
   }
 
@@ -155,12 +240,12 @@ export default class Mask extends BaseElement {
   }
 
   reset() {
-    if (this.mode === EasyMarkerMode.NODE) {
+    if (this.maskType === MaskType.BLOCK) {
       this.paths = []
       this.polygonElement.style.opacity = '0'
       this.polygonElement.setAttribute('points', '')
     }
-    if (this.mode === EasyMarkerMode.REGION) {
+    if (this.maskType === MaskType.LINE) {
       this.removeAllRectangle()
     }
   }
@@ -203,11 +288,17 @@ export default class Mask extends BaseElement {
     return paths
   }
 
-  renderRectsLine(rects) {
+  renderRectsLine(rects, lineHeight) {
     this.rects = rects
     const points = rects.map((rect) => {
-      const margin = 0
-      return rectToPointArray(rect, { x: 0, y: 0 }, margin)
+      let margin = 0
+      let offset = { x: 0, y: 0 }
+      if (this.mode === EasyMarkerMode.NODE) {
+        lineHeight = lineHeight || rect.height
+        margin = this.option.margin || (lineHeight - rect.height) / 4
+        offset = this.screenRelativeOffset
+      }
+      return rectToPointArray(rect, offset, margin)
     })
     if (!this.animating) {
       this.animating = true

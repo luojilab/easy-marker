@@ -358,6 +358,7 @@ class EasyMarker {
     })
     this.menu.easyMarker = this
     this.highlight.easyMarker = this
+    this.mask.easyMarker = this
     this.markdown = new Markdown(this.container, this.options.markdownOptions)
     this.scrollOffsetBottom = anyToPx(this.options.scrollOffsetBottom)
     this.scrollSpeedLevel = this.options.scrollSpeedLevel

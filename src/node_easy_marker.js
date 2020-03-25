@@ -5,7 +5,6 @@ import {
   getTouchPosition,
   matchSubString,
   getClickPosition,
-  screenRelativeToContainerRelative,
 } from './lib/helpers'
 import { SelectStatus, EasyMarkerMode } from './lib/types'
 
@@ -150,23 +149,7 @@ class NodeEasyMarker extends BaseEasyMarker {
    * @memberof EasyMarker
    */
   renderMask() {
-    const { header, body, footer } = TextNode.getSelectRects(
-      this.textNode.start,
-      this.textNode.end,
-    )
-    const relativeHeader = screenRelativeToContainerRelative(
-      header,
-      this.screenRelativeOffset,
-    )
-    const relativeBody = screenRelativeToContainerRelative(
-      body,
-      this.screenRelativeOffset,
-    )
-    const relativeFooter = screenRelativeToContainerRelative(
-      footer,
-      this.screenRelativeOffset,
-    )
-    this.mask.render(relativeHeader, relativeBody, relativeFooter)
+    this.mask.render(this.textNode.start, this.textNode.end)
   }
 
   /**

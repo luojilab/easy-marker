@@ -235,9 +235,9 @@ class RegionEasyMarker extends BaseEasyMarker {
   }
 
   renderMask() {
-    const rects = this.region.getRects(this.selectRegion.start, this.selectRegion.end)
-    this.mask.renderRectsLine(rects)
+    this.mask.render(this.selectRegion.start, this.selectRegion.end)
   }
+
   reset() {
     super.reset()
     this.selectRegion = {
