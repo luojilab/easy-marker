@@ -1,4 +1,5 @@
-import { getDistance, getTouchPosition, isMobile, getTouch } from './helpers'
+import { getDistance, getTouchPosition, getDeviceType, getTouch } from './helpers'
+import { DeviceType } from './types'
 
 export const EventType = {
   TOUCH_START: 'touchstart',
@@ -23,7 +24,7 @@ export default class TouchEvent {
       slideDistance: 20,
       throttleTime: 50,
     }
-    this.element = element
+    this.element = getDeviceType() === DeviceType.MOBILE ? element : window
     this.options = Object.assign(this.options, options)
     this.touchStartCallbacks = []
     this.touchMoveCallbacks = []
@@ -41,9 +42,9 @@ export default class TouchEvent {
     this.onTouchStart = this.onTouchStart.bind(this)
     this.onTouchMove = this.onTouchMove.bind(this)
     this.onTouchEnd = this.onTouchEnd.bind(this)
-    this.startEventName = isMobile() ? 'touchstart' : 'mousedown'
-    this.moveEventName = isMobile() ? 'touchmove' : 'mousemove'
-    this.endEventName = isMobile() ? 'touchend' : 'mouseup'
+    this.startEventName = getDeviceType() === DeviceType.MOBILE ? 'touchstart' : 'mousedown'
+    this.moveEventName = getDeviceType() === DeviceType.MOBILE ? 'touchmove' : 'mousemove'
+    this.endEventName = getDeviceType() === DeviceType.MOBILE ? 'touchend' : 'mouseup'
     this.element.addEventListener(this.startEventName, this.onTouchStart)
     this.element.addEventListener(this.moveEventName, this.onTouchMove, { passive: false })
     this.element.addEventListener(this.endEventName, this.onTouchEnd)

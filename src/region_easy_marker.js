@@ -1,5 +1,5 @@
 import BaseEasyMarker from './base_easy_marker'
-import { SelectStatus, EasyMarkerMode } from './lib/types'
+import { SelectStatus, EasyMarkerMode, DeviceType } from './lib/types'
 import Region from './lib/region'
 
 class RegionEasyMarker extends BaseEasyMarker {
@@ -44,7 +44,7 @@ class RegionEasyMarker extends BaseEasyMarker {
    */
   handleTouchStart(e) {
     super.handleTouchStart(e)
-    if (!this.isMobile) {
+    if (this.deviceType === DeviceType.PC) {
       if (this.selectStatus === SelectStatus.NONE) {
         this.touchStartTime = Date.now()
         const position = this.getTouchRelativePosition(e)
@@ -58,7 +58,7 @@ class RegionEasyMarker extends BaseEasyMarker {
     }
   }
   handleTouchMoveThrottle(e) {
-    if (!this.isMobile) {
+    if (this.deviceType === DeviceType.PC) {
       if (this.selectStatus === SelectStatus.NONE && this.selectRegion.start) {
         if (Date.now() - this.touchStartTime < 100) return
         const position = this.getTouchRelativePosition(e)
@@ -82,7 +82,7 @@ class RegionEasyMarker extends BaseEasyMarker {
     if (this.selectStatus === SelectStatus.SELECTING) {
       this.selectStatus = SelectStatus.FINISH
     }
-    if (!this.isMobile) {
+    if (this.deviceType === DeviceType.PC) {
       if (this.selectStatus === SelectStatus.NONE) {
         this.reset()
       }
@@ -114,7 +114,8 @@ class RegionEasyMarker extends BaseEasyMarker {
       if (
         !inHighlightLine &&
         !this.options.disableTapHighlight &&
-        this.isContains(e.target) && this.isMobile
+        this.isContains(e.target) &&
+        this.deviceType === DeviceType.MOBILE
       ) {
         const position = this.getTouchRelativePosition(e)
         this.selectThisSentence(position)
@@ -130,7 +131,7 @@ class RegionEasyMarker extends BaseEasyMarker {
    * @memberof EasyMarker
    */
   handleLongTap(e) {
-    if (this.isMobile) {
+    if (this.deviceType === DeviceType.MOBILE) {
       if (this.isContains(e.target)) {
         const position = this.getTouchRelativePosition(e)
         this.selectThisSentence(position)

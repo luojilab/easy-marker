@@ -1,3 +1,5 @@
+import { DeviceType } from './types'
+
 /**
  * Get the location of the clicked word
  *
@@ -372,18 +374,18 @@ export function matchSubString(originStr = '', subStr = '') {
   return matchSubstr
 }
 
-export function isMobile() {
+export function getDeviceType() {
   if (typeof navigator !== 'undefined' && navigator.userAgent) {
     const ua = navigator.userAgent
-    if (ua.indexOf('Tablet') > -1 || ua.indexOf('Pad') > -1 || ua.indexOf('Nexus 7') > -1) return true
-    if (ua.indexOf('Mobi') > -1 || ua.indexOf('iPh') > -1) return true
-    return false
+    if (ua.indexOf('Tablet') > -1 || ua.indexOf('Pad') > -1 || ua.indexOf('Nexus 7') > -1) return DeviceType.MOBILE
+    if (ua.indexOf('Mobi') > -1 || ua.indexOf('iPh') > -1) return DeviceType.MOBILE
+    return DeviceType.PC
   }
-  return true
+  return DeviceType.MOBILE
 }
 
 export function getTouch(e) {
-  if (isMobile()) {
+  if (getDeviceType() === DeviceType.MOBILE) {
     return e.changedTouches[0]
   }
   return {

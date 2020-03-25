@@ -15,4 +15,9 @@ const NoteType = {
   HIGHLIGHT: 'highlight',
 }
 
-export { SelectStatus, EasyMarkerMode, NoteType }
+const DeviceType = {
+  PC: 'pc',
+  MOBILE: 'MOBILE',
+}
+
+export { SelectStatus, EasyMarkerMode, NoteType, DeviceType }

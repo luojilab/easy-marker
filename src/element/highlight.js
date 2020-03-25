@@ -207,9 +207,9 @@ export default class Highlight extends BaseElement {
 
   createLine(pointList) {
     const x1 = pointList[2][0]
-    const y1 = pointList[2][1]
+    const y1 = pointList[2][1] + 1
     const x2 = pointList[3][0]
-    const y2 = pointList[3][1]
+    const y2 = pointList[3][1] + 1
     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
     line.style.stroke = this.option.underlineColor
     line.setAttribute('x1', x1)

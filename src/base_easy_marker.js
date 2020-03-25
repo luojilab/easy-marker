@@ -10,9 +10,9 @@ import {
   getTouchPosition,
   anyToPx,
   getTouch,
-  isMobile,
+  getDeviceType,
 } from './lib/helpers'
-import { SelectStatus } from './lib/types'
+import { SelectStatus, DeviceType } from './lib/types'
 
 const defaultOptions = {
   menuItems: [],
@@ -195,7 +195,8 @@ class EasyMarker {
     this.scrollOffsetBottom = null
     this.scrollSpeedLevel = null
     this.containerScroll = null
-    this.isMobile = isMobile()
+    this.copyEvent = null
+    this.deviceType = getDeviceType()
     this.selectStatusChangeHandler = () => {}
     this.menuOnClick = () => {}
     this.highlightLineClick = () => {}
@@ -211,7 +212,7 @@ class EasyMarker {
     }
     this.$selectStatus = val
     if (val === SelectStatus.FINISH) {
-      const cursorOffset = this.isMobile ? this.movingCursor.height / 2 : 0
+      const cursorOffset = this.deviceType === DeviceType.MOBILE ? this.movingCursor.height / 2 : 0
       const top = this.mask.top - cursorOffset
       const { left } = this.mask
       this.menu.setPosition(top, this.mask.top + this.mask.height, left)
@@ -283,6 +284,12 @@ class EasyMarker {
         this.handleScroll()
       }
       this.scrollContainer.addEventListener('scroll', this.containerScroll)
+    }
+    if (this.deviceType === DeviceType.PC) {
+      this.copyEvent = (e) => {
+        this.copy(e)
+      }
+      document.addEventListener('copy', this.copyEvent)
     }
     // this.position.setAll(getElementAbsolutePosition(this.container))
 
@@ -471,6 +478,10 @@ class EasyMarker {
   destroy() {
     this.container.oncontextmenu = null
     this.container.removeEventListener('contextmenu', preventDefaultCb)
+    if (this.deviceType === DeviceType.PC) {
+      document.removeEventListener('copy', this.copyEvent)
+      this.copyEvent = null
+    }
     if (this.containerScroll !== null) {
       this.scrollContainer.removeEventListener('scroll', this.containerScroll)
       this.containerScroll = null
@@ -503,7 +514,6 @@ class EasyMarker {
     this.scrollInterval = null
     this.scrollOffsetBottom = null
     this.scrollSpeedLevel = null
-    this.containerScroll = null
     this.selectStatusChangeHandler = () => {}
     this.menuOnClick = () => {}
     this.highlightLineClick = () => {}
@@ -632,7 +642,7 @@ class EasyMarker {
   handleTouchMoveThrottle(e) {
     // 拖着cursor走的逻辑
     if (this.selectStatus === SelectStatus.SELECTING) {
-      const cursorOffset = this.isMobile ? this.movingCursor.height / 2 : 0
+      const cursorOffset = this.deviceType === DeviceType.MOBILE ? this.movingCursor.height / 2 : 0
       const offset = this.movingCursor.offset || {
         x: 0,
         y: -cursorOffset,
@@ -689,7 +699,7 @@ class EasyMarker {
   }
 
   getTouchRelativePosition(e) {
-    const cursorOffset = this.isMobile ? this.movingCursor.height / 2 : 0
+    const cursorOffset = this.deviceType === DeviceType.MOBILE ? this.movingCursor.height / 2 : 0
     const offset = {
       x: 0,
       y: -cursorOffset,
@@ -698,6 +708,15 @@ class EasyMarker {
     position.x -= this.screenRelativeOffset.x
     position.y -= this.screenRelativeOffset.y
     return position
+  }
+
+  copy(e) {
+    if (this.selectStatus === SelectStatus.FINISH) {
+      const text = this.getSelectText() || ''
+      e.clipboardData.setData('text/plain', text)
+      this.reset()
+      e.preventDefault()
+    }
   }
 
   // endregion

@@ -51,7 +51,6 @@ export default class Menu extends BaseElement {
       },
     }
 
-    console.log(333, this.option)
     if (options.style) {
       Object.assign(this.option.style.menu, options.style.menu)
       Object.assign(this.option.style.triangle, options.style.triangle)
@@ -164,6 +163,19 @@ export default class Menu extends BaseElement {
   handleTap(e, options) {
     const tapTarget = this.getTapTarget(e.target)
     if (!this.itemMap.has(tapTarget)) return false
+
+    const selection = this.getSelection(options)
+
+    const item = this.itemMap.get(tapTarget)
+    if (item.id && this.easyMarker.menuOnClick) {
+      this.easyMarker.menuOnClick(item.id, selection)
+    } else {
+      item.handler.call(this.easyMarker, selection)
+    }
+    return true
+  }
+
+  getSelection(options) {
     let selection
     if (this.mode === EasyMarkerMode.NODE) {
       const {
@@ -202,19 +214,13 @@ export default class Menu extends BaseElement {
         },
       }
     }
-
-
-    const item = this.itemMap.get(tapTarget)
-    if (item.id && this.easyMarker.menuOnClick) {
-      this.easyMarker.menuOnClick(item.id, selection)
-    } else {
-      item.handler.call(this.easyMarker, selection)
-    }
-    return true
+    return selection
   }
 
   getTapTarget(target) {
-    if (this.itemMap.has(target) || (target.classList && target.classList.contains('em-menu'))) {
+    if (this.itemMap.has(target)
+    // || (target.classList && target.classList.contains('em-menu'))
+    ) {
       return target
     }
     if (target.parentNode) {
