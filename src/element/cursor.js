@@ -1,6 +1,5 @@
 import BaseElement from './base'
 import { getDistance } from '../lib/helpers'
-// import { EasyMarkerMode } from '../lib/types'
 
 export const CursorType = {
   START: 'start',
@@ -29,7 +28,6 @@ export default class Cursor extends BaseElement {
   constructor(container, type, options) {
     super()
     this.container = container
-    // this.mode = options.mode || EasyMarkerMode.NODE
     this.type = type
     this.options = Object.assign({}, defaultOptions, options)
     this.$position = { x: 0, y: 0 }

@@ -374,6 +374,12 @@ export function matchSubString(originStr = '', subStr = '') {
   return matchSubstr
 }
 
+/**
+ * get Device Type (mobile || PC)
+ *
+ * @param {Event} Event
+ * @returns {object} { x, y }
+ */
 export function getDeviceType() {
   if (typeof navigator !== 'undefined' && navigator.userAgent) {
     const ua = navigator.userAgent
@@ -384,6 +390,12 @@ export function getDeviceType() {
   return DeviceType.MOBILE
 }
 
+/**
+ * get eventTouch Support mobile and PC
+ *
+ * @param {Event} Event
+ * @returns {object} { x, y }
+ */
 export function getTouch(e) {
   if (getDeviceType() === DeviceType.MOBILE) {
     return e.changedTouches[0]
@@ -394,6 +406,14 @@ export function getTouch(e) {
   }
 }
 
+/**
+ * Binary search
+ *
+ * @param {array} array
+ * @param {object | string} target
+ * @param {string} target key
+ * @returns {number} index
+ */
 export function BSearchUpperBound(arr, target, key) {
   let start = 0
   let end = arr.length - 1
@@ -419,7 +439,7 @@ export function BSearchUpperBound(arr, target, key) {
 }
 
 /**
-   *
+   * rect => Point[]
    *
    * @static
    * @param {ClientRect} rect
