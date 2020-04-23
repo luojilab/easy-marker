@@ -6,7 +6,7 @@ import {
   matchSubString,
   getClickPosition,
 } from './lib/helpers'
-import { SelectStatus, EasyMarkerMode } from './lib/types'
+import { SelectStatus, EasyMarkerMode, DeviceType } from './lib/types'
 
 class NodeEasyMarker extends BaseEasyMarker {
   constructor(options) {
@@ -17,6 +17,7 @@ class NodeEasyMarker extends BaseEasyMarker {
     }
     this.markdown = null
     this.mode = EasyMarkerMode.NODE
+    this.touchStartTime = 0
   }
 
   /**
@@ -119,7 +120,6 @@ class NodeEasyMarker extends BaseEasyMarker {
     } =
       getClickWordsPosition(element, x, y, separators) || {}
     if (!rects || (rects && rects.length === 0)) return
-
     const startRect = rects[0]
     const endRect = rects[rects.length - 1]
     // start
@@ -179,12 +179,79 @@ class NodeEasyMarker extends BaseEasyMarker {
       unmovingCursor.position.x === relativeX &&
       unmovingCursor.position.y === relativeY
     ) { return }
-
     this.swapCursor(clickPosition, { x: relativeX, y: relativeY })
 
     this.movingCursor.height = clickPosition.height
     this.movingCursor.position = { x: relativeX, y: relativeY }
+
+    this.cursor.start.show()
+    this.cursor.end.show()
     this.renderMask()
+  }
+
+  /**
+   * touchstart event handler
+   *
+   * @private
+   * @param {TouchEvent} e
+   * @memberof EasyMarker
+   */
+  handleTouchStart(e) {
+    super.handleTouchStart(e)
+    if (this.deviceType === DeviceType.PC) {
+      if (this.selectStatus === SelectStatus.NONE) {
+        this.touchStartTime = Date.now()
+        const { x, y } = getTouchPosition(e)
+        const element = document.elementFromPoint(x, y)
+        const clickPosition = getClickPosition(
+          element,
+          x,
+          y,
+          this.movingCursor === this.cursor.start,
+        )
+        this.textNode.start = new TextNode(
+          clickPosition.node,
+          clickPosition.index,
+        )
+        if (this.textNode.start) {
+          const startLeft = clickPosition.x - this.screenRelativeOffset.x
+          const startTop = clickPosition.y - this.screenRelativeOffset.y
+
+          this.cursor.start.height = clickPosition.height
+          this.cursor.start.position = { x: startLeft, y: startTop }
+        }
+      }
+    }
+  }
+
+  handleTouchMoveThrottle(e) {
+    if (this.deviceType === DeviceType.PC) {
+      if (this.selectStatus === SelectStatus.NONE && this.textNode.start) {
+        if (Date.now() - this.touchStartTime < 100) return
+        const { x, y } = getTouchPosition(e)
+        const element = document.elementFromPoint(x, y)
+        const clickPosition = getClickPosition(
+          element,
+          x,
+          y,
+          this.movingCursor === this.cursor.start,
+        )
+        this.textNode.end = new TextNode(
+          clickPosition.node,
+          clickPosition.index,
+        )
+
+        if (this.textNode.end) {
+          const endLeft = clickPosition.x - this.screenRelativeOffset.x
+          const endTop = clickPosition.y - this.screenRelativeOffset.y
+
+          this.cursor.end.height = clickPosition.height
+          this.cursor.end.position = { x: endLeft, y: endTop }
+          this.selectStatus = SelectStatus.SELECTING
+        }
+      }
+    }
+    super.handleTouchMoveThrottle(e)
   }
 
   /**
@@ -212,7 +279,8 @@ class NodeEasyMarker extends BaseEasyMarker {
       if (
         !inHighlightLine &&
         !this.options.disableTapHighlight &&
-        this.isContains(e.target)
+        this.isContains(e.target) &&
+        this.deviceType === DeviceType.MOBILE
       ) {
         const { x, y } = getTouchPosition(e)
         this.selectWords(e.target, x, y)
@@ -228,9 +296,11 @@ class NodeEasyMarker extends BaseEasyMarker {
    * @memberof EasyMarker
    */
   handleLongTap(e) {
-    if (this.isContains(e.target)) {
-      const { x, y } = getTouchPosition(e)
-      this.selectWords(e.target, x, y)
+    if (this.deviceType === DeviceType.MOBILE) {
+      if (this.isContains(e.target)) {
+        const { x, y } = getTouchPosition(e)
+        this.selectWords(e.target, x, y)
+      }
     }
   }
 
@@ -245,6 +315,11 @@ class NodeEasyMarker extends BaseEasyMarker {
     super.handleTouchEnd(e)
     if (this.selectStatus === SelectStatus.SELECTING) {
       this.selectStatus = SelectStatus.FINISH
+    }
+    if (this.deviceType === DeviceType.PC) {
+      if (this.selectStatus === SelectStatus.NONE) {
+        this.reset()
+      }
     }
   }
 
