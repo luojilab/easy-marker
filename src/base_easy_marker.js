@@ -195,7 +195,6 @@ class EasyMarker {
     this.scrollOffsetBottom = null
     this.scrollSpeedLevel = null
     this.containerScroll = null
-    this.copyEvent = null
     this.deviceType = getDeviceType()
     this.selectStatusChangeHandler = () => {}
     this.menuOnClick = () => {}
@@ -284,12 +283,6 @@ class EasyMarker {
         this.handleScroll()
       }
       this.scrollContainer.addEventListener('scroll', this.containerScroll)
-    }
-    if (this.deviceType === DeviceType.PC) {
-      this.copyEvent = (e) => {
-        this.copy(e)
-      }
-      document.addEventListener('copy', this.copyEvent)
     }
     // this.position.setAll(getElementAbsolutePosition(this.container))
 
@@ -479,10 +472,6 @@ class EasyMarker {
   destroy() {
     this.container.oncontextmenu = null
     this.container.removeEventListener('contextmenu', preventDefaultCb)
-    if (this.deviceType === DeviceType.PC) {
-      document.removeEventListener('copy', this.copyEvent)
-      this.copyEvent = null
-    }
     if (this.containerScroll !== null) {
       this.scrollContainer.removeEventListener('scroll', this.containerScroll)
       this.containerScroll = null
@@ -711,14 +700,14 @@ class EasyMarker {
     return position
   }
 
-  copy(e) {
-    if (this.selectStatus === SelectStatus.FINISH) {
-      const text = this.getSelectText() || ''
-      e.clipboardData.setData('text/plain', text)
-      this.reset()
-      e.preventDefault()
-    }
-  }
+  // copy(e) {
+  //   if (this.selectStatus === SelectStatus.FINISH) {
+  //     const text = this.getSelectText() || ''
+  //     e.clipboardData.setData('text/plain', text)
+  //     this.reset()
+  //     e.preventDefault()
+  //   }
+  // }
 
   // endregion
 }
