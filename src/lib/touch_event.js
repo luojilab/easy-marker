@@ -89,6 +89,7 @@ export default class TouchEvent {
   }
 
   onTouchStart(e) {
+    if (e.touches && e.touches.length > 1) return
     if (!this.hook('touchstart', e)) return
     this.touchStartCallbacks.forEach(callback => callback(e))
 
@@ -101,6 +102,7 @@ export default class TouchEvent {
   }
 
   onTouchMove(e) {
+    if (e.touches && e.touches.length > 1) return
     if (!this.hook('touchmove', e)) return
 
     this.touchMoveCallbacks.forEach(callback => callback(e))
@@ -123,6 +125,7 @@ export default class TouchEvent {
   }
 
   onTouchEnd(e) {
+    if (e.touches && e.touches.length > 1) return
     if (!this.hook('touchmove', e)) return
 
     this.touchEndCallbacks.forEach(callback => callback(e))
