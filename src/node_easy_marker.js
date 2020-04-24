@@ -19,6 +19,13 @@ class NodeEasyMarker extends BaseEasyMarker {
     this.mode = EasyMarkerMode.NODE
     this.touchStartTime = 0
   }
+  get start() {
+    return this.textNode.start
+  }
+
+  get end() {
+    return this.textNode.end
+  }
 
   /**
    * Get the selected text
@@ -209,16 +216,18 @@ class NodeEasyMarker extends BaseEasyMarker {
           y,
           this.movingCursor === this.cursor.start,
         )
-        this.textNode.start = new TextNode(
-          clickPosition.node,
-          clickPosition.index,
-        )
-        if (this.textNode.start) {
-          const startLeft = clickPosition.x - this.screenRelativeOffset.x
-          const startTop = clickPosition.y - this.screenRelativeOffset.y
+        if (clickPosition) {
+          this.textNode.start = new TextNode(
+            clickPosition.node,
+            clickPosition.index,
+          )
+          if (this.textNode.start) {
+            const startLeft = clickPosition.x - this.screenRelativeOffset.x
+            const startTop = clickPosition.y - this.screenRelativeOffset.y
 
-          this.cursor.start.height = clickPosition.height
-          this.cursor.start.position = { x: startLeft, y: startTop }
+            this.cursor.start.height = clickPosition.height
+            this.cursor.start.position = { x: startLeft, y: startTop }
+          }
         }
       }
     }
@@ -226,7 +235,7 @@ class NodeEasyMarker extends BaseEasyMarker {
 
   handleTouchMoveThrottle(e) {
     if (this.deviceType === DeviceType.PC) {
-      if (this.selectStatus === SelectStatus.NONE && this.textNode.start) {
+      if (this.selectStatus === SelectStatus.NONE && this.textNode.start && !this.textNode.end) {
         if (Date.now() - this.touchStartTime < 100) return
         const { x, y } = getTouchPosition(e)
         const element = document.elementFromPoint(x, y)
@@ -236,18 +245,20 @@ class NodeEasyMarker extends BaseEasyMarker {
           y,
           this.movingCursor === this.cursor.start,
         )
-        this.textNode.end = new TextNode(
-          clickPosition.node,
-          clickPosition.index,
-        )
+        if (clickPosition) {
+          this.textNode.end = new TextNode(
+            clickPosition.node,
+            clickPosition.index,
+          )
 
-        if (this.textNode.end) {
-          const endLeft = clickPosition.x - this.screenRelativeOffset.x
-          const endTop = clickPosition.y - this.screenRelativeOffset.y
+          if (this.textNode.end) {
+            const endLeft = clickPosition.x - this.screenRelativeOffset.x
+            const endTop = clickPosition.y - this.screenRelativeOffset.y
 
-          this.cursor.end.height = clickPosition.height
-          this.cursor.end.position = { x: endLeft, y: endTop }
-          this.selectStatus = SelectStatus.SELECTING
+            this.cursor.end.height = clickPosition.height
+            this.cursor.end.position = { x: endLeft, y: endTop }
+            this.selectStatus = SelectStatus.SELECTING
+          }
         }
       }
     }
@@ -321,6 +332,17 @@ class NodeEasyMarker extends BaseEasyMarker {
         this.reset()
       }
     }
+  }
+
+  setSelection(selection) {
+    this.textNode.start = new TextNode(
+      selection.anchorNode,
+      selection.anchorOffset,
+    )
+    this.textNode.end = new TextNode(
+      selection.focusNode,
+      selection.focusOffset,
+    )
   }
 
   destroy() {

@@ -13,7 +13,13 @@ class RegionEasyMarker extends BaseEasyMarker {
     this.mode = EasyMarkerMode.REGION
     this.touchStartTime = 0
   }
+  get start() {
+    return this.selectRegion.start
+  }
 
+  get end() {
+    return this.selectRegion.end
+  }
   /**
    * Update Regions
    *
@@ -59,7 +65,7 @@ class RegionEasyMarker extends BaseEasyMarker {
   }
   handleTouchMoveThrottle(e) {
     if (this.deviceType === DeviceType.PC) {
-      if (this.selectStatus === SelectStatus.NONE && this.selectRegion.start) {
+      if (this.selectStatus === SelectStatus.NONE && this.selectRegion.start && !this.selectRegion.end) {
         if (Date.now() - this.touchStartTime < 100) return
         const position = this.getTouchRelativePosition(e)
         this.selectRegion.end = this.region.getRegionByPoint(position)
@@ -236,6 +242,11 @@ class RegionEasyMarker extends BaseEasyMarker {
 
   renderMask() {
     this.mask.render(this.selectRegion.start, this.selectRegion.end)
+  }
+
+  setSelection(selection) {
+    this.selectRegion.start = selection.start
+    this.selectRegion.end = selection.end
   }
 
   reset() {

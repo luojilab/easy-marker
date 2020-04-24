@@ -46,7 +46,7 @@ export default class BaseElement {
   }
 
   get isShow() {
-    return this.style.display === 'none'
+    return this.style.display !== 'none' && this.style.display !== ''
   }
 
   /**

@@ -20,4 +20,9 @@ const DeviceType = {
   MOBILE: 'MOBILE',
 }
 
-export { SelectStatus, EasyMarkerMode, NoteType, DeviceType }
+const MenuType = {
+  SELECT: 'select',
+  HIGHLIGHT: 'highlight',
+}
+
+export { SelectStatus, EasyMarkerMode, NoteType, DeviceType, MenuType }

@@ -12,9 +12,10 @@ import {
   getTouch,
   getDeviceType,
 } from './lib/helpers'
-import { SelectStatus, DeviceType } from './lib/types'
+import { SelectStatus, DeviceType, MenuType } from './lib/types'
 
 const defaultOptions = {
+  disableSelect: false,
   menuItems: [],
   menuTopOffset: 0,
   cursor: {
@@ -198,7 +199,7 @@ class EasyMarker {
     this.deviceType = getDeviceType()
     this.selectStatusChangeHandler = () => {}
     this.menuOnClick = () => {}
-    this.highlightLineClick = () => {}
+    this.highlightLineClick = null
   }
 
   get selectStatus() {
@@ -211,10 +212,8 @@ class EasyMarker {
     }
     this.$selectStatus = val
     if (val === SelectStatus.FINISH) {
-      const cursorOffset = this.deviceType === DeviceType.MOBILE ? this.movingCursor.height / 2 : 0
-      const top = this.mask.top - cursorOffset
-      const { left } = this.mask
-      this.menu.setPosition(top, this.mask.top + this.mask.height, left)
+      this.menu.setPosition(this.start, this.end)
+      this.menu.type = MenuType.SELECT
       this.menu.show()
     } else {
       this.menu.hide()
@@ -291,22 +290,25 @@ class EasyMarker {
     this.container.style.position = 'relative'
 
     this.touchEvent = new TouchEvent(this.container)
-    this.touchEvent.registerEvent(
-      EventType.TOUCH_START,
-      this.handleTouchStart.bind(this),
-    )
-    this.touchEvent.registerEvent(
-      EventType.TOUCH_MOVE,
-      this.handleTouchMove.bind(this),
-    )
-    this.touchEvent.registerEvent(
-      EventType.TOUCH_MOVE_THROTTLE,
-      this.handleTouchMoveThrottle.bind(this),
-    )
-    this.touchEvent.registerEvent(
-      EventType.TOUCH_END,
-      this.handleTouchEnd.bind(this),
-    )
+    if (!this.options.disableSelect) {
+      this.touchEvent.registerEvent(
+        EventType.TOUCH_START,
+        this.handleTouchStart.bind(this),
+      )
+      this.touchEvent.registerEvent(
+        EventType.TOUCH_MOVE,
+        this.handleTouchMove.bind(this),
+      )
+      this.touchEvent.registerEvent(
+        EventType.TOUCH_MOVE_THROTTLE,
+        this.handleTouchMoveThrottle.bind(this),
+      )
+      this.touchEvent.registerEvent(
+        EventType.TOUCH_END,
+        this.handleTouchEnd.bind(this),
+      )
+    }
+
     this.touchEvent.registerEvent(EventType.TAP, this.handleTap.bind(this))
     this.touchEvent.registerEvent(
       EventType.LONG_TAP,
@@ -506,7 +508,7 @@ class EasyMarker {
     this.scrollSpeedLevel = null
     this.selectStatusChangeHandler = () => {}
     this.menuOnClick = () => {}
-    this.highlightLineClick = () => {}
+    this.highlightLineClick = null
   }
 
   reset() {
@@ -514,6 +516,7 @@ class EasyMarker {
     this.cursor.start.hide()
     this.cursor.end.hide()
     this.mask.reset()
+    this.menu.hide()
   }
 
   // endregion
@@ -589,7 +592,7 @@ class EasyMarker {
    * @memberof EasyMarker
    */
   handleTouchStart(e) {
-    if (this.selectStatus === SelectStatus.FINISH) {
+    if (this.selectStatus === SelectStatus.FINISH && this.menu.isShow && this.menu.type !== MenuType.HIGHLIGHT) {
       const position = this.getTouchRelativePosition(e)
       const startCursorRegion = this.cursor.start.inRegion(position)
       const endCursorRegion = this.cursor.end.inRegion(position)
@@ -607,6 +610,9 @@ class EasyMarker {
         this.movingCursor = this.cursor.start
       }
     }
+    // if (!this.highlight.inRegion(e)) {
+    //   e.preventDefault()
+    // }
   }
 
   /**
@@ -687,6 +693,18 @@ class EasyMarker {
       this.menu.handleScroll()
     }
   }
+
+  showHighlightMenu(selection, options) {
+    this.setSelection(selection)
+    this.selectStatus = SelectStatus.FINISH
+    this.menu.setPosition(this.start, this.end)
+    this.menu.type = MenuType.HIGHLIGHT
+    this.menu.options = options
+    this.menu.show()
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  setSelection() {}
 
   getTouchRelativePosition(e) {
     const cursorOffset = this.deviceType === DeviceType.MOBILE ? this.movingCursor.height / 2 : 0

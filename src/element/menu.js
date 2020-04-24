@@ -1,6 +1,7 @@
 import BaseElement from './base'
 import { anyToPx } from '../lib/helpers'
-import { EasyMarkerMode } from '../lib/types'
+import TextNode from '../lib/text_node'
+import { EasyMarkerMode, MenuType } from '../lib/types'
 
 /**
  *
@@ -69,20 +70,31 @@ export default class Menu extends BaseElement {
     this.windowWidth = document.documentElement.clientWidth
     this.ticking = false
     this.height = 0
+    this.width = 0
+    this.type = MenuType.SELECT
+    this.options = {}
     this.createElement()
     this.mount()
     this.hide()
   }
 
+  get screenRelativeOffset() {
+    const { top, left } = this.container.getBoundingClientRect()
+    return {
+      x: left,
+      y: top,
+    }
+  }
+
   createElement() {
     const wrapper = document.createElement('div')
     wrapper.style.position = 'absolute'
-    wrapper.style.width = '100%'
+    wrapper.style.width = 'max-content'
     wrapper.style.textAlign = 'center'
     wrapper.style.lineHeight = '0'
     wrapper.style.zIndex = '10'
-    wrapper.style.transform = 'translateY(-100%)'
-    wrapper.style.webkitTransform = 'translateY(-100%)'
+    wrapper.style.transform = 'translate3d(-50%, -100%, 0)'
+    wrapper.style.webkitTransform = 'translate3d(-50%, -100%, 0)'
     wrapper.style.transition = 'transform 0.2s ease, opacity 0.2s ease'
 
     const menu = document.createElement('div')
@@ -96,18 +108,31 @@ export default class Menu extends BaseElement {
     wrapper.appendChild(menu)
     wrapper.appendChild(bottomTriangle)
     this.option.items.forEach((item) => {
-      const menuItem = this.createMenuItemElement(item.text, item.iconName, item.style, item.iconStyle)
+      const menuItem = this.createMenuItemElement(item)
       this.itemMap.set(menuItem, item)
       menu.appendChild(menuItem)
     })
     this.menuElement = menu
     this.element = wrapper
+    const style = document.createElement('style')
+    style.type = 'text/css'
+    style.rel = 'stylesheet'
+    // eslint-disable-next-line max-len
+    const styleText = '.em-menu-wrapper-select .em-menu-item-highlight{display: none !important} .em-menu-wrapper-highlight .em-menu-item-select{display: none !important}'
+    style.appendChild(document.createTextNode(styleText))
+    const head = document.getElementsByTagName('head')[0]
+    head.appendChild(style)
   }
 
-  createMenuItemElement(text, iconName, itemStyle, iconStyle) {
+  createMenuItemElement({
+    text, iconName, style: itemStyle, iconStyle, type,
+  }) {
     // eslint-disable-line class-methods-use-this
     const menuItem = document.createElement('span')
     menuItem.classList.add('em-menu-item')
+    if (type !== undefined) {
+      menuItem.classList.add(`em-menu-item-${type}`)
+    }
     Object.assign(menuItem.style, this.option.style.item, itemStyle)
     if (iconName) {
       const iconItem = document.createElement('span')
@@ -124,21 +149,77 @@ export default class Menu extends BaseElement {
     return menuItem
   }
 
-  setPosition(top, bottom, left) {
-    this.positionRange.top = top
-    this.positionRange.bottom = bottom
-    this.positionRange.left = left
+  setPosition(start, end) {
+    const mergeRects = {}
+    if (this.mode === EasyMarkerMode.REGION) {
+      const rects = this.easyMarker.region.getRects(start, end)
+      rects.forEach((rect, index) => {
+        if (index === 0) {
+          mergeRects.left = rect.left
+          mergeRects.top = rect.top
+          mergeRects.right = rect.right
+          mergeRects.bottom = rect.bottom
+        } else {
+          mergeRects.left = Math.min(rect.left, mergeRects.left)
+          mergeRects.top = Math.min(rect.top, mergeRects.top)
+          mergeRects.right = Math.max(rect.right, mergeRects.right)
+          mergeRects.bottom = Math.max(rect.bottom, mergeRects.bottom)
+        }
+      })
+    } else {
+      const { rects } = TextNode.getSelectNodeRectAndText(
+        start.node,
+        end.node,
+        start.offset,
+        end.offset
+      )
+      rects.forEach((rect, index) => {
+        if (index === 0) {
+          mergeRects.left = rect.left - this.screenRelativeOffset.x
+          mergeRects.top = rect.top - this.screenRelativeOffset.y
+          mergeRects.right = rect.right - this.screenRelativeOffset.x
+          mergeRects.bottom = rect.bottom - this.screenRelativeOffset.y
+        } else {
+          mergeRects.left = Math.min(rect.left - this.screenRelativeOffset.x, mergeRects.left)
+          mergeRects.top = Math.min(rect.top - this.screenRelativeOffset.y, mergeRects.top)
+          mergeRects.right = Math.max(rect.right - this.screenRelativeOffset.x, mergeRects.right)
+          mergeRects.bottom = Math.max(rect.bottom - this.screenRelativeOffset.y, mergeRects.bottom)
+        }
+      })
+    }
+
+
+    this.positionRange.top = mergeRects.top
+    this.positionRange.bottom = mergeRects.bottom
+    this.positionRange.left = (mergeRects.left + mergeRects.right) / 2
   }
 
   hide() {
     this.style.visibility = 'hidden'
     this.style.opacity = '0'
+    this.reset()
+  }
+
+  reset() {
+    this.options = {}
+  }
+
+  get isShow() {
+    return this.style.visibility === 'visible'
   }
 
   show() {
+    if (this.type === MenuType.HIGHLIGHT) {
+      this.element.classList.remove('em-menu-wrapper-select')
+      this.element.classList.add('em-menu-wrapper-highlight')
+    } else if (this.type === MenuType.SELECT) {
+      this.element.classList.remove('em-menu-wrapper-highlight')
+      this.element.classList.add('em-menu-wrapper-select')
+    }
     let relativeTop = 0
-    if (!this.height) {
+    if (!this.height || !this.width) {
       this.height = Number((window.getComputedStyle(this.menuElement).height || '').replace('px', ''))
+      this.width = Number((window.getComputedStyle(this.menuElement).width || '').replace('px', ''))
     }
     const { top: containerTop } = this.container.getBoundingClientRect()
     if (containerTop < 0 && this.positionRange.bottom < -containerTop) {
@@ -156,7 +237,16 @@ export default class Menu extends BaseElement {
     // this.style.display = 'block'
     this.style.visibility = 'visible'
     this.style.top = `${relativeTop}px`
-    this.style.left = `${Math.floor(this.positionRange.left / this.windowWidth) * this.windowWidth}px`
+    if (this.positionRange.left + this.width / 2 > this.windowWidth) {
+      this.style.right = `-${this.width / 2}px`
+      this.style.left = ''
+    } else if (this.positionRange.left - this.width / 2 < 0) {
+      this.style.left = `${this.width / 2}px`
+      this.style.right = ''
+    } else {
+      this.style.right = ''
+      this.style.left = `${this.positionRange.left}px`
+    }
     this.style.opacity = '1'
   }
 
@@ -168,9 +258,9 @@ export default class Menu extends BaseElement {
 
     const item = this.itemMap.get(tapTarget)
     if (item.id && this.easyMarker.menuOnClick) {
-      this.easyMarker.menuOnClick(item.id, selection)
+      this.easyMarker.menuOnClick(item.id, selection, this.options)
     } else {
-      item.handler.call(this.easyMarker, selection)
+      item.handler.call(this.easyMarker, selection, this.options)
     }
     return true
   }

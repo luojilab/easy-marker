@@ -137,7 +137,7 @@ export default class Highlight extends BaseElement {
   }
 
   render() {
-    // this.removeAllRectangle()
+    this.removeAllRectangle()
     this.lineMap.forEach((line) => {
       const type = line.meta.type || this.type
       line.points.forEach((points) => {
@@ -244,8 +244,32 @@ export default class Highlight extends BaseElement {
         }
       }
     })
-    if (clickLine && this.easyMarker && this.easyMarker.highlightLineClick) {
-      this.easyMarker.highlightLineClick(clickLine.id, clickLine.line.meta, clickLine.line.selection)
+    if (clickLine && this.easyMarker) {
+      if (this.easyMarker.highlightLineClick) {
+        this.easyMarker.highlightLineClick(clickLine.id, clickLine.line.meta, clickLine.line.selection)
+      } else {
+        this.easyMarker.showHighlightMenu(clickLine.line.selection, { id: clickLine.id, meta: clickLine.line.meta })
+      }
+      return true
+    }
+    return false
+  }
+
+  inRegion(e) {
+    const { x, y } = getTouchPosition(e)
+    const { top, left } = this.container.getBoundingClientRect()
+    let clickLine
+    this.lineMap.forEach((line, id) => {
+      for (let i = 0; i < line.relativeRects.length; i++) {
+        const rect = line.relativeRects[i]
+        const margin = line.lineHeight ? (line.lineHeight - rect.height) / 2 : 0
+        if (inRectangle(x - left, y - top, rect, margin)) {
+          clickLine = { id, line }
+          break
+        }
+      }
+    })
+    if (clickLine && this.easyMarker) {
       return true
     }
     return false
