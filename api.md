@@ -181,7 +181,7 @@ em.onMenuClick((id, data) => {
   console.log(id, data);
 });
 
-A Region example
+// A Region example
 
 const em = new EasyMarker({
  regions: texts,

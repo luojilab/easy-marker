@@ -145,7 +145,7 @@ const preventDefaultCb = e => e.preventDefault()
  *   console.log(id, data);
  * });
  *
- * A Region example
+ * // A Region example
  *
  * const em = new EasyMarker({
  *  regions: texts,
