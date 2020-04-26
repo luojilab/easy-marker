@@ -145,6 +145,63 @@ const preventDefaultCb = e => e.preventDefault()
  *   console.log(id, data);
  * });
  *
+ * A Region example
+ *
+ * const em = new EasyMarker({
+ *  regions: texts,
+ *  menuTopOffset: '120px',
+ *  scrollSpeedLevel: 6,
+ *  scrollOffsetBottom: '1.5rem',
+ *  mask: {
+ *    color: '#407ff2',
+ *  },
+ *  menuStyle: {
+ *    menu: {},
+ *    item: {
+ *      fontSize: '15px',
+ *      padding: '0px 10px',
+ *      lineHeight: '30px',
+ *    },
+ *    triangle: {},
+ *  },
+ *  menuItems: [
+ *    {
+ *      text: '划线',
+ *      type: 'select',
+ *      iconName: 'iconfont mark',
+ *      id: '302',
+ *      style: {
+ *        backgroundColor: 'yellow',
+ *        paddingLeft: '1rem',
+ *      },
+ *      iconStyle: {
+ *        background: 'green',
+ *      },
+ *    },
+ *    {
+ *      text: '删除划线',
+ *      type: 'highlight',
+ *      iconName: 'iconfont icon-delete',
+ *      id: '302',
+ *    },
+ *    {
+ *      id: 222,
+ *      text: '复制',
+ *      iconName: 'iconfont icon-copy',
+ *    },
+ *   ],
+ * });
+ *
+ * em.onMenuClick(function (id, data) {
+ *   console.log('You click the menu!', id, data);
+ * });
+ *
+ * em.onSelectStatusChange((val) => {
+ *   console.log('onSelectStatusChange', val);
+ * });
+ *
+ * em.create(document.body);
+ *
  * @export
  */
 class EasyMarker {
@@ -153,6 +210,7 @@ class EasyMarker {
    * @param {Object} options options
    * @param {Object[]} options.menuItems menu item option
    * @param {string} options.menuItems[].text menu text
+   * @param {string} options.menuItems[].type menu type 'select'(Show menu only when selected) 'highlight' (Show menu only when click highlight)
    * @param {string[]} options.menuItems[].iconName menu icon class
    * @param {Object} options.menuItems[].style menu item style
    * @param {Object} options.menuItems[].iconStyle menu item icon style
@@ -173,6 +231,13 @@ class EasyMarker {
    * @param {number} options.scrollSpeedLevel The speed of scrolling when touching bottom, default 4
    * @param {number|string} options.scrollOffsetBottom triggering scrolling, distance from the bottom, default 100
    * @param {Object} options.markdownOptions Customize options about the mapping relations between HTML and Markdown
+   * @param {Object[]} options.regions In region mode, all region info
+   * @param {string} options.regions[].text region text
+   * @param {number} options.regions[].top region top
+   * @param {number} options.regions[].left region left
+   * @param {number} options.regions[].width region width
+   * @param {number} options.regions[].height region height
+   * @param {boolean} options.disableSelect disabled select
    */
   constructor(options) {
     this.options = Object.assign({}, defaultOptions, options)
