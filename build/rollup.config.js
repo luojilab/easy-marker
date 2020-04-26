@@ -6,6 +6,7 @@ import uglify from 'rollup-plugin-uglify'
 export default {
   input: 'src/index.js',
   output: {
+    exports: 'named',
     file: 'dist/easy-marker.dist.js',
     format: 'iife',
     name: 'EasyMarker',

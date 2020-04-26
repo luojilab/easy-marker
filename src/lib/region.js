@@ -3,79 +3,158 @@ import { BSearchUpperBound } from './helpers'
 export default class Region {
   constructor(list) {
     this.originalRegionList = list
-    this.lineRectRegionList = []
+    this.regions = []
     // {
     //   text: '', required
     //   width: '', required
     //   height: '', required
     //   left: '', required
     //   top: '', required
-    //   offset: 0,
-    //   phase: 0,
+    //   page: '', required
     // }
 
     this.initRectRegion()
   }
-
   initRectRegion() {
+    this.regions = Region.getLineRectRegionList(this.originalRegionList)
+  }
+
+  static getLineRectRegionList(originalRegionList) {
+    const pageRegionList = []
+    const pageRegion = {
+      page: 0,
+      top: 0,
+      right: 0,
+      left: 0,
+      width: 0,
+      height: 0,
+      regions: [],
+    }
     const lineRectRegion = {
       top: 0,
       bottom: 0,
       left: 0,
-      height: 0,
       width: 0,
+      height: 0,
       regions: [],
     }
     let lineIndex = 0
     let columnIndex = 0
-    this.originalRegionList.forEach((region, index) => {
+    let pageIndex = 0
+    originalRegionList.forEach((region, index) => {
       const {
-        top, height, left,
+        top, height, left, page, width,
       } = region
 
       if (lineRectRegion.regions.length === 0) {
-        columnIndex = 0
+        // 第一个字
+        pageRegion.page = region.page
+        pageRegion.top = top
+        pageRegion.right = left + width
+        pageRegion.left = left
+        pageRegion.width = width
+
         lineRectRegion.top = top
         lineRectRegion.bottom = top + height
         lineRectRegion.left = left
         lineRectRegion.height = height
-        lineRectRegion.regions.push(Object.assign({ originalIndex: index, lineIndex, columnIndex }, region))
+        lineRectRegion.page = page
+
+        lineRectRegion.regions.push(Object.assign({
+          originalIndex: index, lineIndex, columnIndex, pageIndex,
+        }, region))
       } else if (
+        pageRegion.page === region.page &&
         Region.isSameLine({ top: lineRectRegion.top, height: lineRectRegion.bottom - lineRectRegion.top }, region)
       ) {
+        // 同页 且 同行
         columnIndex++
-        lineRectRegion.regions.push(Object.assign({ originalIndex: index, lineIndex, columnIndex }, region))
+        lineRectRegion.regions.push(Object.assign({
+          originalIndex: index, lineIndex, columnIndex, pageIndex,
+        }, region))
         lineRectRegion.top = Math.min(lineRectRegion.top, top)
         lineRectRegion.bottom = Math.max(lineRectRegion.bottom, top + height)
         lineRectRegion.height = Math.max(lineRectRegion.height, lineRectRegion.bottom - lineRectRegion.top)
-      } else {
+      } else if (pageRegion.page === region.page) {
+        // 同页不同行
         lineIndex++
         columnIndex = 0
         const lastItem = lineRectRegion.regions[lineRectRegion.regions.length - 1]
         const lastWidth = lastItem.width
         const lastLeft = lastItem.left
         lineRectRegion.width = (lastLeft + lastWidth) - lineRectRegion.left
-        this.lineRectRegionList.push(Object.assign({}, lineRectRegion))
+
+        pageRegion.regions.push(Object.assign({}, lineRectRegion))
+        pageRegion.top = Math.min(pageRegion.top, lineRectRegion.top)
+        pageRegion.left = Math.min(pageRegion.left, lineRectRegion.left)
+        pageRegion.right = Math.max(pageRegion.right, lineRectRegion.left + lineRectRegion.width)
+        pageRegion.width = Math.max(pageRegion.width, pageRegion.right - lineRectRegion.left)
+
         lineRectRegion.top = top
         lineRectRegion.bottom = top + height
         lineRectRegion.left = left
         lineRectRegion.height = height
+        lineRectRegion.page = page
         lineRectRegion.regions = []
-        lineRectRegion.regions.push(Object.assign({ originalIndex: index, lineIndex, columnIndex }, region))
-      }
-      if (index === this.originalRegionList.length - 1) {
+        lineRectRegion.regions.push(Object.assign({
+          originalIndex: index, lineIndex, columnIndex, pageIndex,
+        }, region))
+      } else {
+        // 不同页
         const lastItem = lineRectRegion.regions[lineRectRegion.regions.length - 1]
         const lastWidth = lastItem.width
         const lastLeft = lastItem.left
         lineRectRegion.width = (lastLeft + lastWidth) - lineRectRegion.left
-        this.lineRectRegionList.push(Object.assign({}, lineRectRegion))
+        pageRegion.regions.push(Object.assign({}, lineRectRegion))
+
+        const lastLineItem = pageRegion.regions[pageRegion.regions.length - 1]
+        const lastLineTop = lastLineItem.top
+        const lastLineHeight = lastLineItem.height
+        pageRegion.height = (lastLineTop + lastLineHeight) - pageRegion.top
+        pageRegionList.push(Object.assign({}, pageRegion))
+
+        pageIndex++
+        lineIndex = 0
+        columnIndex = 0
+
+        pageRegion.page = region.page
+        pageRegion.top = top
+        pageRegion.right = left + width
+        pageRegion.left = left
+        pageRegion.width = width
+        pageRegion.regions = []
+
+        lineRectRegion.top = top
+        lineRectRegion.bottom = top + height
+        lineRectRegion.left = left
+        lineRectRegion.height = height
+        lineRectRegion.page = page
+        lineRectRegion.regions = []
+
+        lineRectRegion.regions.push(Object.assign({
+          originalIndex: index, lineIndex, columnIndex, pageIndex,
+        }, region))
+      }
+      if (index === originalRegionList.length - 1) {
+        const lastItem = lineRectRegion.regions[lineRectRegion.regions.length - 1]
+        const lastWidth = lastItem.width
+        const lastLeft = lastItem.left
+        lineRectRegion.width = (lastLeft + lastWidth) - lineRectRegion.left
+        pageRegion.regions.push(Object.assign({}, lineRectRegion))
+
+        const lastLineItem = pageRegion.regions[pageRegion.regions.length - 1]
+        const lastLineTop = lastLineItem.top
+        const lastLineHeight = lastLineItem.height
+        pageRegion.height = (lastLineTop + lastLineHeight) - pageRegion.top
+        pageRegionList.push(Object.assign({}, pageRegion))
       }
     })
+    return pageRegionList
   }
 
   setRegions(list) {
     this.originalRegionList = list
-    this.lineRectRegionList = []
+    this.regions = []
     this.initRectRegion()
   }
 
@@ -134,33 +213,55 @@ export default class Region {
   }
 
   getRects(startRegion, endRegion) {
+    const startPageIndex = startRegion.pageIndex
+    const endPageIndex = endRegion.pageIndex
     const startLineIndex = startRegion.lineIndex
     const endLineIndex = endRegion.lineIndex
     const startColumnIndex = startRegion.columnIndex
     const endColumnIndex = endRegion.columnIndex
-
     const rects = []
-    if (startLineIndex === endLineIndex) {
-      const lineRectRegion = this.lineRectRegionList[startLineIndex]
+    if (startLineIndex === endLineIndex && startPageIndex === endPageIndex) {
+      const lineRectRegion = this.regions[startPageIndex].regions[startLineIndex]
       rects.push(new DOMRect(
         startRegion.left, lineRectRegion.top,
         (endRegion.left + endRegion.width) - startRegion.left, lineRectRegion.height
       ))
       return rects
     }
-    const resultLineRegionList = this.lineRectRegionList.slice(startLineIndex, endLineIndex + 1)
-    resultLineRegionList.forEach((lineRectRegion, index) => {
-      if (index === 0) {
+
+    if (startPageIndex === endPageIndex) {
+      const regions = this.regions[startPageIndex].regions.slice(startLineIndex, endLineIndex + 1)
+      rects.push(...Region.getRectsByRegions(regions, startColumnIndex, endColumnIndex))
+    } else {
+      for (let i = startPageIndex; i <= endPageIndex; i++) {
+        if (i === startPageIndex) {
+          const regions = this.regions[i].regions.slice(startLineIndex)
+          rects.push(...Region.getRectsByRegions(regions, startColumnIndex, null))
+        } else if (i === endPageIndex) {
+          const regions = this.regions[i].regions.slice(0, endLineIndex + 1)
+          rects.push(...Region.getRectsByRegions(regions, null, endColumnIndex))
+        } else {
+          const { regions } = this.regions[i]
+          rects.push(...Region.getRectsByRegions(regions, null, null))
+        }
+      }
+    }
+    return rects
+  }
+  static getRectsByRegions(LineRegions, startColumnIndex, endColumnIndex) {
+    const rects = []
+    LineRegions.forEach((lineRectRegion, index) => {
+      if (index === 0 && startColumnIndex !== null) {
         const region = lineRectRegion.regions[startColumnIndex]
         rects.push(new DOMRect(
           region.left, lineRectRegion.top,
-          lineRectRegion.width - region.left, lineRectRegion.height
+          lineRectRegion.width - region.left + lineRectRegion.left, lineRectRegion.height
         ))
-      } else if (index === resultLineRegionList.length - 1) {
+      } else if (index === LineRegions.length - 1 && endColumnIndex !== null) {
         const region = lineRectRegion.regions[endColumnIndex]
         rects.push(new DOMRect(
           lineRectRegion.left, lineRectRegion.top,
-          region.left + region.width, lineRectRegion.height
+          region.left + region.width - lineRectRegion.left, lineRectRegion.height
         ))
       } else {
         rects.push(new DOMRect(lineRectRegion.left, lineRectRegion.top, lineRectRegion.width, lineRectRegion.height))
@@ -168,7 +269,6 @@ export default class Region {
     })
     return rects
   }
-
   /**
    * get Region By Point
    *
@@ -183,27 +283,29 @@ export default class Region {
       top: point.y,
       left: point.x,
     }
-    const lineRegions = BSearchUpperBound(this.lineRectRegionList, pointPosition, 'top')
+    const pageRegions = BSearchUpperBound(this.regions, pointPosition, 'left')
+    if (pageRegions === -1) return null
+    const lineRectRegionList = this.regions[pageRegions].regions
+    const lineRegions = BSearchUpperBound(lineRectRegionList, pointPosition, 'top')
     if (lineRegions === -1) return null
 
-    const touchLine = this.lineRectRegionList[lineRegions]
+    const touchLine = lineRectRegionList[lineRegions]
     const regionIndex = BSearchUpperBound(touchLine.regions, pointPosition, 'left')
     if (regionIndex === -1) return null
     return touchLine.regions[regionIndex]
   }
 
   getLineInfoByRegion(region) {
-    const regionIndex = region.lineIndex
+    const { pageIndex, lineIndex } = region
     const {
       top,
-      bottom,
       left,
       height,
       width,
-    } = this.lineRectRegionList[regionIndex]
+    } = this.regions[pageIndex].regions[lineIndex]
+
     return {
       top,
-      bottom,
       left,
       height,
       width,
@@ -211,28 +313,37 @@ export default class Region {
   }
 
   getPreviousRegion(region) {
-    const { lineIndex, columnIndex } = region
+    const { lineIndex, columnIndex, pageIndex } = region
     let previousRegion
     if (columnIndex === 0) {
-      const lineRectRegion = this.lineRectRegionList[lineIndex - 1]
-      if (lineRectRegion) {
-        previousRegion = lineRectRegion.regions[lineRectRegion.regions.length - 1]
+      if (lineIndex !== 0) {
+        const lineRectRegion = this.regions[pageIndex].regions[lineIndex - 1]
+        if (lineRectRegion) {
+          previousRegion = lineRectRegion.regions[lineRectRegion.regions.length - 1]
+        }
+      } else if (pageIndex !== 0) {
+        const lineRectRegion = this.regions[pageIndex - 1].regions[this.regions[pageIndex - 1].region.length - 1]
+        if (lineRectRegion) {
+          previousRegion = lineRectRegion.regions[lineRectRegion.regions.length - 1]
+        }
       }
     } else {
-      previousRegion = this.lineRectRegionList[lineIndex].regions[columnIndex - 1]
+      previousRegion = this.regions[pageIndex].regions[lineIndex].regions[columnIndex - 1]
     }
     return previousRegion || null
   }
 
   getNextRegion(region) {
-    const { lineIndex, columnIndex } = region
+    const { lineIndex, columnIndex, pageIndex } = region
     let nextRegion
-    const lineRectRegion = this.lineRectRegionList[lineIndex]
+    const lineRectRegion = this.regions[pageIndex].regions[lineIndex]
     if (lineRectRegion) {
       if (columnIndex === lineRectRegion.regions.length - 1) {
-        const nextLineRectRegion = this.lineRectRegionList[lineIndex + 1]
+        const nextLineRectRegion = this.regions[pageIndex].regions[lineIndex + 1]
         if (nextLineRectRegion) {
           [nextRegion] = nextLineRectRegion.regions
+        } else if (this.regions[pageIndex + 1]) {
+          [nextRegion] = this.regions[pageIndex + 1].regions[0].regions
         }
       } else {
         nextRegion = lineRectRegion.regions[columnIndex + 1]
@@ -257,6 +368,6 @@ export default class Region {
 
   destroy() {
     this.originalRegionList = []
-    this.lineRectRegionList = []
+    this.regions = []
   }
 }

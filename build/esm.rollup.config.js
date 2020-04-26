@@ -7,6 +7,7 @@ import resolve from 'rollup-plugin-node-resolve'
 export default {
   input: 'src/index.js',
   output: {
+    exports: 'named',
     file: 'dist/easy-marker.esm.js',
     format: 'es',
     name: 'EasyMarker',
