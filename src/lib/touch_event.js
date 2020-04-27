@@ -1,4 +1,5 @@
-import { getDistance, getTouchPosition } from './helpers'
+import { getDistance, getTouchPosition, getDeviceType, getTouch } from './helpers'
+import { DeviceType } from './types'
 
 export const EventType = {
   TOUCH_START: 'touchstart',
@@ -23,7 +24,7 @@ export default class TouchEvent {
       slideDistance: 20,
       throttleTime: 50,
     }
-    this.element = element
+    this.element = getDeviceType() === DeviceType.MOBILE ? element : window
     this.options = Object.assign(this.options, options)
     this.touchStartCallbacks = []
     this.touchMoveCallbacks = []
@@ -41,9 +42,12 @@ export default class TouchEvent {
     this.onTouchStart = this.onTouchStart.bind(this)
     this.onTouchMove = this.onTouchMove.bind(this)
     this.onTouchEnd = this.onTouchEnd.bind(this)
-    this.element.addEventListener('touchstart', this.onTouchStart)
-    this.element.addEventListener('touchmove', this.onTouchMove)
-    this.element.addEventListener('touchend', this.onTouchEnd)
+    this.startEventName = getDeviceType() === DeviceType.MOBILE ? 'touchstart' : 'mousedown'
+    this.moveEventName = getDeviceType() === DeviceType.MOBILE ? 'touchmove' : 'mousemove'
+    this.endEventName = getDeviceType() === DeviceType.MOBILE ? 'touchend' : 'mouseup'
+    this.element.addEventListener(this.startEventName, this.onTouchStart)
+    this.element.addEventListener(this.moveEventName, this.onTouchMove, { passive: false })
+    this.element.addEventListener(this.endEventName, this.onTouchEnd)
   }
 
   /**
@@ -85,6 +89,7 @@ export default class TouchEvent {
   }
 
   onTouchStart(e) {
+    if (e.touches && e.touches.length > 1) return
     if (!this.hook('touchstart', e)) return
     this.touchStartCallbacks.forEach(callback => callback(e))
 
@@ -97,6 +102,7 @@ export default class TouchEvent {
   }
 
   onTouchMove(e) {
+    if (e.touches && e.touches.length > 1) return
     if (!this.hook('touchmove', e)) return
 
     this.touchMoveCallbacks.forEach(callback => callback(e))
@@ -119,6 +125,7 @@ export default class TouchEvent {
   }
 
   onTouchEnd(e) {
+    if (e.touches && e.touches.length > 1) return
     if (!this.hook('touchmove', e)) return
 
     this.touchEndCallbacks.forEach(callback => callback(e))
@@ -152,13 +159,13 @@ export default class TouchEvent {
   }
 
   destroy() {
-    this.element.removeEventListener('touchstart', this.onTouchStart)
-    this.element.removeEventListener('touchmove', this.onTouchMove)
-    this.element.removeEventListener('touchend', this.onTouchEnd)
+    this.element.removeEventListener(this.startEventName, this.onTouchStart)
+    this.element.removeEventListener(this.moveEventName, this.onTouchMove)
+    this.element.removeEventListener(this.endEventName, this.onTouchEnd)
   }
 
   static createMouseEvent(type, e) {
-    const touch = e.changedTouches[0]
+    const touch = getTouch(e)
     const event = new MouseEvent(type)
     event.initMouseEvent(
       type,

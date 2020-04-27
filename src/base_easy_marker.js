@@ -2,27 +2,20 @@ import Cursor, { CursorType } from './element/cursor'
 import Menu from './element/menu'
 import Mask from './element/mask'
 import Highlight from './element/highlight'
-import TextNode from './text_node'
-import Markdown from './markdown'
-import TouchEvent, { EventType } from './touch_event'
+
+import Markdown from './lib/markdown'
+import TouchEvent, { EventType } from './lib/touch_event'
 
 import {
-  getClickWordsPosition,
-  getClickPosition,
   getTouchPosition,
-  // getElementAbsolutePosition,
-  matchSubString,
-  screenRelativeToContainerRelative,
   anyToPx,
-} from './helpers'
-
-const SelectStatus = {
-  NONE: 'none',
-  SELECTING: 'selecting',
-  FINISH: 'finish',
-}
+  getTouch,
+  getDeviceType,
+} from './lib/helpers'
+import { SelectStatus, DeviceType, MenuType } from './lib/types'
 
 const defaultOptions = {
+  disableSelect: false,
   menuItems: [],
   menuTopOffset: 0,
   cursor: {
@@ -152,6 +145,63 @@ const preventDefaultCb = e => e.preventDefault()
  *   console.log(id, data);
  * });
  *
+ * // A Region example
+ *
+ * const em = new EasyMarker({
+ *  regions: texts,
+ *  menuTopOffset: '120px',
+ *  scrollSpeedLevel: 6,
+ *  scrollOffsetBottom: '1.5rem',
+ *  mask: {
+ *    color: '#407ff2',
+ *  },
+ *  menuStyle: {
+ *    menu: {},
+ *    item: {
+ *      fontSize: '15px',
+ *      padding: '0px 10px',
+ *      lineHeight: '30px',
+ *    },
+ *    triangle: {},
+ *  },
+ *  menuItems: [
+ *    {
+ *      text: '划线',
+ *      type: 'select',
+ *      iconName: 'iconfont mark',
+ *      id: '302',
+ *      style: {
+ *        backgroundColor: 'yellow',
+ *        paddingLeft: '1rem',
+ *      },
+ *      iconStyle: {
+ *        background: 'green',
+ *      },
+ *    },
+ *    {
+ *      text: '删除划线',
+ *      type: 'highlight',
+ *      iconName: 'iconfont icon-delete',
+ *      id: '302',
+ *    },
+ *    {
+ *      id: 222,
+ *      text: '复制',
+ *      iconName: 'iconfont icon-copy',
+ *    },
+ *   ],
+ * });
+ *
+ * em.onMenuClick(function (id, data) {
+ *   console.log('You click the menu!', id, data);
+ * });
+ *
+ * em.onSelectStatusChange((val) => {
+ *   console.log('onSelectStatusChange', val);
+ * });
+ *
+ * em.create(document.body);
+ *
  * @export
  */
 class EasyMarker {
@@ -160,6 +210,7 @@ class EasyMarker {
    * @param {Object} options options
    * @param {Object[]} options.menuItems menu item option
    * @param {string} options.menuItems[].text menu text
+   * @param {string} options.menuItems[].type menu type 'select'(Show menu only when selected) 'highlight' (Show menu only when click highlight)
    * @param {string[]} options.menuItems[].iconName menu icon class
    * @param {Object} options.menuItems[].style menu item style
    * @param {Object} options.menuItems[].iconStyle menu item icon style
@@ -178,8 +229,15 @@ class EasyMarker {
    * @param {Object} options.highlight highlight config
    * @param {string} options.highlight.color highlight color
    * @param {number} options.scrollSpeedLevel The speed of scrolling when touching bottom, default 4
-   * @param {number|string} options.scrollOffsetBottom The distance from the bottom when triggering scrolling，default 100
+   * @param {number|string} options.scrollOffsetBottom triggering scrolling, distance from the bottom, default 100
    * @param {Object} options.markdownOptions Customize options about the mapping relations between HTML and Markdown
+   * @param {Object[]} options.regions In region mode, all region info
+   * @param {string} options.regions[].text region text
+   * @param {number} options.regions[].top region top
+   * @param {number} options.regions[].left region left
+   * @param {number} options.regions[].width region width
+   * @param {number} options.regions[].height region height
+   * @param {boolean} options.disableSelect disabled select
    */
   constructor(options) {
     this.options = Object.assign({}, defaultOptions, options)
@@ -197,19 +255,16 @@ class EasyMarker {
       start: null,
       end: null,
     }
-    this.textNode = {
-      start: null,
-      end: null,
-    }
+
     this.mask = null
     this.menu = null
-    this.markdown = null
     this.scrollOffsetBottom = null
     this.scrollSpeedLevel = null
+    this.containerScroll = null
+    this.deviceType = getDeviceType()
     this.selectStatusChangeHandler = () => {}
     this.menuOnClick = () => {}
-    this.highlightLineClick = () => {}
-    this.containerScroll = null
+    this.highlightLineClick = null
   }
 
   get selectStatus() {
@@ -222,9 +277,8 @@ class EasyMarker {
     }
     this.$selectStatus = val
     if (val === SelectStatus.FINISH) {
-      const top = this.mask.top - this.movingCursor.height / 2
-      const { left } = this.mask
-      this.menu.setPosition(top, this.mask.top + this.mask.height, left)
+      this.menu.setPosition(this.start, this.end)
+      this.menu.type = MenuType.SELECT
       this.menu.show()
     } else {
       this.menu.hide()
@@ -301,22 +355,25 @@ class EasyMarker {
     this.container.style.position = 'relative'
 
     this.touchEvent = new TouchEvent(this.container)
-    this.touchEvent.registerEvent(
-      EventType.TOUCH_START,
-      this.handleTouchStart.bind(this),
-    )
-    this.touchEvent.registerEvent(
-      EventType.TOUCH_MOVE,
-      this.handleTouchMove.bind(this),
-    )
-    this.touchEvent.registerEvent(
-      EventType.TOUCH_MOVE_THROTTLE,
-      this.handleTouchMoveThrottle.bind(this),
-    )
-    this.touchEvent.registerEvent(
-      EventType.TOUCH_END,
-      this.handleTouchEnd.bind(this),
-    )
+    if (!this.options.disableSelect) {
+      this.touchEvent.registerEvent(
+        EventType.TOUCH_START,
+        this.handleTouchStart.bind(this),
+      )
+      this.touchEvent.registerEvent(
+        EventType.TOUCH_MOVE,
+        this.handleTouchMove.bind(this),
+      )
+      this.touchEvent.registerEvent(
+        EventType.TOUCH_MOVE_THROTTLE,
+        this.handleTouchMoveThrottle.bind(this),
+      )
+      this.touchEvent.registerEvent(
+        EventType.TOUCH_END,
+        this.handleTouchEnd.bind(this),
+      )
+    }
+
     this.touchEvent.registerEvent(EventType.TAP, this.handleTap.bind(this))
     this.touchEvent.registerEvent(
       EventType.LONG_TAP,
@@ -332,13 +389,13 @@ class EasyMarker {
       this.cursor.start = new CursorElement(
         this.container,
         CursorType.END,
-        this.options.cursor || {},
+        Object.assign({ mode: this.mode }, this.options.cursor || {})
       )
     } else {
       this.cursor.start = new CursorElement(
         this.container,
         CursorType.START,
-        this.options.cursor || {},
+        Object.assign({ mode: this.mode }, this.options.cursor || {})
       )
     }
     this.cursor.end = new CursorElement(
@@ -348,44 +405,23 @@ class EasyMarker {
     )
     this.movingCursor = this.cursor.end
 
-    this.mask = new Mask(this.container, this.options.mask || {})
+    this.mask = new Mask(this.container, Object.assign({ mode: this.mode }, this.options.mask || {}))
     this.highlight = new Highlight(
       this.container,
-      this.options.highlight || {},
+      Object.assign({ mode: this.mode }, this.options.highlight || {}),
     )
     this.menu = new Menu(this.container, {
       menuItems: this.options.menuItems,
       topOffset: this.options.menuTopOffset,
       style: this.options.menuStyle,
+      mode: this.mode,
     })
     this.menu.easyMarker = this
     this.highlight.easyMarker = this
+    this.mask.easyMarker = this
     this.markdown = new Markdown(this.container, this.options.markdownOptions)
     this.scrollOffsetBottom = anyToPx(this.options.scrollOffsetBottom)
     this.scrollSpeedLevel = this.options.scrollSpeedLevel
-  }
-
-  /**
-   * Get the selected text
-   *
-   * @memberof EasyMarker
-   * @returns {string}
-   */
-  getSelectText() {
-    const text =
-      TextNode.getSelectText(this.textNode.start, this.textNode.end) || ''
-    return matchSubString(this.container.innerText, text) || text
-  }
-
-  getSelectMarkdown() {
-    return (
-      this.markdown.getSelectMarkdown(
-        this.textNode.start.node,
-        this.textNode.end.node,
-        this.textNode.start.offset,
-        this.textNode.end.offset,
-      ).markdown || ''
-    )
   }
 
   /**
@@ -527,23 +563,25 @@ class EasyMarker {
       start: null,
       end: null,
     }
-    this.textNode = {
-      start: null,
-      end: null,
-    }
     this.mask = null
     this.menu = null
+
+    this.windowHeight = null
+    this.includeElements = []
+    this.scrollInterval = null
+    this.scrollOffsetBottom = null
+    this.scrollSpeedLevel = null
+    this.selectStatusChangeHandler = () => {}
+    this.menuOnClick = () => {}
+    this.highlightLineClick = null
   }
 
   reset() {
     this.selectStatus = SelectStatus.NONE
     this.cursor.start.hide()
     this.cursor.end.hide()
-    this.textNode = {
-      start: null,
-      end: null,
-    }
     this.mask.reset()
+    this.menu.hide()
   }
 
   // endregion
@@ -578,167 +616,6 @@ class EasyMarker {
   }
 
   /**
-   * Move the cursor to the specified location
-   *
-   * @private
-   * @param {HTMLElement} element
-   * @param {number} x Relative to the screen positioning x
-   * @param {number} y Relative to the screen positioning Y
-   * @memberof EasyMarker
-   */
-  moveCursor(element, x, y) {
-    const clickPosition = getClickPosition(
-      element,
-      x,
-      y,
-      this.movingCursor === this.cursor.start,
-    )
-    if (clickPosition === null) return
-    const relativeX = clickPosition.x - this.screenRelativeOffset.x
-    const relativeY = clickPosition.y - this.screenRelativeOffset.y
-    const unmovingCursor =
-      this.movingCursor === this.cursor.start
-        ? this.cursor.end
-        : this.cursor.start
-    if (
-      unmovingCursor.position.x === relativeX &&
-      unmovingCursor.position.y === relativeY
-    ) { return }
-
-    this.swapCursor(clickPosition, { x: relativeX, y: relativeY })
-
-    this.movingCursor.height = clickPosition.height
-    this.movingCursor.position = { x: relativeX, y: relativeY }
-    this.renderMask()
-  }
-
-  /**
-   * Swap the start and end cursors
-   *
-   * @private
-   * @param {any} clickPosition
-   * @param {any} currentPosition
-   * @memberof EasyMarker
-   */
-  swapCursor(clickPosition, currentPosition) {
-    const { x, y } = currentPosition
-    if (this.movingCursor === this.cursor.start) {
-      const endPosition = this.cursor.end.position
-      if (y > endPosition.y || (y === endPosition.y && x >= endPosition.x)) {
-        this.cursor.start.position = this.cursor.end.position
-        this.movingCursor = this.cursor.end
-        this.textNode.start = new TextNode(
-          this.textNode.end.node,
-          this.textNode.end.offset,
-        )
-        this.textNode.end = new TextNode(
-          clickPosition.node,
-          clickPosition.index,
-        )
-      } else {
-        this.textNode.start = new TextNode(
-          clickPosition.node,
-          clickPosition.index,
-        )
-      }
-    } else {
-      const startPosition = this.cursor.start.position
-      if (
-        y < startPosition.y ||
-        (y === startPosition.y && x <= startPosition.x)
-      ) {
-        this.cursor.end.position = this.cursor.start.position
-        this.movingCursor = this.cursor.start
-        this.textNode.end = new TextNode(
-          this.textNode.start.node,
-          this.textNode.start.offset,
-        )
-        this.textNode.start = new TextNode(
-          clickPosition.node,
-          clickPosition.index,
-        )
-      } else {
-        this.textNode.end = new TextNode(
-          clickPosition.node,
-          clickPosition.index,
-        )
-      }
-    }
-  }
-
-  /**
-   * Start text selection
-   *
-   * @private
-   * @param {any} element
-   * @param {any} x
-   * @param {any} y
-   * @memberof EasyMarker
-   */
-  selectWords(element, x, y) {
-    const separators = [
-      '\u3002\u201D',
-      '\uFF1F\u201D',
-      '\uFF01\u201D',
-      '\u3002',
-      '\uFF1F',
-      '\uFF01',
-    ]
-    const {
-      rects, node, index, wordsLength,
-    } =
-      getClickWordsPosition(element, x, y, separators) || {}
-    if (!rects || (rects && rects.length === 0)) return
-
-    const startRect = rects[0]
-    const endRect = rects[rects.length - 1]
-    // start
-    const startLeft = startRect.left - this.screenRelativeOffset.x
-    const startTop = startRect.top - this.screenRelativeOffset.y
-    this.textNode.start = new TextNode(node, index)
-    this.cursor.start.height = startRect.height
-    this.cursor.start.position = { x: startLeft, y: startTop }
-
-    // end
-    const endLeft = endRect.left - this.screenRelativeOffset.x
-    const endTop = endRect.top - this.screenRelativeOffset.y
-    this.textNode.end = new TextNode(node, index + wordsLength)
-    this.cursor.end.height = endRect.height
-    this.cursor.end.position = { x: endLeft + endRect.width, y: endTop }
-
-    this.cursor.start.show()
-    this.cursor.end.show()
-
-    this.renderMask()
-    this.selectStatus = SelectStatus.FINISH
-  }
-
-  /**
-   * Renders the selected mask layer
-   * @private
-   * @memberof EasyMarker
-   */
-  renderMask() {
-    const { header, body, footer } = TextNode.getSelectRects(
-      this.textNode.start,
-      this.textNode.end,
-    )
-    const relativeHeader = screenRelativeToContainerRelative(
-      header,
-      this.screenRelativeOffset,
-    )
-    const relativeBody = screenRelativeToContainerRelative(
-      body,
-      this.screenRelativeOffset,
-    )
-    const relativeFooter = screenRelativeToContainerRelative(
-      footer,
-      this.screenRelativeOffset,
-    )
-    this.mask.render(relativeHeader, relativeBody, relativeFooter)
-  }
-
-  /**
    *
    * @private
    * @param {HTMLElement} element
@@ -753,50 +630,23 @@ class EasyMarker {
   }
 
   /**
-   * Tap event
-   *
-   * @private
-   * @param {TouchEvent} e
-   * @memberof EasyMarker
-   */
-  handleTap(e) {
-    if (this.selectStatus === SelectStatus.FINISH) {
-      this.menu.handleTap(e, {
-        start: this.textNode.start,
-        end: this.textNode.end,
-        content: this.getSelectText(),
-        markdown: this.getSelectMarkdown(),
-      })
-      const position = this.getTouchRelativePosition(e)
-      const startCursorRegion = this.cursor.start.inRegion(position)
-      const endCursorRegion = this.cursor.end.inRegion(position)
-      if (startCursorRegion.inRegion || endCursorRegion.inRegion) return
-      this.reset()
-    } else if (this.selectStatus === SelectStatus.NONE) {
-      const inHighlightLine = this.highlight.handleTap(e)
-      if (
-        !inHighlightLine &&
-        !this.options.disableTapHighlight &&
-        this.isContains(e.target)
-      ) {
-        const { x, y } = getTouchPosition(e)
-        this.selectWords(e.target, x, y)
-      }
-    }
-  }
-
-  /**
    * Long press event
    *
    * @private
    * @param {TouchEvent} e
    * @memberof EasyMarker
    */
-  handleLongTap(e) {
-    if (this.isContains(e.target)) {
-      const { x, y } = getTouchPosition(e)
-      this.selectWords(e.target, x, y)
-    }
+  handleLongTap() { // eslint-disable-line class-methods-use-this
+  }
+
+  /**
+   * Tap event
+   *
+   * @private
+   * @param {TouchEvent} e
+   * @memberof EasyMarker
+   */
+  handleTap() { // eslint-disable-line class-methods-use-this
   }
 
   /**
@@ -807,7 +657,7 @@ class EasyMarker {
    * @memberof EasyMarker
    */
   handleTouchStart(e) {
-    if (this.selectStatus === SelectStatus.FINISH) {
+    if (this.selectStatus === SelectStatus.FINISH && this.menu.isShow && this.menu.type !== MenuType.HIGHLIGHT) {
       const position = this.getTouchRelativePosition(e)
       const startCursorRegion = this.cursor.start.inRegion(position)
       const endCursorRegion = this.cursor.end.inRegion(position)
@@ -825,6 +675,9 @@ class EasyMarker {
         this.movingCursor = this.cursor.start
       }
     }
+    // if (!this.highlight.inRegion(e)) {
+    //   e.preventDefault()
+    // }
   }
 
   /**
@@ -848,12 +701,15 @@ class EasyMarker {
    * @memberof EasyMarker
    */
   handleTouchMoveThrottle(e) {
+    // 拖着cursor走的逻辑
     if (this.selectStatus === SelectStatus.SELECTING) {
+      const cursorOffset = this.deviceType === DeviceType.MOBILE ? this.movingCursor.height / 2 : 0
       const offset = this.movingCursor.offset || {
         x: 0,
-        y: -this.movingCursor.height / 2,
+        y: -cursorOffset,
       }
-      const targetY = e.clientY || e.changedTouches[0].clientY
+      const touch = getTouch(e)
+      const targetY = e.clientY || touch.clientY
       if (targetY >= this.windowHeight - this.scrollOffsetBottom) {
         if (this.scrollInterval !== null) clearInterval(this.scrollInterval)
         const rate =
@@ -888,7 +744,6 @@ class EasyMarker {
         clearInterval(this.scrollInterval)
         this.scrollInterval = null
       }
-      this.selectStatus = SelectStatus.FINISH
     }
   }
 
@@ -904,16 +759,38 @@ class EasyMarker {
     }
   }
 
+  showHighlightMenu(selection, options) {
+    this.setSelection(selection)
+    this.selectStatus = SelectStatus.FINISH
+    this.menu.setPosition(this.start, this.end)
+    this.menu.type = MenuType.HIGHLIGHT
+    this.menu.options = options
+    this.menu.show()
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  setSelection() {}
+
   getTouchRelativePosition(e) {
+    const cursorOffset = this.deviceType === DeviceType.MOBILE ? this.movingCursor.height / 2 : 0
     const offset = {
       x: 0,
-      y: -this.movingCursor.height / 2,
+      y: -cursorOffset,
     }
     const position = getTouchPosition(e, offset)
     position.x -= this.screenRelativeOffset.x
     position.y -= this.screenRelativeOffset.y
     return position
   }
+
+  // copy(e) {
+  //   if (this.selectStatus === SelectStatus.FINISH) {
+  //     const text = this.getSelectText() || ''
+  //     e.clipboardData.setData('text/plain', text)
+  //     this.reset()
+  //     e.preventDefault()
+  //   }
+  // }
 
   // endregion
 }

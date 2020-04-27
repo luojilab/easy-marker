@@ -55,13 +55,30 @@ export interface EasyMarkerOptions {
   scrollSpeedLevel?: number;
   scrollOffsetBottom?: number | string;
   markdownOptions?: MarkdownOptions;
+  disableSelect?: boolean;
+  regions?: Region;
+}
+
+export interface Region {
+  text: string;
+  width: number;
+  height: number;
+  left: number;
+  top: number;
+  meta?: unknown;
 }
 
 export interface MenuItem {
   text: string;
+  type?: MenuType;
   iconName?: string;
   style?: Record<string, string>;
   handler?: (selection: SelectionContent) => void;
+}
+
+export enum MenuType {
+  SELECT = 'select',
+  HIGHLIGHT = 'highlight',
 }
 
 export interface SelectionContent extends SelectionIdentifier {

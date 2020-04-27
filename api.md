@@ -9,7 +9,6 @@ A simple article  marker library
     * [new EasyMarker(options)](#new_EasyMarker_new)
     * _instance_
         * [.create(containerElement, [scrollContainerElement], options)](#EasyMarker+create)
-        * [.getSelectText()](#EasyMarker+getSelectText) ⇒ <code>string</code>
         * [.highlightLine(selection, [id], [meta])](#EasyMarker+highlightLine)
         * [.highlightLines(lines)](#EasyMarker+highlightLines)
         * [.cancelHighlightLine(id)](#EasyMarker+cancelHighlightLine) ⇒ <code>boolean</code>
@@ -35,6 +34,7 @@ Creates an instance of EasyMarker.
 | options | <code>Object</code> | options |
 | options.menuItems | <code>Array.&lt;Object&gt;</code> | menu item option |
 | options.menuItems[].text | <code>string</code> | menu text |
+| options.menuItems[].type | <code>string</code> | menu type 'select'(Show menu only when selected) 'highlight' (Show menu only when click highlight) |
 | options.menuItems[].iconName | <code>Array.&lt;string&gt;</code> | menu icon class |
 | options.menuItems[].style | <code>Object</code> | menu item style |
 | options.menuItems[].iconStyle | <code>Object</code> | menu item icon style |
@@ -53,8 +53,15 @@ Creates an instance of EasyMarker.
 | options.highlight | <code>Object</code> | highlight config |
 | options.highlight.color | <code>string</code> | highlight color |
 | options.scrollSpeedLevel | <code>number</code> | The speed of scrolling when touching bottom, default 4 |
-| options.scrollOffsetBottom | <code>number</code> \| <code>string</code> | The distance from the bottom when triggering scrolling，default 100 |
+| options.scrollOffsetBottom | <code>number</code> \| <code>string</code> | triggering scrolling, distance from the bottom, default 100 |
 | options.markdownOptions | <code>Object</code> | Customize options about the mapping relations between HTML and Markdown |
+| options.regions | <code>Array.&lt;Object&gt;</code> | In region mode, all region info |
+| options.regions[].text | <code>string</code> | region text |
+| options.regions[].top | <code>number</code> | region top |
+| options.regions[].left | <code>number</code> | region left |
+| options.regions[].width | <code>number</code> | region width |
+| options.regions[].height | <code>number</code> | region height |
+| options.disableSelect | <code>boolean</code> | disabled select |
 
 **Example**  
 ```js
@@ -173,6 +180,63 @@ em.onMenuClick((id, data) => {
   console.log('You click the menu!');
   console.log(id, data);
 });
+
+// A Region example
+
+const em = new EasyMarker({
+ regions: texts,
+ menuTopOffset: '120px',
+ scrollSpeedLevel: 6,
+ scrollOffsetBottom: '1.5rem',
+ mask: {
+   color: '#407ff2',
+ },
+ menuStyle: {
+   menu: {},
+   item: {
+     fontSize: '15px',
+     padding: '0px 10px',
+     lineHeight: '30px',
+   },
+   triangle: {},
+ },
+ menuItems: [
+   {
+     text: '划线',
+     type: 'select',
+     iconName: 'iconfont mark',
+     id: '302',
+     style: {
+       backgroundColor: 'yellow',
+       paddingLeft: '1rem',
+     },
+     iconStyle: {
+       background: 'green',
+     },
+   },
+   {
+     text: '删除划线',
+     type: 'highlight',
+     iconName: 'iconfont icon-delete',
+     id: '302',
+   },
+   {
+     id: 222,
+     text: '复制',
+     iconName: 'iconfont icon-copy',
+   },
+  ],
+});
+
+em.onMenuClick(function (id, data) {
+  console.log('You click the menu!', id, data);
+});
+
+em.onSelectStatusChange((val) => {
+  console.log('onSelectStatusChange', val);
+});
+
+em.create(document.body);
 ```
 <a name="EasyMarker+create"></a>
 
@@ -189,12 +253,6 @@ Initialization
 | options.includeElements | <code>Object</code> | included elements |
 | options.excludeElements | <code>Object</code> | not included elements, Higher priority |
 
-<a name="EasyMarker+getSelectText"></a>
-
-### easyMarker.getSelectText() ⇒ <code>string</code>
-Get the selected text
-
-**Kind**: instance method of [<code>EasyMarker</code>](#EasyMarker)  
 <a name="EasyMarker+highlightLine"></a>
 
 ### easyMarker.highlightLine(selection, [id], [meta])

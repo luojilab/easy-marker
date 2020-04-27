@@ -1,3 +1,5 @@
+import { DeviceType } from './types'
+
 /**
  * Get the location of the clicked word
  *
@@ -173,9 +175,10 @@ export function getClickPosition(pElement, x, y, isStart) {
  * @returns
  */
 export function getTouchPosition(e, offset = { x: 0, y: 0 }) {
+  const touch = getTouch(e)
   return {
-    x: (e.clientX || e.changedTouches[0].clientX) + offset.x,
-    y: (e.clientY || e.changedTouches[0].clientY) + offset.y,
+    x: (touch.clientX) + offset.x,
+    y: (touch.clientY) + offset.y,
   }
 }
 
@@ -369,4 +372,94 @@ export function matchSubString(originStr = '', subStr = '') {
     }
   }
   return matchSubstr
+}
+
+/**
+ * get Device Type (mobile || PC)
+ *
+ * @param {Event} Event
+ * @returns {object} { x, y }
+ */
+export function getDeviceType() {
+  if (typeof navigator !== 'undefined' && navigator.userAgent) {
+    const ua = navigator.userAgent
+    if (ua.indexOf('Tablet') > -1 || ua.indexOf('Pad') > -1 || ua.indexOf('Nexus 7') > -1) return DeviceType.MOBILE
+    if (ua.indexOf('Mobi') > -1 || ua.indexOf('iPh') > -1) return DeviceType.MOBILE
+    return DeviceType.PC
+  }
+  return DeviceType.MOBILE
+}
+
+/**
+ * get eventTouch Support mobile and PC
+ *
+ * @param {Event} Event
+ * @returns {object} { x, y }
+ */
+export function getTouch(e) {
+  if (getDeviceType() === DeviceType.MOBILE) {
+    return e.changedTouches[0]
+  }
+  return {
+    clientX: e.clientX,
+    clientY: e.clientY,
+  }
+}
+
+/**
+ * Binary search
+ *
+ * @param {array} array
+ * @param {object | string} target
+ * @param {string} target key
+ * @returns {number} index
+ */
+export function BSearchUpperBound(arr, target, key) {
+  let start = 0
+  let end = arr.length - 1
+  let mid = Math.floor((start + end) / 2)
+  const targetValue = (key ? target[key] : target)
+  if (targetValue >= (key ? arr[end][key] : arr[end])) {
+    return end
+  } else if (targetValue < (key ? arr[start][key] : arr[start])) {
+    return -1
+  }
+  while (start <= end) {
+    if (start === mid || end === mid) {
+      return mid
+    }
+    if ((key ? arr[mid][key] : arr[mid]) > targetValue) {
+      end = mid
+    } else {
+      start = mid
+    }
+    mid = Math.floor((start + end) / 2)
+  }
+  return mid
+}
+
+/**
+   * rect => Point[]
+   *
+   * @static
+   * @param {ClientRect} rect
+   * @param {Object} offset
+   * @param {number} offset.x
+   * @param {number} offset.y
+   * @memberof Highlight
+   */
+export function rectToPointArray(rect, offset, margin) {
+  const points = []
+  if (rect.width === 0) return points
+
+  points.push([rect.left - margin, rect.top - margin])
+  points.push([rect.right + margin, rect.top - margin])
+  points.push([rect.right + margin, rect.bottom + margin])
+  points.push([rect.left - margin, rect.bottom + margin])
+
+  points.forEach((point) => {
+    point[0] -= offset.x
+    point[1] -= offset.y
+  })
+  return points
 }

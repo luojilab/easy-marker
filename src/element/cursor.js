@@ -1,5 +1,6 @@
 import BaseElement from './base'
-import { getDistance } from '../helpers'
+import { getDistance, getDeviceType } from '../lib/helpers'
+import { DeviceType } from '../lib/types'
 
 export const CursorType = {
   START: 'start',
@@ -36,6 +37,7 @@ export default class Cursor extends BaseElement {
     this.topPoint = null
     this.lineElement = null
     this.bottomPoint = null
+    this.deviceType = getDeviceType()
     this.createElement()
     this.mount()
   }
@@ -65,6 +67,15 @@ export default class Cursor extends BaseElement {
   get width() {
     return this.height / 4
   }
+
+  show() {
+    if (this.deviceType === DeviceType.PC) {
+      return
+    }
+
+    this.style.display = 'block'
+  }
+
   /**
    * Move to the specified location
    *

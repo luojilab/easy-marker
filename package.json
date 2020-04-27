@@ -5,14 +5,15 @@
   "main": "dist/easy-marker.esm.js",
   "scripts": {
     "build": "rollup -c build/esm.rollup.config.js && rollup -c build/rollup.config.js",
-    "test": "rollup -f iife -o dist/test.js -i test.js -n test -w",
-    "doc": "jsdoc2md  lib/easy_marker.js > api.md",
+    "testRegion": "rollup -f iife -o test/regionDist.js -i test/testRegion.js -n test -w",
+    "testNode": "rollup -f iife -o test/nodeDist.js -i test/testNode.js -n test -w",
+    "doc": "jsdoc2md  src/base_easy_marker.js > api.md",
     "preversion": "npm run build",
     "postversion": "git push && git push --tags"
   },
   "files": [
     "dist",
-    "lib",
+    "src",
     "api.md",
     "build",
     "index.d.ts"

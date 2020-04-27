@@ -27,6 +27,11 @@ export default class BaseElement {
     this.container.appendChild(this.element)
   }
 
+  /**
+   * get Element Style
+   *
+   * @memberof BaseElement
+   */
   get style() {
     return this.element.style
   }
@@ -41,9 +46,14 @@ export default class BaseElement {
   }
 
   get isShow() {
-    return this.style.display === 'none'
+    return this.style.display !== 'none' && this.style.display !== ''
   }
 
+  /**
+   * Remove Element
+   *
+   * @memberof BaseElement
+   */
   destroy() {
     if (this.element) {
       this.element.parentElement.removeChild(this.element)
