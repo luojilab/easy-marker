@@ -24,7 +24,8 @@ export default class TouchEvent {
       slideDistance: 20,
       throttleTime: 50,
     }
-    this.element = getDeviceType() === DeviceType.MOBILE ? element : window
+    // this.element = getDeviceType() === DeviceType.MOBILE ? element : window
+    this.element = element || window
     this.options = Object.assign(this.options, options)
     this.touchStartCallbacks = []
     this.touchMoveCallbacks = []
