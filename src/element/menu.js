@@ -237,18 +237,27 @@ export default class Menu extends BaseElement {
     // this.style.display = 'block'
     this.style.visibility = 'visible'
     this.style.top = `${relativeTop}px`
-    if (this.positionRange.left + this.width / 2 > this.windowWidth) {
-      this.style.right = this.style.position === 'fixed'
-        ? `${containerRight - (this.width / 2)}px` : `-${this.width / 2}px`
+    if (this.positionRange.left + containerLeft + this.width / 2 > this.windowWidth) {
+      let right = this.positionRange.left + this.width - containerRight - (this.width / 2)
+      if (right < 0 && this.style.position === 'fixed') {
+        right = this.width / 2
+      }
+      this.style.right = `${right}px`
       this.style.left = ''
-    } else if (this.positionRange.left - this.width / 2 < 0) {
-      this.style.left = this.style.position === 'fixed'
-        ? `${this.width / 2 + containerLeft}px` : `${this.width / 2}px`
+    } else if (this.positionRange.left + containerLeft - this.width / 2 < 0) {
+      let left = this.width / 2 + this.positionRange.left + containerLeft
+      if (left < 0 && this.style.position === 'fixed') {
+        left = this.width / 2
+      }
+      this.style.left = `${left}px`
       this.style.right = ''
     } else {
+      let left = this.positionRange.left + containerLeft
+      if (left < 0 && this.style.position === 'fixed') {
+        left = this.width / 2
+      }
+      this.style.left = `${left}px`
       this.style.right = ''
-      this.style.left = this.style.position === 'fixed'
-        ? `${this.positionRange.left + containerLeft}px` : `${this.positionRange.left}px`
     }
     this.style.opacity = '1'
   }
