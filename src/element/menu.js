@@ -152,7 +152,15 @@ export default class Menu extends BaseElement {
   setPosition(start, end) {
     const mergeRects = {}
     if (this.mode === EasyMarkerMode.REGION) {
-      const rects = this.easyMarker.region.getRects(start, end)
+      let rects
+      if (start.pageIndex !== end.pageIndex) {
+        // menu 跟随最后一页走
+        const startRegion = this.easyMarker.region.regions[end.pageIndex].regions[0].regions[0]
+        rects = this.easyMarker.region.getRects(startRegion, end)
+      } else {
+        rects = this.easyMarker.region.getRects(start, end)
+      }
+      // const rects = this.easyMarker.region.getRects(start, end)
       rects.forEach((rect, index) => {
         if (index === 0) {
           mergeRects.left = rect.left
@@ -238,23 +246,33 @@ export default class Menu extends BaseElement {
     this.style.visibility = 'visible'
     this.style.top = `${relativeTop}px`
     if (this.positionRange.left + containerLeft + this.width / 2 > this.windowWidth) {
-      let right = this.positionRange.left + this.width - containerRight - (this.width / 2)
-      if (right < 0 && this.style.position === 'fixed') {
-        right = this.width / 2
+      let right
+      if (this.style.position === 'fixed') {
+        right = this.positionRange.left + this.width - containerRight - (this.width / 2)
+        right = right < 0 ? this.width / 2 : right
+      } else {
+        right = this.positionRange.left - (this.width / 2)
       }
       this.style.right = `${right}px`
       this.style.left = ''
     } else if (this.positionRange.left + containerLeft - this.width / 2 < 0) {
-      let left = this.width / 2 + this.positionRange.left + containerLeft
-      if (left < 0 && this.style.position === 'fixed') {
-        left = this.width / 2
+      let left
+      if (this.style.position === 'fixed') {
+        left = this.width / 2 + this.positionRange.left + containerLeft
+        left = left < 0 ? this.width / 2 : left
+      } else {
+        left = this.width / 2 + this.positionRange.left
       }
       this.style.left = `${left}px`
       this.style.right = ''
     } else {
-      let left = this.positionRange.left + containerLeft
-      if (left < 0 && this.style.position === 'fixed') {
-        left = this.width / 2
+      let left
+      if (this.style.position === 'fixed') {
+        left = this.positionRange.left + containerLeft
+        left = left < 0 ? this.width / 2 : left
+      } else {
+        // eslint-disable-next-line prefer-destructuring
+        left = this.positionRange.left
       }
       this.style.left = `${left}px`
       this.style.right = ''
