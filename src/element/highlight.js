@@ -16,6 +16,8 @@ export default class Highlight extends BaseElement {
     const defaultOptions = {
       highlightColor: '#FEFFCA',
       underlineColor: '#af8978',
+      tagBackground: '#af8978',
+      tagColor: '#fff',
       opacity: 1,
       type: 'highlight',
       // margin: '0.1rem',
@@ -140,11 +142,32 @@ export default class Highlight extends BaseElement {
     this.removeAllRectangle()
     this.lineMap.forEach((line) => {
       const type = line.meta.type || this.type
-      line.points.forEach((points) => {
+      line.points.forEach((points, index) => {
         if (type === NoteType.UNDERLINE) {
           this.element.appendChild(this.createLine(points))
         } else {
           this.element.appendChild(this.createRectangle(points))
+        }
+        if (line.points.length - 1 === index && line.meta && line.meta.tag) {
+          const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+          text.setAttribute('x', points[2][0] - 5)
+          text.setAttribute('y', points[2][1] + 3)
+          text.setAttribute('dominant-baseline', 'hanging')
+          text.setAttribute('text-anchor', 'end')
+          text.setAttribute('font-size', '10')
+          text.setAttribute('fill', this.option.tagColor)
+          text.textContent = line.meta.tag
+          this.element.appendChild(text)
+          const textRect = text.getBBox()
+          const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+          rect.setAttribute('x', textRect.x - 5)
+          rect.setAttribute('y', textRect.y - 1)
+          rect.setAttribute('rx', 2)
+          rect.setAttribute('ry', 2)
+          rect.setAttribute('width', textRect.width + 10)
+          rect.setAttribute('height', textRect.height + 2)
+          rect.setAttribute('fill', this.option.tagBackground)
+          this.element.insertBefore(rect, text)
         }
       })
     })
