@@ -372,13 +372,13 @@ class EasyMarker {
         EventType.TOUCH_END,
         this.handleTouchEnd.bind(this),
       )
+      this.touchEvent.registerEvent(
+        EventType.LONG_TAP,
+        this.handleLongTap.bind(this),
+      )
     }
 
     this.touchEvent.registerEvent(EventType.TAP, this.handleTap.bind(this))
-    this.touchEvent.registerEvent(
-      EventType.LONG_TAP,
-      this.handleLongTap.bind(this),
-    )
 
     const CursorElement =
       this.options.cursor && this.options.cursor.Cursor
