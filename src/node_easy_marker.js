@@ -290,6 +290,7 @@ class NodeEasyMarker extends BaseEasyMarker {
       if (
         !inHighlightLine &&
         !this.options.disableTapHighlight &&
+        !this.options.disableSelect &&
         this.isContains(e.target) &&
         this.deviceType === DeviceType.MOBILE
       ) {
