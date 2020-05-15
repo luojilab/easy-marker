@@ -206,7 +206,7 @@ class NodeEasyMarker extends BaseEasyMarker {
   handleTouchStart(e) {
     super.handleTouchStart(e)
     if (this.deviceType === DeviceType.PC) {
-      if (this.selectStatus === SelectStatus.NONE) {
+      if (this.selectStatus === SelectStatus.NONE && this.isContains(e.target)) {
         this.touchStartTime = Date.now()
         const { x, y } = getTouchPosition(e)
         const element = document.elementFromPoint(x, y)
