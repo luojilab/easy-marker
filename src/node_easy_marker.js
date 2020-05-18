@@ -214,7 +214,7 @@ class NodeEasyMarker extends BaseEasyMarker {
           element,
           x,
           y,
-          this.movingCursor === this.cursor.start,
+          this.movingCursor !== this.cursor.start,
         )
         if (clickPosition) {
           this.textNode.start = new TextNode(

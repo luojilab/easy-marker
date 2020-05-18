@@ -155,6 +155,9 @@ export default class Cursor extends BaseElement {
    * @memberof Cursor
    */
   inRegion(position = {}) {
+    if (this.deviceType === DeviceType.PC) {
+      return { inRegion: false }
+    }
     const maxDistance = this.height
     let distance = Number.MAX_SAFE_INTEGER
     if (position.y > this.position.y && position.y < this.position.y + this.height) {
