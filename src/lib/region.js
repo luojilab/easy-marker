@@ -283,6 +283,7 @@ export default class Region {
       top: point.y,
       left: point.x,
     }
+    if (this.regions.length <= 0) return null
     const pageRegions = BSearchUpperBound(this.regions, pointPosition, 'left')
     if (pageRegions === -1) return null
     const lineRectRegionList = this.regions[pageRegions].regions

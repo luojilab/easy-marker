@@ -157,6 +157,7 @@ export default class Highlight extends BaseElement {
           text.setAttribute('font-size', '10')
           text.setAttribute('fill', this.option.tagColor)
           text.textContent = line.meta.tag
+          text.classList.add('em-highlight-tag-text')
           this.element.appendChild(text)
           setTimeout(() => {
             // 同步执行在某些时候无法取到getBox
@@ -170,7 +171,7 @@ export default class Highlight extends BaseElement {
             rect.setAttribute('height', textRect.height + 2)
             rect.setAttribute('fill', this.option.tagBackground)
             this.element.insertBefore(rect, text)
-          }, 100)
+          }, 0)
         }
       })
     })
