@@ -171,7 +171,7 @@ export default class Highlight extends BaseElement {
             rect.setAttribute('height', textRect.height + 2)
             rect.setAttribute('fill', this.option.tagBackground)
             this.element.insertBefore(rect, text)
-          }, 0)
+          }, 10)
         }
       })
     })
