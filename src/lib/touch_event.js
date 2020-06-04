@@ -18,6 +18,7 @@ export const EventType = {
  */
 export default class TouchEvent {
   constructor(element, options) {
+    this.disabled = false
     this.options = {
       longTapTime: 600,
       tapTime: 500,
@@ -48,11 +49,19 @@ export default class TouchEvent {
     this.endEventName = getDeviceType() === DeviceType.MOBILE ? 'touchend' : 'mouseup'
     // this.cancelEventName = getDeviceType() === DeviceType.MOBILE ? 'touchcancel' : 'mouseup'
     this.element.addEventListener(this.startEventName, this.onTouchStart)
-    this.element.addEventListener(this.moveEventName, this.onTouchMove, { passive: false })
+    this.element.addEventListener(this.moveEventName, this.onTouchMove, {
+      passive: false,
+    })
     this.element.addEventListener(this.endEventName, this.onTouchEnd)
     // this.element.addEventListener(this.cancelEventName, this.onTouchEnd)
   }
 
+  disable() {
+    this.disabled = true
+  }
+  enable() {
+    this.disabled = false
+  }
   /**
    * Register event
    *
@@ -92,6 +101,7 @@ export default class TouchEvent {
   }
 
   onTouchStart(e) {
+    if (this.disabled) return
     if (e.touches && e.touches.length > 1) return
     if (!this.hook('touchstart', e)) return
     this.touchStartCallbacks.forEach(callback => callback(e))
@@ -105,6 +115,7 @@ export default class TouchEvent {
   }
 
   onTouchMove(e) {
+    if (this.disabled) return
     if (e.touches && e.touches.length > 1) return
     if (!this.hook('touchmove', e)) return
 
@@ -128,6 +139,7 @@ export default class TouchEvent {
   }
 
   onTouchEnd(e) {
+    if (this.disabled) return
     if (e.touches && e.touches.length > 1) return
     if (!this.hook('touchmove', e)) return
 
@@ -170,23 +182,7 @@ export default class TouchEvent {
   static createMouseEvent(type, e) {
     const touch = getTouch(e)
     const event = new MouseEvent(type)
-    event.initMouseEvent(
-      type,
-      true,
-      true,
-      window,
-      1,
-      touch.screenX,
-      touch.screenY,
-      touch.clientX,
-      touch.clientY,
-      false,
-      false,
-      false,
-      false,
-      0,
-      null
-    )
+    event.initMouseEvent(type, true, true, window, 1, touch.screenX, touch.screenY, touch.clientX, touch.clientY, false, false, false, false, 0, null)
     event.forwardedTouchEvent = true
     return event
   }

@@ -6,12 +6,7 @@ import Highlight from './element/highlight'
 import Markdown from './lib/markdown'
 import TouchEvent, { EventType } from './lib/touch_event'
 
-import {
-  getTouchPosition,
-  anyToPx,
-  getTouch,
-  getDeviceType,
-} from './lib/helpers'
+import { getTouchPosition, anyToPx, getTouch, getDeviceType } from './lib/helpers'
 import { SelectStatus, DeviceType, MenuType } from './lib/types'
 
 const defaultOptions = {
@@ -297,17 +292,9 @@ class EasyMarker {
    * @returns {EasyMarker}
    * @memberof EasyMarker
    */
-  static create(
-    containerElement,
-    scrollContainerElement,
-    options = [],
-  ) {
+  static create(containerElement, scrollContainerElement, options = []) {
     const easyMarker = new this()
-    easyMarker.create(
-      containerElement,
-      scrollContainerElement,
-      options,
-    )
+    easyMarker.create(containerElement, scrollContainerElement, options)
     return easyMarker
   }
 
@@ -324,7 +311,8 @@ class EasyMarker {
   create(containerElement, scrollContainerElement, options = []) {
     this.container = containerElement
     this.adjustTextStyle()
-    this.container.oncontextmenu = (event) => {
+    // eslint-disable-next-line arrow-parens
+    this.container.oncontextmenu = event => {
       event.returnValue = false
     }
 
@@ -356,34 +344,16 @@ class EasyMarker {
 
     this.touchEvent = new TouchEvent(this.container)
     if (!this.options.disableSelect) {
-      this.touchEvent.registerEvent(
-        EventType.TOUCH_START,
-        this.handleTouchStart.bind(this),
-      )
-      this.touchEvent.registerEvent(
-        EventType.TOUCH_MOVE,
-        this.handleTouchMove.bind(this),
-      )
-      this.touchEvent.registerEvent(
-        EventType.TOUCH_MOVE_THROTTLE,
-        this.handleTouchMoveThrottle.bind(this),
-      )
-      this.touchEvent.registerEvent(
-        EventType.TOUCH_END,
-        this.handleTouchEnd.bind(this),
-      )
-      this.touchEvent.registerEvent(
-        EventType.LONG_TAP,
-        this.handleLongTap.bind(this),
-      )
+      this.touchEvent.registerEvent(EventType.TOUCH_START, this.handleTouchStart.bind(this))
+      this.touchEvent.registerEvent(EventType.TOUCH_MOVE, this.handleTouchMove.bind(this))
+      this.touchEvent.registerEvent(EventType.TOUCH_MOVE_THROTTLE, this.handleTouchMoveThrottle.bind(this))
+      this.touchEvent.registerEvent(EventType.TOUCH_END, this.handleTouchEnd.bind(this))
+      this.touchEvent.registerEvent(EventType.LONG_TAP, this.handleLongTap.bind(this))
     }
 
     this.touchEvent.registerEvent(EventType.TAP, this.handleTap.bind(this))
 
-    const CursorElement =
-      this.options.cursor && this.options.cursor.Cursor
-        ? this.options.cursor.Cursor
-        : Cursor
+    const CursorElement = this.options.cursor && this.options.cursor.Cursor ? this.options.cursor.Cursor : Cursor
 
     if (this.options.cursor.same) {
       this.cursor.start = new CursorElement(
@@ -398,18 +368,11 @@ class EasyMarker {
         Object.assign({ mode: this.mode }, this.options.cursor || {})
       )
     }
-    this.cursor.end = new CursorElement(
-      this.container,
-      CursorType.END,
-      this.options.cursor || {},
-    )
+    this.cursor.end = new CursorElement(this.container, CursorType.END, this.options.cursor || {})
     this.movingCursor = this.cursor.end
 
     this.mask = new Mask(this.container, Object.assign({ mode: this.mode }, this.options.mask || {}))
-    this.highlight = new Highlight(
-      this.container,
-      Object.assign({ mode: this.mode }, this.options.highlight || {}),
-    )
+    this.highlight = new Highlight(this.container, Object.assign({ mode: this.mode }, this.options.highlight || {}))
     this.menu = new Menu(this.container, {
       menuItems: this.options.menuItems,
       topOffset: this.options.menuTopOffset,
@@ -424,6 +387,19 @@ class EasyMarker {
     this.scrollSpeedLevel = this.options.scrollSpeedLevel
   }
 
+  /**
+   * Disable touch event
+   */
+  disable() {
+    this.touchEvent.disable()
+  }
+
+  /**
+   * Enable touch event
+   */
+  enable() {
+    this.touchEvent.enable()
+  }
   /**
    * Highlight the lines between the specified nodes
    * @example
@@ -446,12 +422,7 @@ class EasyMarker {
    * @memberof EasyMarker
    */
   highlightLine(selection, id, meta) {
-    this.highlight.highlightLine(
-      selection,
-      id,
-      meta,
-      this.screenRelativeOffset,
-    )
+    this.highlight.highlightLine(selection, id, meta, this.screenRelativeOffset)
   }
 
   /**
@@ -636,8 +607,8 @@ class EasyMarker {
    * @param {TouchEvent} e
    * @memberof EasyMarker
    */
-  handleLongTap() { // eslint-disable-line class-methods-use-this
-  }
+  // eslint-disable-next-line class-methods-use-this
+  handleLongTap() {}
 
   /**
    * Tap event
@@ -646,8 +617,8 @@ class EasyMarker {
    * @param {TouchEvent} e
    * @memberof EasyMarker
    */
-  handleTap() { // eslint-disable-line class-methods-use-this
-  }
+  // eslint-disable-next-line class-methods-use-this
+  handleTap() {}
 
   /**
    * touchstart event handler
@@ -663,10 +634,7 @@ class EasyMarker {
       const endCursorRegion = this.cursor.end.inRegion(position)
       if (startCursorRegion.inRegion && endCursorRegion.inRegion) {
         this.selectStatus = SelectStatus.SELECTING
-        this.movingCursor =
-          startCursorRegion.distance < endCursorRegion.distance
-            ? this.cursor.start
-            : this.cursor.end
+        this.movingCursor = startCursorRegion.distance < endCursorRegion.distance ? this.cursor.start : this.cursor.end
       } else if (endCursorRegion.inRegion) {
         this.selectStatus = SelectStatus.SELECTING
         this.movingCursor = this.cursor.end
@@ -713,9 +681,7 @@ class EasyMarker {
       if (targetY >= this.windowHeight - this.scrollOffsetBottom) {
         if (this.scrollInterval !== null) clearInterval(this.scrollInterval)
         const rate =
-          ((targetY - this.windowHeight + this.scrollOffsetBottom) *
-            this.scrollSpeedLevel) /
-          this.scrollOffsetBottom
+          ((targetY - this.windowHeight + this.scrollOffsetBottom) * this.scrollSpeedLevel) / this.scrollOffsetBottom
         this.scrollInterval = setInterval(() => {
           this.scrollContainer.scrollTop += rate
           document.documentElement.scrollTop += rate
