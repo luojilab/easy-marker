@@ -26,6 +26,8 @@ declare class EasyMarker {
   ): void;
   public registerEventHook(cb: () => void): void;
   public destroy(): void;
+  public disable(): void;
+  public enable(): void;
   public static create(
     containerElement: HTMLElement,
     scrollContainerElement?: HTMLElement,
