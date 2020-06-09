@@ -164,12 +164,14 @@ export default class TouchEvent {
   }
 
   onTap(e) {
+    if (this.disabled) return
     if (!this.hook('tap', e)) return
 
     this.tapCallbacks.forEach(callback => callback(e))
   }
 
   onLongTap(e) {
+    if (this.disabled) return
     this.longTapCallbacks.forEach(callback => callback(e))
   }
 
@@ -182,7 +184,23 @@ export default class TouchEvent {
   static createMouseEvent(type, e) {
     const touch = getTouch(e)
     const event = new MouseEvent(type)
-    event.initMouseEvent(type, true, true, window, 1, touch.screenX, touch.screenY, touch.clientX, touch.clientY, false, false, false, false, 0, null)
+    event.initMouseEvent(
+      type,
+      true,
+      true,
+      window,
+      1,
+      touch.screenX,
+      touch.screenY,
+      touch.clientX,
+      touch.clientY,
+      false,
+      false,
+      false,
+      false,
+      0,
+      null
+    )
     event.forwardedTouchEvent = true
     return event
   }
