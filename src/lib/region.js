@@ -153,9 +153,9 @@ export default class Region {
   }
 
   setRegions(list) {
+    const regions = Region.getLineRectRegionList(list)
     this.originalRegionList = list
-    this.regions = []
-    this.initRectRegion()
+    this.regions = regions
   }
 
   getSentenceByPosition(point) {
