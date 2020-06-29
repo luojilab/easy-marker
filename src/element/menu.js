@@ -17,6 +17,7 @@ export default class Menu extends BaseElement {
     this.mode = options.mode
     this.option = {
       items: options.menuItems,
+      isMultiColumnLayout: options.isMultiColumnLayout,
       topOffset: anyToPx(options.topOffset),
       style: {
         menu: {
@@ -181,17 +182,19 @@ export default class Menu extends BaseElement {
         start.offset,
         end.offset
       )
-      rects.forEach((rect, index) => {
+      rects.filter(item => item.left <= this.windowWidth && item.left >= 0).forEach((rect, index) => {
         if (index === 0) {
           mergeRects.left = rect.left - this.screenRelativeOffset.x
           mergeRects.top = rect.top - this.screenRelativeOffset.y
           mergeRects.right = rect.right - this.screenRelativeOffset.x
           mergeRects.bottom = rect.bottom - this.screenRelativeOffset.y
+        } else if (index === rects.length - 1) {
+          mergeRects.bottom = rect.bottom - this.screenRelativeOffset.y
         } else {
           mergeRects.left = Math.min(rect.left - this.screenRelativeOffset.x, mergeRects.left)
-          mergeRects.top = Math.min(rect.top - this.screenRelativeOffset.y, mergeRects.top)
+          // mergeRects.top = Math.min(rect.top - this.screenRelativeOffset.y, mergeRects.top)
           mergeRects.right = Math.max(rect.right - this.screenRelativeOffset.x, mergeRects.right)
-          mergeRects.bottom = Math.max(rect.bottom - this.screenRelativeOffset.y, mergeRects.bottom)
+          // mergeRects.bottom = Math.max(rect.bottom - this.screenRelativeOffset.y, mergeRects.bottom)
         }
       })
     }
@@ -247,7 +250,7 @@ export default class Menu extends BaseElement {
     this.style.top = `${relativeTop}px`
     if (this.positionRange.left + containerLeft + this.width / 2 > this.windowWidth) {
       let right
-      if (this.style.position === 'fixed') {
+      if (this.style.position === 'fixed' && !this.option.isMultiColumnLayout) {
         right = this.positionRange.left + this.width - containerRight - (this.width / 2)
         right = right < 0 ? this.width / 2 : right
       } else {
@@ -257,7 +260,7 @@ export default class Menu extends BaseElement {
       this.style.left = ''
     } else if (this.positionRange.left + containerLeft - this.width / 2 < 0) {
       let left
-      if (this.style.position === 'fixed') {
+      if (this.style.position === 'fixed' && !this.option.isMultiColumnLayout) {
         left = this.width / 2 + this.positionRange.left + containerLeft
         left = left < 0 ? this.width / 2 : left
       } else {
@@ -267,7 +270,7 @@ export default class Menu extends BaseElement {
       this.style.right = ''
     } else {
       let left
-      if (this.style.position === 'fixed') {
+      if (this.style.position === 'fixed' && !this.option.isMultiColumnLayout) {
         left = this.positionRange.left + containerLeft
         left = left < 0 ? this.width / 2 : left
       } else {

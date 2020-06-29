@@ -13,6 +13,7 @@ const defaultOptions = {
   disableSelect: false,
   menuItems: [],
   menuTopOffset: 0,
+  isMultiColumnLayout: false,
   cursor: {
     same: false,
   },
@@ -377,6 +378,7 @@ class EasyMarker {
       menuItems: this.options.menuItems,
       topOffset: this.options.menuTopOffset,
       style: this.options.menuStyle,
+      isMultiColumnLayout: this.options.isMultiColumnLayout,
       mode: this.mode,
     })
     this.menu.easyMarker = this
