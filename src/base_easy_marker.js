@@ -22,6 +22,7 @@ const defaultOptions = {
 }
 
 const preventDefaultCb = e => e.preventDefault()
+let copyListener = () => {}
 /**
  * A simple article  marker library
  * @example
@@ -329,6 +330,8 @@ class EasyMarker {
     }
     this.scrollContainer = scrollContainerElement || document.body
     this.container.addEventListener('contextmenu', preventDefaultCb)
+    copyListener = e => this.copyListener(e)
+    document.addEventListener('copy', copyListener)
     if (this.scrollContainer === document.body) {
       this.scrollContainer.onscroll = this.handleScroll.bind(this)
     } else {
@@ -512,6 +515,7 @@ class EasyMarker {
   destroy() {
     this.container.oncontextmenu = null
     this.container.removeEventListener('contextmenu', preventDefaultCb)
+    document.removeEventListener('copy', copyListener)
     if (this.containerScroll !== null) {
       this.scrollContainer.removeEventListener('scroll', this.containerScroll)
       this.containerScroll = null
@@ -621,6 +625,15 @@ class EasyMarker {
    */
   // eslint-disable-next-line class-methods-use-this
   handleTap() {}
+
+  /**
+   * copy listener
+   *
+   * @private
+   * @memberof EasyMarker
+   */
+  // eslint-disable-next-line class-methods-use-this
+  copyListener() {}
 
   /**
    * touchstart event handler
