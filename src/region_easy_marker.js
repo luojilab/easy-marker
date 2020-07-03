@@ -96,6 +96,24 @@ class RegionEasyMarker extends BaseEasyMarker {
   }
 
   /**
+   * copy listener
+   *
+   * @private
+   * @memberof EasyMarker
+   */
+  copyListener(e) {
+    if (this.selectStatus === SelectStatus.FINISH) {
+      this.menu.copyListener({
+        start: this.selectRegion.start,
+        end: this.selectRegion.end,
+        content: this.getSelectText(),
+        markdown: RegionEasyMarker.getSelectMarkdown(),
+      }, e)
+      this.reset()
+    }
+  }
+
+  /**
    * Tap event
    *
    * @private

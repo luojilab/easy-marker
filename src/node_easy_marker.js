@@ -266,6 +266,24 @@ class NodeEasyMarker extends BaseEasyMarker {
   }
 
   /**
+   * copy listener
+   *
+   * @private
+   * @memberof EasyMarker
+   */
+  copyListener(e) {
+    if (this.selectStatus === SelectStatus.FINISH) {
+      this.menu.copyListener({
+        start: this.textNode.start,
+        end: this.textNode.end,
+        content: this.getSelectText(),
+        markdown: this.getSelectMarkdown(),
+      }, e)
+      this.reset()
+    }
+  }
+
+  /**
    * Tap event
    *
    * @private
