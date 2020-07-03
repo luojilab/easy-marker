@@ -282,7 +282,21 @@ export default class Menu extends BaseElement {
     }
     this.style.opacity = '1'
   }
-
+  copyListener(options, e) {
+    let copyItem
+    this.itemMap.forEach((item) => {
+      if (item.id === 'copy' || item.text === '复制') {
+        copyItem = item
+      }
+    })
+    if (!copyItem) return
+    const selection = this.getSelection(options)
+    if (copyItem.id && this.easyMarker.menuOnClick) {
+      this.easyMarker.menuOnClick(copyItem.id, selection, Object.assign({}, this.options, { e }))
+    } else {
+      copyItem.handler.call(this.easyMarker, selection, Object.assign({}, this.options, { e }))
+    }
+  }
   handleTap(e, options) {
     const tapTarget = this.getTapTarget(e.target)
     if (!this.itemMap.has(tapTarget)) return false
