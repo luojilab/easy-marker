@@ -251,10 +251,10 @@ export default class Menu extends BaseElement {
     if (this.positionRange.left + containerLeft + this.width / 2 > this.windowWidth) {
       let right
       if (this.style.position === 'fixed' && !this.option.isMultiColumnLayout) {
-        right = this.positionRange.left + this.width - containerRight - (this.width / 2)
-        right = right < 0 ? this.width / 2 : right
+        right = containerRight - this.positionRange.left - (this.width / 2)
+        right = containerLeft < 0 ? -this.width / 2 : right
       } else {
-        right = this.positionRange.left - (this.width / 2)
+        right = containerRight - this.positionRange.left - containerLeft - this.width / 2
       }
       this.style.right = `${right}px`
       this.style.left = ''
