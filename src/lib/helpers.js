@@ -388,6 +388,7 @@ export function getDeviceType() {
     || ua.indexOf('Android') > -1
     || ua.indexOf('iPh') > -1
     || ua.indexOf('FLOW') > -1) return DeviceType.MOBILE
+    return DeviceType.PC
   }
   return DeviceType.MOBILE
 }
