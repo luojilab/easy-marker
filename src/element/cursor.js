@@ -98,7 +98,7 @@ export default class Cursor extends BaseElement {
     this.element = document.createElement('div')
     this.style.userSelect = 'none'
     this.style.webkitUserSelect = 'none'
-    this.style.zIndex = '2'
+    this.style.zIndex = '3'
     this.style.transition = 'top 0.1s, left 0.1s'
     this.style.display = 'none'
     this.style.position = 'absolute'
