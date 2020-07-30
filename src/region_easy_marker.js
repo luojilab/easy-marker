@@ -51,6 +51,20 @@ class RegionEasyMarker extends BaseEasyMarker {
   handleTouchStart(e) {
     super.handleTouchStart(e)
     if (this.deviceType === DeviceType.PC) {
+      if (this.selectStatus === SelectStatus.FINISH) {
+        this.menu.handleTap(e, {
+          start: this.selectRegion.start,
+          end: this.selectRegion.end,
+          content: this.getSelectText(),
+          markdown: RegionEasyMarker.getSelectMarkdown(),
+        })
+        const position = this.getTouchRelativePosition(e)
+        const startCursorRegion = this.cursor.start.inRegion(position)
+        const endCursorRegion = this.cursor.end.inRegion(position)
+        if (startCursorRegion.inRegion || endCursorRegion.inRegion) return
+        this.reset()
+      }
+
       if (this.selectStatus === SelectStatus.NONE && this.isContains(e.target)) {
         this.touchStartTime = Date.now()
         const position = this.getTouchRelativePosition(e)
@@ -103,12 +117,15 @@ class RegionEasyMarker extends BaseEasyMarker {
    */
   copyListener(e) {
     if (this.selectStatus === SelectStatus.FINISH) {
-      this.menu.copyListener({
-        start: this.selectRegion.start,
-        end: this.selectRegion.end,
-        content: this.getSelectText(),
-        markdown: RegionEasyMarker.getSelectMarkdown(),
-      }, e)
+      this.menu.copyListener(
+        {
+          start: this.selectRegion.start,
+          end: this.selectRegion.end,
+          content: this.getSelectText(),
+          markdown: RegionEasyMarker.getSelectMarkdown(),
+        },
+        e
+      )
       this.reset()
     }
   }
@@ -198,14 +215,10 @@ class RegionEasyMarker extends BaseEasyMarker {
     // const relativePosition = this.getTouchRelativePosition({ x, y })
     const clickRegion = this.region.getRegionByPoint({ x: relativeX, y: relativeY })
     if (!clickRegion) return
-    const unmovingCursor =
-      this.movingCursor === this.cursor.start
-        ? this.cursor.end
-        : this.cursor.start
-    if (
-      unmovingCursor.position.x === relativeX &&
-      unmovingCursor.position.y === relativeY
-    ) { return }
+    const unmovingCursor = this.movingCursor === this.cursor.start ? this.cursor.end : this.cursor.start
+    if (unmovingCursor.position.x === relativeX && unmovingCursor.position.y === relativeY) {
+      return
+    }
 
     this.swapCursor(clickRegion, { x: relativeX, y: relativeY })
     const { height: lineHeight } = this.region.getLineInfoByRegion(clickRegion)
