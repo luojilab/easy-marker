@@ -52,23 +52,19 @@ class RegionEasyMarker extends BaseEasyMarker {
     super.handleTouchStart(e)
     if (this.deviceType === DeviceType.PC) {
       if (this.selectStatus === SelectStatus.FINISH) {
-        this.menu.handleTap(e, {
-          start: this.selectRegion.start,
-          end: this.selectRegion.end,
-          content: this.getSelectText(),
-          markdown: RegionEasyMarker.getSelectMarkdown(),
-        })
+        const isMenuClick = this.menu.inRegion(e)
         const position = this.getTouchRelativePosition(e)
         const startCursorRegion = this.cursor.start.inRegion(position)
         const endCursorRegion = this.cursor.end.inRegion(position)
-        if (startCursorRegion.inRegion || endCursorRegion.inRegion) return
-        this.reset()
+        if (!isMenuClick && !startCursorRegion.inRegion && !endCursorRegion.inRegion) {
+          this.reset()
+        }
       }
 
       if (this.selectStatus === SelectStatus.NONE && this.isContains(e.target)) {
         this.touchStartTime = Date.now()
         const position = this.getTouchRelativePosition(e)
-        this.selectRegion.start = this.region.getRegionByPoint(position)
+        this.selectRegion.start = this.region.getRegionByPoint(position, true)
         if (this.selectRegion.start) {
           const { height: lineHeight } = this.region.getLineInfoByRegion(this.selectRegion.start)
           this.cursor.start.height = lineHeight

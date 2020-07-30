@@ -119,7 +119,8 @@ export default class Menu extends BaseElement {
     style.type = 'text/css'
     style.rel = 'stylesheet'
     // eslint-disable-next-line max-len
-    const styleText = '.em-menu-wrapper-select .em-menu-item-highlight{display: none !important} .em-menu-wrapper-highlight .em-menu-item-select{display: none !important}'
+    const styleText =
+      '.em-menu-wrapper-select .em-menu-item-highlight{display: none !important} .em-menu-wrapper-highlight .em-menu-item-select{display: none !important}'
     style.appendChild(document.createTextNode(styleText))
     const head = document.getElementsByTagName('head')[0]
     head.appendChild(style)
@@ -176,29 +177,25 @@ export default class Menu extends BaseElement {
         }
       })
     } else {
-      const { rects } = TextNode.getSelectNodeRectAndText(
-        start.node,
-        end.node,
-        start.offset,
-        end.offset
-      )
-      rects.filter(item => item.left <= this.windowWidth && item.left >= 0).forEach((rect, index) => {
-        if (index === 0) {
-          mergeRects.left = rect.left - this.screenRelativeOffset.x
-          mergeRects.top = rect.top - this.screenRelativeOffset.y
-          mergeRects.right = rect.right - this.screenRelativeOffset.x
-          mergeRects.bottom = rect.bottom - this.screenRelativeOffset.y
-        } else if (index === rects.length - 1) {
-          mergeRects.bottom = rect.bottom - this.screenRelativeOffset.y
-        } else {
-          mergeRects.left = Math.min(rect.left - this.screenRelativeOffset.x, mergeRects.left)
-          // mergeRects.top = Math.min(rect.top - this.screenRelativeOffset.y, mergeRects.top)
-          mergeRects.right = Math.max(rect.right - this.screenRelativeOffset.x, mergeRects.right)
-          // mergeRects.bottom = Math.max(rect.bottom - this.screenRelativeOffset.y, mergeRects.bottom)
-        }
-      })
+      const { rects } = TextNode.getSelectNodeRectAndText(start.node, end.node, start.offset, end.offset)
+      rects
+        .filter(item => item.left <= this.windowWidth && item.left >= 0)
+        .forEach((rect, index) => {
+          if (index === 0) {
+            mergeRects.left = rect.left - this.screenRelativeOffset.x
+            mergeRects.top = rect.top - this.screenRelativeOffset.y
+            mergeRects.right = rect.right - this.screenRelativeOffset.x
+            mergeRects.bottom = rect.bottom - this.screenRelativeOffset.y
+          } else if (index === rects.length - 1) {
+            mergeRects.bottom = rect.bottom - this.screenRelativeOffset.y
+          } else {
+            mergeRects.left = Math.min(rect.left - this.screenRelativeOffset.x, mergeRects.left)
+            // mergeRects.top = Math.min(rect.top - this.screenRelativeOffset.y, mergeRects.top)
+            mergeRects.right = Math.max(rect.right - this.screenRelativeOffset.x, mergeRects.right)
+            // mergeRects.bottom = Math.max(rect.bottom - this.screenRelativeOffset.y, mergeRects.bottom)
+          }
+        })
     }
-
 
     this.positionRange.top = mergeRects.top
     this.positionRange.bottom = mergeRects.bottom
@@ -251,7 +248,7 @@ export default class Menu extends BaseElement {
     if (this.positionRange.left + containerLeft + this.width / 2 > this.windowWidth) {
       let right
       if (this.style.position === 'fixed' && !this.option.isMultiColumnLayout) {
-        right = containerRight - this.positionRange.left - (this.width / 2)
+        right = containerRight - this.positionRange.left - this.width / 2
         right = containerLeft < 0 ? -this.width / 2 : right
       } else {
         right = containerRight - this.positionRange.left - containerLeft - this.width / 2
@@ -297,6 +294,13 @@ export default class Menu extends BaseElement {
       copyItem.handler.call(this.easyMarker, selection, Object.assign({}, this.options, { e }))
     }
   }
+
+  inRegion(e) {
+    const tapTarget = this.getTapTarget(e.target)
+    if (!this.itemMap.has(tapTarget)) return false
+    return true
+  }
+
   handleTap(e, options) {
     const tapTarget = this.getTapTarget(e.target)
     if (!this.itemMap.has(tapTarget)) return false
@@ -316,10 +320,7 @@ export default class Menu extends BaseElement {
     let selection
     if (this.mode === EasyMarkerMode.NODE) {
       const {
-        start,
-        end,
-        content,
-        markdown,
+        start, end, content, markdown,
       } = options
       selection = {
         anchorNode: start.node,
@@ -335,10 +336,7 @@ export default class Menu extends BaseElement {
       }
     } else {
       const {
-        start,
-        end,
-        content,
-        markdown,
+        start, end, content, markdown,
       } = options
       selection = {
         start,
@@ -355,8 +353,9 @@ export default class Menu extends BaseElement {
   }
 
   getTapTarget(target) {
-    if (this.itemMap.has(target)
-    // || (target.classList && target.classList.contains('em-menu'))
+    if (
+      this.itemMap.has(target)
+      // || (target.classList && target.classList.contains('em-menu'))
     ) {
       return target
     }
