@@ -206,6 +206,15 @@ class NodeEasyMarker extends BaseEasyMarker {
   handleTouchStart(e) {
     super.handleTouchStart(e)
     if (this.deviceType === DeviceType.PC) {
+      if (this.selectStatus === SelectStatus.FINISH) {
+        const isMenuClick = this.menu.inRegion(e)
+        const position = this.getTouchRelativePosition(e)
+        const startCursorRegion = this.cursor.start.inRegion(position)
+        const endCursorRegion = this.cursor.end.inRegion(position)
+        if (!isMenuClick && !startCursorRegion.inRegion && !endCursorRegion.inRegion) {
+          this.reset()
+        }
+      }
       if (this.selectStatus === SelectStatus.NONE && this.isContains(e.target)) {
         this.touchStartTime = Date.now()
         const { x, y } = getTouchPosition(e)

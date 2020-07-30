@@ -276,22 +276,23 @@ export default class Region {
    * @param {object} point
    * @param {number} point.x
    * @param {number} point.y
+   * @param {boolean} is the boundary strict
    * @returns {(Region | null)}
    */
-  getRegionByPoint(point) {
+  getRegionByPoint(point, isLoose = false) {
     const pointPosition = {
       top: point.y,
       left: point.x,
     }
     if (this.regions.length <= 0) return null
-    const pageRegions = BSearchUpperBound(this.regions, pointPosition, 'left')
+    const pageRegions = BSearchUpperBound(this.regions, pointPosition, 'left', isLoose)
     if (pageRegions === -1) return null
     const lineRectRegionList = this.regions[pageRegions].regions
-    const lineRegions = BSearchUpperBound(lineRectRegionList, pointPosition, 'top')
+    const lineRegions = BSearchUpperBound(lineRectRegionList, pointPosition, 'top', isLoose)
     if (lineRegions === -1) return null
 
     const touchLine = lineRectRegionList[lineRegions]
-    const regionIndex = BSearchUpperBound(touchLine.regions, pointPosition, 'left')
+    const regionIndex = BSearchUpperBound(touchLine.regions, pointPosition, 'left', isLoose)
     if (regionIndex === -1) return null
     return touchLine.regions[regionIndex]
   }

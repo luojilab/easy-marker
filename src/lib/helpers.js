@@ -139,9 +139,7 @@ export function getClickPosition(pElement, x, y, isStart) {
             return position
           }
 
-          if (
-            isLineEnd
-          ) {
+          if (isLineEnd) {
             if (!isStart) {
               position.x += rect.width
               position.index += 1
@@ -177,8 +175,8 @@ export function getClickPosition(pElement, x, y, isStart) {
 export function getTouchPosition(e, offset = { x: 0, y: 0 }) {
   const touch = getTouch(e)
   return {
-    x: (touch.clientX) + offset.x,
-    y: (touch.clientY) + offset.y,
+    x: touch.clientX + offset.x,
+    y: touch.clientY + offset.y,
   }
 }
 
@@ -384,10 +382,7 @@ export function getDeviceType() {
   if (typeof navigator !== 'undefined' && navigator.userAgent) {
     const ua = navigator.userAgent
     if (ua.indexOf('Tablet') > -1 || ua.indexOf('Pad') > -1 || ua.indexOf('Nexus 7') > -1) return DeviceType.MOBILE
-    if (ua.indexOf('Mobi') > -1
-    || ua.indexOf('Android') > -1
-    || ua.indexOf('iPh') > -1
-    || ua.indexOf('FLOW') > -1) return DeviceType.MOBILE
+    if (ua.indexOf('Mobi') > -1 || ua.indexOf('Android') > -1 || ua.indexOf('iPh') > -1 || ua.indexOf('FLOW') > -1) { return DeviceType.MOBILE }
     return DeviceType.PC
   }
   return DeviceType.MOBILE
@@ -415,17 +410,18 @@ export function getTouch(e) {
  * @param {array} array
  * @param {object | string} target
  * @param {string} target key
+ * @param {boolean} is the boundary strict
  * @returns {number} index
  */
-export function BSearchUpperBound(arr, target, key) {
+export function BSearchUpperBound(arr, target, key, isLoose = false) {
   let start = 0
   let end = arr.length - 1
   let mid = Math.floor((start + end) / 2)
-  const targetValue = (key ? target[key] : target)
+  const targetValue = key ? target[key] : target
   if (targetValue >= (key ? arr[end][key] : arr[end])) {
     return end
   } else if (targetValue < (key ? arr[start][key] : arr[start])) {
-    return -1
+    return isLoose ? start : -1
   }
   while (start <= end) {
     if (start === mid || end === mid) {
@@ -442,15 +438,15 @@ export function BSearchUpperBound(arr, target, key) {
 }
 
 /**
-   * rect => Point[]
-   *
-   * @static
-   * @param {ClientRect} rect
-   * @param {Object} offset
-   * @param {number} offset.x
-   * @param {number} offset.y
-   * @memberof Highlight
-   */
+ * rect => Point[]
+ *
+ * @static
+ * @param {ClientRect} rect
+ * @param {Object} offset
+ * @param {number} offset.x
+ * @param {number} offset.y
+ * @memberof Highlight
+ */
 export function rectToPointArray(rect, offset, margin) {
   const points = []
   if (rect.width === 0) return points
