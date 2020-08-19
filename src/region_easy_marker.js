@@ -297,13 +297,13 @@ class RegionEasyMarker extends BaseEasyMarker {
     this.touchStartTime = 0
   }
 
-  adjustTextStyle() {
-    const { children } = this.container
-    for (let i = 0; i < children.length; i++) {
-      children[i].style.zIndex = '5'
-      // children[i].style.position = 'relative'
-    }
-  }
+  // adjustTextStyle() {
+  //   const { children } = this.container
+  //   for (let i = 0; i < children.length; i++) {
+  //     children[i].style.zIndex = '50'
+  //     // children[i].style.position = 'relative'
+  //   }
+  // }
 
   static getSelectMarkdown() {
     return 'Markdown is not supported in current mode.'

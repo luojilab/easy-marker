@@ -225,7 +225,8 @@ export default class Highlight extends BaseElement {
 
   createElement() {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-    svg.style.zIndex = '1'
+    svg.style.zIndex = '10'
+    svg.style.pointerEvents = 'none'
     svg.style.width = '100%'
     svg.style.height = '100%'
     svg.style.position = 'absolute'
