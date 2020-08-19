@@ -55,8 +55,7 @@ export default class Mask extends BaseElement {
       return this.position.header.y
     }
     if (this.rects[0]) {
-      return this.mode === EasyMarkerMode.NODE ?
-        this.rects[0].top - this.screenRelativeOffset.y : this.rects[0].top
+      return this.mode === EasyMarkerMode.NODE ? this.rects[0].top - this.screenRelativeOffset.y : this.rects[0].top
     }
     return 0
   }
@@ -66,8 +65,7 @@ export default class Mask extends BaseElement {
       return this.position.header.x
     }
     if (this.rects[0]) {
-      return this.mode === EasyMarkerMode.NODE ?
-        this.rects[0].left - this.screenRelativeOffset.x : this.rects[0].left
+      return this.mode === EasyMarkerMode.NODE ? this.rects[0].left - this.screenRelativeOffset.x : this.rects[0].left
     }
     return 0
   }
@@ -85,7 +83,8 @@ export default class Mask extends BaseElement {
 
   createElement() {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-    svg.style.zIndex = 2
+    svg.style.zIndex = '20'
+    svg.style.pointerEvents = 'none'
     svg.style.width = '100%'
     svg.style.height = '100%'
     svg.style.position = 'absolute'
@@ -111,12 +110,7 @@ export default class Mask extends BaseElement {
       if (this.maskType === 'line') {
         let rects
         try {
-          ({ rects } = TextNode.getSelectNodeRectAndText(
-            start.node,
-            end.node,
-            start.offset,
-            end.offset
-          ))
+          ({ rects } = TextNode.getSelectNodeRectAndText(start.node, end.node, start.offset, end.offset))
         } catch (error) {
           console.error('EasyMarkerError:', error) // eslint-disable-line no-console
           rects = []
@@ -124,22 +118,10 @@ export default class Mask extends BaseElement {
         const lineHeight = Number(window.getComputedStyle(start.node.parentElement).lineHeight.replace('px', ''))
         this.renderRectsLine(rects, lineHeight)
       } else {
-        const { header, body, footer } = TextNode.getSelectRects(
-          start,
-          end,
-        )
-        const relativeHeader = screenRelativeToContainerRelative(
-          header,
-          this.screenRelativeOffset,
-        )
-        const relativeBody = screenRelativeToContainerRelative(
-          body,
-          this.screenRelativeOffset,
-        )
-        const relativeFooter = screenRelativeToContainerRelative(
-          footer,
-          this.screenRelativeOffset,
-        )
+        const { header, body, footer } = TextNode.getSelectRects(start, end)
+        const relativeHeader = screenRelativeToContainerRelative(header, this.screenRelativeOffset)
+        const relativeBody = screenRelativeToContainerRelative(body, this.screenRelativeOffset)
+        const relativeFooter = screenRelativeToContainerRelative(footer, this.screenRelativeOffset)
         this.renderBlock(relativeHeader, relativeBody, relativeFooter)
       }
     }
