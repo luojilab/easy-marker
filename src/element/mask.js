@@ -42,12 +42,22 @@ export default class Mask extends BaseElement {
     this.mount()
   }
 
+  // get screenRelativeOffset() {
+  //   const { top, left } = this.container.getBoundingClientRect()
+  //   return {
+  //     x: left,
+  //     y: top,
+  //   }
+  // }
+
   get screenRelativeOffset() {
-    const { top, left } = this.container.getBoundingClientRect()
-    return {
-      x: left,
-      y: top,
+    if (!this.easyMarker) {
+      return {
+        x: 0,
+        y: 0,
+      }
     }
+    return this.easyMarker.screenRelativeOffset
   }
 
   get top() {

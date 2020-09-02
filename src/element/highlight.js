@@ -38,6 +38,15 @@ export default class Highlight extends BaseElement {
     this.easyMarker = null
   }
 
+  get screenRelativeOffset() {
+    if (!this.easyMarker) {
+      return {
+        x: 0,
+        y: 0,
+      }
+    }
+    return this.easyMarker.screenRelativeOffset
+  }
   getID() {
     return this.id++
   }
@@ -48,12 +57,9 @@ export default class Highlight extends BaseElement {
    * @param {Selection} selection
    * @param {any} id
    * @param {any} meta
-   * @param {Object} offset
-   * @param {number} offset.x
-   * @param {number} offset.y
    * @memberof Highlight
    */
-  highlight(selection, id, meta = {}, offset) {
+  highlight(selection, id, meta = {}) {
     const lineID = id === undefined || id === null ? this.getID() : id
     let points
     let selectionContent
@@ -78,6 +84,7 @@ export default class Highlight extends BaseElement {
         text = ''
       }
 
+      const offset = this.screenRelativeOffset
 
       points = rects.map((rect) => {
         const relativeRect = {
@@ -189,9 +196,9 @@ export default class Highlight extends BaseElement {
    * @param {any} [lines[].meta]
    * @memberof Highlight
    */
-  highlightLines(lines, offset) {
+  highlightLines(lines) {
     this.lineMap.clear()
-    const ids = lines.map(({ selection, id, meta }) => this.highlight(selection, id, meta, offset))
+    const ids = lines.map(({ selection, id, meta }) => this.highlight(selection, id, meta))
     this.render()
     return ids
   }
@@ -202,11 +209,10 @@ export default class Highlight extends BaseElement {
    * @param {Selection} selection
    * @param {*} id
    * @param {*} meta
-   * @param {Object} offset
    * @memberof Highlight
    */
-  highlightLine(selection, id, meta, offset) {
-    const lineID = this.highlight(selection, id, meta, offset)
+  highlightLine(selection, id, meta) {
+    const lineID = this.highlight(selection, id, meta)
     this.render()
     return lineID
   }

@@ -427,7 +427,7 @@ class EasyMarker {
    * @memberof EasyMarker
    */
   highlightLine(selection, id, meta) {
-    this.highlight.highlightLine(selection, id, meta, this.screenRelativeOffset)
+    this.highlight.highlightLine(selection, id, meta)
   }
 
   /**
@@ -453,7 +453,7 @@ class EasyMarker {
    * @memberof EasyMarker
    */
   highlightLines(lines) {
-    this.highlight.highlightLines(lines, this.screenRelativeOffset)
+    this.highlight.highlightLines(lines)
   }
 
   /**
