@@ -80,11 +80,18 @@ export default class Menu extends BaseElement {
   }
 
   get screenRelativeOffset() {
-    const { top, left } = this.container.getBoundingClientRect()
-    return {
-      x: left,
-      y: top,
+    // const { top, left } = this.container.getBoundingClientRect()
+    // return {
+    //   x: left,
+    //   y: top,
+    // }
+    if (!this.easyMarker) {
+      return {
+        x: 0,
+        y: 0,
+      }
     }
+    return this.easyMarker.screenRelativeOffset
   }
 
   createElement() {
