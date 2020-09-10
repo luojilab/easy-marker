@@ -283,7 +283,7 @@ export default class Highlight extends BaseElement {
     })
     if (clickLine && this.easyMarker) {
       if (this.easyMarker.highlightLineClick) {
-        this.easyMarker.highlightLineClick(clickLine.id, clickLine.line.meta, clickLine.line.selection)
+        this.easyMarker.highlightLineClick(clickLine.id, clickLine.line.meta, clickLine.line.selection, e)
       } else {
         this.easyMarker.showHighlightMenu(clickLine.line.selection, { id: clickLine.id, meta: clickLine.line.meta })
       }
