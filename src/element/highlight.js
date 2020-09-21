@@ -16,6 +16,7 @@ export default class Highlight extends BaseElement {
     const defaultOptions = {
       highlightColor: '#FEFFCA',
       underlineColor: '#af8978',
+      underlineWidth: 1,
       tagBackground: '#af8978',
       tagColor: '#fff',
       opacity: 1,
@@ -249,6 +250,7 @@ export default class Highlight extends BaseElement {
     const y2 = pointList[3][1] + 1
     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
     line.style.stroke = this.option.underlineColor
+    line.style.strokeWidth = this.option.underlineWidth
     line.setAttribute('x1', x1)
     line.setAttribute('y1', y1)
     line.setAttribute('x2', x2)
