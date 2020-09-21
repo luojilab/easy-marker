@@ -100,7 +100,7 @@ export default class Menu extends BaseElement {
     wrapper.style.width = 'max-content'
     wrapper.style.textAlign = 'center'
     wrapper.style.lineHeight = '0'
-    wrapper.style.zIndex = '30'
+    wrapper.style.zIndex = '50'
     wrapper.style.transform = 'translate3d(-50%, -100%, 0)'
     wrapper.style.webkitTransform = 'translate3d(-50%, -100%, 0)'
     wrapper.style.transition = 'transform 0.2s ease, opacity 0.2s ease'
