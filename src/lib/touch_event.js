@@ -47,13 +47,13 @@ export default class TouchEvent {
     this.startEventName = getDeviceType() === DeviceType.MOBILE ? 'touchstart' : 'mousedown'
     this.moveEventName = getDeviceType() === DeviceType.MOBILE ? 'touchmove' : 'mousemove'
     this.endEventName = getDeviceType() === DeviceType.MOBILE ? 'touchend' : 'mouseup'
-    // this.cancelEventName = getDeviceType() === DeviceType.MOBILE ? 'touchcancel' : 'mouseup'
+    this.cancelEventName = getDeviceType() === DeviceType.MOBILE ? 'touchcancel' : 'mouseleave'
     this.element.addEventListener(this.startEventName, this.onTouchStart)
     this.element.addEventListener(this.moveEventName, this.onTouchMove, {
       passive: false,
     })
     this.element.addEventListener(this.endEventName, this.onTouchEnd)
-    // this.element.addEventListener(this.cancelEventName, this.onTouchEnd)
+    this.element.addEventListener(this.cancelEventName, this.onTouchEnd)
   }
 
   disable() {
@@ -179,6 +179,7 @@ export default class TouchEvent {
     this.element.removeEventListener(this.startEventName, this.onTouchStart)
     this.element.removeEventListener(this.moveEventName, this.onTouchMove)
     this.element.removeEventListener(this.endEventName, this.onTouchEnd)
+    this.element.removeEventListener(this.cancelEventName, this.onTouchEnd)
   }
 
   static createMouseEvent(type, e) {

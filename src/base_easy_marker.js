@@ -19,6 +19,7 @@ const defaultOptions = {
   },
   scrollOffsetBottom: 100,
   scrollSpeedLevel: 4,
+  adjustTextStyleDisabled: false,
 }
 
 const preventDefaultCb = e => e.preventDefault()
@@ -312,7 +313,7 @@ class EasyMarker {
    */
   create(containerElement, scrollContainerElement, options = []) {
     this.container = containerElement
-    // this.adjustTextStyle()
+    this.adjustTextStyle()
     // eslint-disable-next-line arrow-parens
     this.container.oncontextmenu = event => {
       event.returnValue = false
@@ -584,13 +585,14 @@ class EasyMarker {
    * @private
    * @memberof EasyMarker
    */
-  // adjustTextStyle() {
-  //   const { children } = this.container
-  //   for (let i = 0; i < children.length; i++) {
-  //     children[i].style.zIndex = '50'
-  //     children[i].style.position = 'relative'
-  //   }
-  // }
+  adjustTextStyle() {
+    if (this.options.adjustTextStyleDisabled) return
+    const { children } = this.container
+    for (let i = 0; i < children.length; i++) {
+      children[i].style.zIndex = '40'
+      children[i].style.position = 'relative'
+    }
+  }
 
   /**
    *
