@@ -1,4 +1,4 @@
-import { getNodeRects, copyRect } from './helpers'
+import { getNodeRects, copyRect, isExclude } from './helpers'
 import Position from './position'
 
 /**
@@ -21,13 +21,14 @@ export default class TextNode {
    * @param {any} endTextNode
    * @memberof TextNode
    */
-  static getSelectText(startTextNode, endTextNode) {
+  static getSelectText(startTextNode, endTextNode, excludeElements) {
     try {
       const { text } = this.getSelectNodeRectAndText(
         startTextNode.node,
         endTextNode.node,
         startTextNode.offset,
-        endTextNode.offset
+        endTextNode.offset,
+        excludeElements
       )
       return text
     } catch (error) {
@@ -45,7 +46,7 @@ export default class TextNode {
    * @returns
    * @memberof TextNode
    */
-  static getSelectRects(startTextNode, endTextNode) {
+  static getSelectRects(startTextNode, endTextNode, excludeElements) {
     const headerLine = new Position()
     const bodyLine = new Position()
     const footerLine = new Position()
@@ -76,7 +77,8 @@ export default class TextNode {
         startTextNode.node,
         endTextNode.node,
         startTextNode.offset,
-        endTextNode.offset
+        endTextNode.offset,
+        excludeElements
       ))
     } catch (error) {
       console.error('EasyMarkerError:', error) // eslint-disable-line no-console
@@ -88,15 +90,16 @@ export default class TextNode {
       if (lineMergedRects.length > 0) {
         const lastLineMergedRect = lineMergedRects[lineMergedRects.length - 1]
         const safetyBoundary = lastLineMergedRect.height / 2
-        if (Math.abs(lastLineMergedRect.top - rect.top) < safetyBoundary
-        && Math.abs(lastLineMergedRect.bottom - rect.bottom) < safetyBoundary) {
+        if (
+          Math.abs(lastLineMergedRect.top - rect.top) < safetyBoundary &&
+          Math.abs(lastLineMergedRect.bottom - rect.bottom) < safetyBoundary
+        ) {
           lastLineMergedRect.width += rect.width
-          lastLineMergedRect.height = lastLineMergedRect.height - rect.height > 0
-            ? lastLineMergedRect.height : rect.height
-          lastLineMergedRect.top = lastLineMergedRect.top - rect.top < 0
-            ? lastLineMergedRect.top : rect.top
-          lastLineMergedRect.bottom = lastLineMergedRect.bottom - rect.bottom > 0
-            ? lastLineMergedRect.bottom : rect.bottom
+          lastLineMergedRect.height =
+            lastLineMergedRect.height - rect.height > 0 ? lastLineMergedRect.height : rect.height
+          lastLineMergedRect.top = lastLineMergedRect.top - rect.top < 0 ? lastLineMergedRect.top : rect.top
+          lastLineMergedRect.bottom =
+            lastLineMergedRect.bottom - rect.bottom > 0 ? lastLineMergedRect.bottom : rect.bottom
         } else {
           lineMergedRects.push(copyRect(rect))
         }
@@ -182,27 +185,28 @@ export default class TextNode {
     }
   }
 
-  static getSelectNodeRectAndText(startNode, endNode, startIndex, endIndex) {
+  static getSelectNodeRectAndText(startNode, endNode, startIndex, endIndex, excludeElements) {
     const result = {
       rects: [],
       text: '',
     }
     if (startNode.childNodes.length > 0 && startNode.nodeName !== 'SCRIPT' && startNode.nodeName !== 'STYLE') {
       const childNode = startNode.childNodes[0]
-      const { text, rects } = this.getSelectNodeRectAndText(childNode, endNode, 0, endIndex)
+      const { text, rects } = this.getSelectNodeRectAndText(childNode, endNode, 0, endIndex, excludeElements)
       result.rects.push(...rects)
       result.text += text
       return result
     }
+    if (!isExclude(excludeElements, startNode)) {
+      if (startNode.nodeName === '#text') {
+        const textEndIndex = startNode === endNode ? endIndex : startNode.textContent.length
+        result.rects.push(...getNodeRects(startNode, startIndex, textEndIndex))
+        result.text += startNode.textContent.substring(startIndex, textEndIndex)
+      }
 
-    if (startNode.nodeName === '#text') {
-      const textEndIndex = startNode === endNode ? endIndex : startNode.textContent.length
-      result.rects.push(...getNodeRects(startNode, startIndex, textEndIndex))
-      result.text += startNode.textContent.substring(startIndex, textEndIndex)
-    }
-
-    if (startNode.nodeName === 'IMG') {
-      result.rects.push(startNode.getBoundingClientRect())
+      if (startNode.nodeName === 'IMG') {
+        result.rects.push(startNode.getBoundingClientRect())
+      }
     }
 
     if (startNode === endNode) {
@@ -211,7 +215,7 @@ export default class TextNode {
 
     const nextNode = startNode.nextSibling
     if (nextNode) {
-      const { text, rects } = this.getSelectNodeRectAndText(nextNode, endNode, 0, endIndex)
+      const { text, rects } = this.getSelectNodeRectAndText(nextNode, endNode, 0, endIndex, excludeElements)
       result.rects.push(...rects)
       result.text += text
     } else {
@@ -220,7 +224,13 @@ export default class TextNode {
         currentNode = currentNode.parentNode
       }
       if (currentNode) {
-        const { text, rects } = this.getSelectNodeRectAndText(currentNode.nextSibling, endNode, 0, endIndex)
+        const { text, rects } = this.getSelectNodeRectAndText(
+          currentNode.nextSibling,
+          endNode,
+          0,
+          endIndex,
+          excludeElements
+        )
         result.rects.push(...rects)
         result.text += text
       } else {

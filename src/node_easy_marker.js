@@ -35,19 +35,22 @@ class NodeEasyMarker extends BaseEasyMarker {
    */
   getSelectText() {
     const text =
-      TextNode.getSelectText(this.textNode.start, this.textNode.end) || ''
-    return matchSubString(this.container.innerText, text) || text
+      TextNode.getSelectText(this.textNode.start, this.textNode.end, this.excludeElements) || ''
+    return matchSubString(this.container.innerText, text) || text.replace(/\s+/g, '\n')
   }
 
-  getSelectMarkdown() {
-    return (
-      this.markdown.getSelectMarkdown(
-        this.textNode.start.node,
-        this.textNode.end.node,
-        this.textNode.start.offset,
-        this.textNode.end.offset,
-      ).markdown || ''
-    )
+  static getSelectMarkdown() {
+    // TODO: 临时关掉 getMarkdown 方法 稍后处理
+    return 'Markdown is not supported in current mode.'
+    // return (
+    //   this.markdown.getSelectMarkdown(
+    //     this.textNode.start.node,
+    //     this.textNode.end.node,
+    //     this.textNode.start.offset,
+    //     this.textNode.end.offset,
+    //     this.excludeElements
+    //   ).markdown || ''
+    // )
   }
 
   /**
@@ -286,7 +289,7 @@ class NodeEasyMarker extends BaseEasyMarker {
         start: this.textNode.start,
         end: this.textNode.end,
         content: this.getSelectText(),
-        markdown: this.getSelectMarkdown(),
+        markdown: NodeEasyMarker.getSelectMarkdown(),
       }, e)
       this.reset()
     }
@@ -305,7 +308,7 @@ class NodeEasyMarker extends BaseEasyMarker {
         start: this.textNode.start,
         end: this.textNode.end,
         content: this.getSelectText(),
-        markdown: this.getSelectMarkdown(),
+        markdown: NodeEasyMarker.getSelectMarkdown(),
       })
       const position = this.getTouchRelativePosition(e)
       const startCursorRegion = this.cursor.start.inRegion(position)

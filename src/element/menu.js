@@ -184,7 +184,13 @@ export default class Menu extends BaseElement {
         }
       })
     } else {
-      const { rects } = TextNode.getSelectNodeRectAndText(start.node, end.node, start.offset, end.offset)
+      const { rects } = TextNode.getSelectNodeRectAndText(
+        start.node,
+        end.node,
+        start.offset,
+        end.offset,
+        this.easyMarker.excludeElements
+      )
       rects
         .filter(item => item.left <= this.windowWidth && item.left >= 0)
         .forEach((rect, index) => {

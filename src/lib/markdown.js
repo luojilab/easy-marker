@@ -1,4 +1,4 @@
-import { domCollectionToArray } from './helpers'
+import { domCollectionToArray, isExclude } from './helpers'
 
 const defaultOptions = Object.freeze({
   H1: text => `\n# ${text}\n\n`,
@@ -30,12 +30,16 @@ const defaultOptions = Object.freeze({
   },
   LI: (text, option) => {
     let spaceString = ''
-    for (let i = 1; i < option.itemLevel; i++) { spaceString += '    ' }
+    for (let i = 1; i < option.itemLevel; i++) {
+      spaceString += '    '
+    }
     let endString = '\n'
     if (option.hasChild || option.isLastOne) {
       endString = ''
     }
-    if (option.type === 'UL') { return `${spaceString}- ${text}${endString}` }
+    if (option.type === 'UL') {
+      return `${spaceString}- ${text}${endString}`
+    }
     return `${spaceString}${option.index}. ${text}${endString}`
   },
 })
@@ -62,7 +66,7 @@ export default class Markdown {
    * @param {number} endIndex
    * @param {Stack} markdownStack
    */
-  getSelectMarkdown(startNode, endNode, startIndex, endIndex, markdownStack) {
+  getSelectMarkdown(startNode, endNode, startIndex, endIndex, excludeElements, markdownStack) {
     const result = {
       markdown: '',
     }
@@ -70,63 +74,69 @@ export default class Markdown {
     if (markdownStack === undefined) markdownStack = []
     if (startNode.childNodes.length > 0 && startNode.nodeName !== 'SCRIPT' && startNode.nodeName !== 'STYLE') {
       const childNode = startNode.childNodes[0]
-      const { markdown } = this.getSelectMarkdown(childNode, endNode, 0, endIndex, markdownStack)
+      const { markdown } = this.getSelectMarkdown(childNode, endNode, 0, endIndex, excludeElements, markdownStack)
       result.markdown = markdown
       return result
     }
-
-    if (startNode.nodeName === '#text') {
-      let node = startNode
-      const tempMarkdownStack = []
-      const textEndIndex = startNode === endNode ? endIndex : startNode.textContent.length
-      const currentText = startNode.textContent.substring(startIndex, textEndIndex).replace(/(^\s*)|(\s*$)/g, '')
-      if (markdownStack.length !== 0 && node.parentNode === markdownStack[markdownStack.length - 1].node) {
-        popText = currentText
-      }
-      let isContainer = false
-      while (!isContainer
-        && (markdownStack.length === 0 || node.parentNode !== markdownStack[markdownStack.length - 1].node)) {
-        if (node === this.container) isContainer = true
-        let text = ''
-        if (node.nodeName === '#text') {
-          text = currentText
+    if (!isExclude(excludeElements, startNode)) {
+      if (startNode.nodeName === '#text') {
+        let node = startNode
+        const tempMarkdownStack = []
+        const textEndIndex = startNode === endNode ? endIndex : startNode.textContent.length
+        const currentText = startNode.textContent.substring(startIndex, textEndIndex).replace(/(^\s*)|(\s*$)/g, '')
+        if (markdownStack.length !== 0 && node.parentNode === markdownStack[markdownStack.length - 1].node) {
+          popText = currentText
         }
-        node = node.parentNode
-        tempMarkdownStack.push({
-          node,
-          text,
-        })
+        let isContainer = false
+        while (
+          !isContainer &&
+          (markdownStack.length === 0 || node.parentNode !== markdownStack[markdownStack.length - 1].node)
+        ) {
+          if (node === this.container) isContainer = true
+          let text = ''
+          if (node.nodeName === '#text') {
+            text = currentText
+          }
+          node = node.parentNode
+          tempMarkdownStack.push({
+            node,
+            text,
+          })
+        }
+        while (tempMarkdownStack.length !== 0) {
+          markdownStack.push(tempMarkdownStack.pop())
+        }
       }
-      while (tempMarkdownStack.length !== 0) {
-        markdownStack.push(tempMarkdownStack.pop())
+
+      if (startNode.nodeName === 'IMG') {
+        if (markdownStack.length > 0) {
+          markdownStack[markdownStack.length - 1].text += this.wrapMarkdown(startNode, this.options)
+        } else {
+          result.markdown += this.wrapMarkdown(startNode, this.options)
+        }
       }
     }
-
-    if (startNode.nodeName === 'IMG') {
-      if (markdownStack.length > 0) {
-        markdownStack[markdownStack.length - 1].text += this.wrapMarkdown(startNode, this.options)
-      } else {
-        result.markdown += this.wrapMarkdown(startNode, this.options)
-      }
-    }
-
     if (startNode === endNode) {
       if (markdownStack.length !== 0) {
         const popMarkdown = markdownStack.pop()
         popMarkdown.text += popText
         result.markdown = this.wrapMarkdown(popMarkdown.node, this.options, popMarkdown.text)
-        if (markdownStack.length !== 0) { markdownStack[markdownStack.length - 1].text += result.markdown }
+        if (markdownStack.length !== 0) {
+          markdownStack[markdownStack.length - 1].text += result.markdown
+        }
       }
       while (markdownStack.length !== 0) {
         const popMarkdown = markdownStack.pop()
         result.markdown = this.wrapMarkdown(popMarkdown.node, this.options, popMarkdown.text)
-        if (markdownStack.length !== 0) { markdownStack[markdownStack.length - 1].text += result.markdown }
+        if (markdownStack.length !== 0) {
+          markdownStack[markdownStack.length - 1].text += result.markdown
+        }
       }
       return result
     }
     const nextNode = startNode.nextSibling
     if (nextNode) {
-      const { markdown } = this.getSelectMarkdown(nextNode, endNode, 0, endIndex, markdownStack)
+      const { markdown } = this.getSelectMarkdown(nextNode, endNode, 0, endIndex, excludeElements, markdownStack)
       if (markdownStack.length > 0) {
         markdownStack[markdownStack.length - 1].text += markdown
       } else {
@@ -137,16 +147,27 @@ export default class Markdown {
       let popMarkdown = markdownStack.pop()
       popMarkdown.text += popText
       result.markdown += this.wrapMarkdown(popMarkdown.node, this.options, popMarkdown.text)
-      if (markdownStack.length !== 0) { markdownStack[markdownStack.length - 1].text += result.markdown }
+      if (markdownStack.length !== 0) {
+        markdownStack[markdownStack.length - 1].text += result.markdown
+      }
       while (currentNode && currentNode.nextSibling === null) {
         currentNode = currentNode.parentNode
         popMarkdown = markdownStack.pop()
         popMarkdown.text += popText
         result.markdown = this.wrapMarkdown(popMarkdown.node, this.options, popMarkdown.text)
-        if (markdownStack.length !== 0) { markdownStack[markdownStack.length - 1].text += result.markdown }
+        if (markdownStack.length !== 0) {
+          markdownStack[markdownStack.length - 1].text += result.markdown
+        }
       }
       if (currentNode) {
-        const { markdown } = this.getSelectMarkdown(currentNode.nextSibling, endNode, 0, endIndex, markdownStack)
+        const { markdown } = this.getSelectMarkdown(
+          currentNode.nextSibling,
+          endNode,
+          0,
+          endIndex,
+          excludeElements,
+          markdownStack
+        )
         if (markdownStack.length !== 0) {
           markdownStack[markdownStack.length - 1].text += markdown
         } else {
@@ -176,8 +197,9 @@ export default class Markdown {
         if (tempNode.nodeName === node.parentNode.nodeName) itemLevel++
       }
       let hasChild = false
-      if (domCollectionToArray(node.childNodes)
-        .some(childNode => childNode.nodeName === 'UL' || childNode.nodeName === 'OL')) {
+      if (
+        domCollectionToArray(node.childNodes).some(childNode => childNode.nodeName === 'UL' || childNode.nodeName === 'OL')
+      ) {
         hasChild = true
       }
       let isLastOne = false

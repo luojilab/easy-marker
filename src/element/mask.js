@@ -120,7 +120,13 @@ export default class Mask extends BaseElement {
       if (this.maskType === 'line') {
         let rects
         try {
-          ({ rects } = TextNode.getSelectNodeRectAndText(start.node, end.node, start.offset, end.offset))
+          ({ rects } = TextNode.getSelectNodeRectAndText(
+            start.node,
+            end.node,
+            start.offset,
+            end.offset,
+            this.easyMarker.excludeElements
+          ))
         } catch (error) {
           console.error('EasyMarkerError:', error) // eslint-disable-line no-console
           rects = []

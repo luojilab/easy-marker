@@ -77,7 +77,8 @@ export default class Highlight extends BaseElement {
           startTextNode.node,
           endTextNode.node,
           startTextNode.offset,
-          endTextNode.offset
+          endTextNode.offset,
+          this.easyMarker.excludeElements
         ))
       } catch (error) {
         console.error('EasyMarkerError:', error) // eslint-disable-line no-console
@@ -101,26 +102,31 @@ export default class Highlight extends BaseElement {
         const margin = this.option.margin || (lineHeight - rect.height) / 4
         return rectToPointArray(rect, offset, margin)
       })
-      let markdown
-      if (this.easyMarker && this.easyMarker.markdown) {
-        ({ markdown } = this.easyMarker.markdown.getSelectMarkdown(
-          startTextNode.node,
-          endTextNode.node,
-          startTextNode.offset,
-          endTextNode.offset
-        ))
-      } else {
-        markdown = ''
-      }
+      const markdown = ''
+      // TODO: 临时关掉 getMarkdown 方法 稍后处理
+      // if (this.easyMarker && this.easyMarker.markdown) {
+      //   ({ markdown } = this.easyMarker.markdown.getSelectMarkdown(
+      //     startTextNode.node,
+      //     endTextNode.node,
+      //     startTextNode.offset,
+      //     endTextNode.offset,
+      //     this.easyMarker.excludeElements
+      //   ))
+      // } else {
+      //   markdown = ''
+      // }
 
-      selectionContent = Object.assign({
-        toString() {
-          return text
+      selectionContent = Object.assign(
+        {
+          toString() {
+            return text
+          },
+          toMarkdown() {
+            return markdown
+          },
         },
-        toMarkdown() {
-          return markdown
-        },
-      }, selection)
+        selection
+      )
     } else {
       const { start, end } = selection
       relativeRects = this.easyMarker && this.easyMarker.region.getRects(start, end)
@@ -130,18 +136,25 @@ export default class Highlight extends BaseElement {
         const margin = 0
         return rectToPointArray(rect, { x: 0, y: 0 }, margin)
       })
-      selectionContent = Object.assign({
-        toString() {
-          return text
+      selectionContent = Object.assign(
+        {
+          toString() {
+            return text
+          },
+          toMarkdown() {
+            return markdown
+          },
         },
-        toMarkdown() {
-          return markdown
-        },
-      }, selection)
+        selection
+      )
     }
 
     this.lineMap.set(lineID, {
-      selection: selectionContent, points, relativeRects, meta, lineHeight,
+      selection: selectionContent,
+      points,
+      relativeRects,
+      meta,
+      lineHeight,
     })
     return lineID
   }
@@ -320,4 +333,3 @@ export default class Highlight extends BaseElement {
     }
   }
 }
-
