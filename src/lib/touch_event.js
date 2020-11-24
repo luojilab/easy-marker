@@ -141,7 +141,7 @@ export default class TouchEvent {
   onTouchEnd(e) {
     if (this.disabled) return
     if (e.touches && e.touches.length > 1) return
-    if (!this.hook('touchmove', e)) return
+    if (!this.hook('touchend', e)) return
 
     this.touchEndCallbacks.forEach(callback => callback(e))
 
