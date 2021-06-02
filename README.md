@@ -46,39 +46,41 @@ easyMarker.create(container);
 
 Creates an instance of EasyMarker.
 
-| Param                         | Type                                       | Description                                                                                        |
-| ----------------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------- |
-| options                       | <code>Object</code>                        | options                                                                                            |
-| options.menuItems             | <code>Array.&lt;Object&gt;</code>          | menu item option                                                                                   |
-| options.menuItems[].text      | <code>string</code>                        | menu text                                                                                          |
-| options.menuItems[].type      | <code>string</code>                        | menu type 'select'(Show menu only when selected) 'highlight' (Show menu only when click highlight) |
-| options.menuItems[].iconName  | <code>Array.&lt;string&gt;</code>          | menu icon class                                                                                    |
-| options.menuItems[].style     | <code>Object</code>                        | menu item style                                                                                    |
-| options.menuItems[].iconStyle | <code>Object</code>                        | menu item icon style                                                                               |
-| options.menuTopOffset         | <code>number</code> \| <code>string</code> | the offset from the top of the menu relative screen, default 0.                                    |
-| options.menuStyle             | <code>Object</code>                        | the menu style                                                                                     |
-| options.menuStyle.menu        | <code>Object</code>                        | the menu style                                                                                     |
-| options.menuStyle.triangle    | <code>Object</code>                        | the triangle style                                                                                 |
-| options.menuStyle.item        | <code>Object</code>                        | the sub menu style                                                                                 |
-| options.menuStyle.icon        | <code>Object</code>                        | the sub menu icon style                                                                            |
-| options.disableTapHighlight   | <code>boolean</code>                       | disable highlight when tap                                                                         |
-| options.cursor                | <code>Object</code>                        | cursor config                                                                                      |
-| options.cursor.color          | <code>string</code>                        | cursor color                                                                                       |
-| options.cursor.same           | <code>boolean</code>                       | whether the cursor is in the same direction                                                        |
-| options.mask                  | <code>Object</code>                        | mask config                                                                                        |
-| options.mask.color            | <code>string</code>                        | mask color                                                                                         |
-| options.highlight             | <code>Object</code>                        | highlight config                                                                                   |
-| options.highlight.color       | <code>string</code>                        | highlight color                                                                                    |
-| options.scrollSpeedLevel      | <code>number</code>                        | The speed of scrolling when touching bottom, default 4                                             |
-| options.scrollOffsetBottom    | <code>number</code> \| <code>string</code> | triggering scrolling, distance from the bottom, default 100                                        |
-| options.markdownOptions       | <code>Object</code>                        | Customize options about the mapping relations between HTML and Markdown                            |
-| options.regions               | <code>Array.&lt;Object&gt;</code>          | In region mode, all region info                                                                    |
-| options.regions[].text        | <code>string</code>                        | region text                                                                                        |
-| options.regions[].top         | <code>number</code>                        | region top                                                                                         |
-| options.regions[].left        | <code>number</code>                        | region left                                                                                        |
-| options.regions[].width       | <code>number</code>                        | region width                                                                                       |
-| options.regions[].height      | <code>number</code>                        | region height                                                                                      |
-| options.disableSelect         | <code>boolean</code>                       | disabled select                                                                                    |
+| Param                          | Type                                       | Description                                                                                        |
+| ------------------------------ | ------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| options                        | <code>Object</code>                        | options                                                                                            |
+| options.menuItems              | <code>Array&lt;Object&gt;</code> \| <code>(selection: SelectionContent, type: 'select'\|'highlight') => Array&lt;Object&gt;</code>         | menu item option                                                                                   |
+| options.menuItems[].text       | <code>string</code>                        | menu text                                                                                          |
+| options.menuItems[].type       | <code>string</code>                    | menu type 'select'(Show menu only when selected) 'highlight' (Show menu only when click highlight) |
+| options.menuItems[].style      | <code>Object</code>                        | menu item style                                                                                    |
+| options.menuItems[].iconName   | <code>string</code>          | menu icon class                                                                                    |
+| options.menuItems[].iconStyle  | <code>Object</code>                        | menu item icon style                                                                               |
+| options.menuItems[].title      | <code>String</code>                        | menu item title                                                                                    |
+| options.menuItems[].titleStyle | <code>Object</code>                        | menu item title style                                                                              |
+| options.menuTopOffset          | <code>number</code>\|<code>string</code> | the offset from the top of the menu relative screen, default 0.                                    |
+| options.menuStyle              | <code>Object</code>                        | the menu style                                                                                     |
+| options.menuStyle.menu         | <code>Object</code>                        | the menu style                                                                                     |
+| options.menuStyle.triangle     | <code>Object</code>                        | the triangle style                                                                                 |
+| options.menuStyle.item         | <code>Object</code>                        | the sub menu style                                                                                 |
+| options.menuStyle.icon         | <code>Object</code>                        | the sub menu icon style                                                                            |
+| options.disableTapHighlight    | <code>boolean</code>                       | disable highlight when tap                                                                         |
+| options.cursor                 | <code>Object</code>                        | cursor config                                                                                      |
+| options.cursor.color           | <code>string</code>                        | cursor color                                                                                       |
+| options.cursor.same            | <code>boolean</code>                       | whether the cursor is in the same direction                                                        |
+| options.mask                   | <code>Object</code>                        | mask config                                                                                        |
+| options.mask.color             | <code>string</code>                        | mask color                                                                                         |
+| options.highlight              | <code>Object</code>                        | highlight config                                                                                   |
+| options.highlight.color        | <code>string</code>                        | highlight color                                                                                    |
+| options.scrollSpeedLevel       | <code>number</code>                        | The speed of scrolling when touching bottom, default 4                                             |
+| options.scrollOffsetBottom     | <code>number</code> \| <code>string</code> | triggering scrolling, distance from the bottom, default 100                                        |
+| options.markdownOptions        | <code>Object</code>                        | Customize options about the mapping relations between HTML and Markdown                            |
+| options.regions                | <code>Array.&lt;Object&gt;</code>          | In region mode, all region info                                                                    |
+| options.regions[].text         | <code>string</code>                        | region text                                                                                        |
+| options.regions[].top          | <code>number</code>                        | region top                                                                                         |
+| options.regions[].left         | <code>number</code>                        | region left                                                                                        |
+| options.regions[].width        | <code>number</code>                        | region width                                                                                       |
+| options.regions[].height       | <code>number</code>                        | region height                                                                                      |
+| options.disableSelect          | <code>boolean</code>                       | disabled select                                                                                    |
 
 **Example**
 
@@ -281,15 +283,15 @@ Highlight the lines between the specified nodes
 
 **Kind**: instance method of [<code>EasyMarker</code>](#EasyMarker)
 
-| Param                  | Type                | Description              |
-| ---------------------- | ------------------- | ------------------------ |
-| selection              | <code>Object</code> | selection                |
-| selection.anchorNode   | <code>Node</code>   | start node               |
-| selection.anchorOffset | <code>number</code> | start node's text offset |
-| selection.focusNode    | <code>Node</code>   | end node                 |
-| selection.focusOffset  | <code>number</code> | start node's text offset |
-| [id]                   | <code>\*</code>     | line id                  |
-| [meta]                 | <code>\*</code>     | meta information         |
+| Param                  | Type                           | Description              |
+| ---------------------- | ------------------------------ | ------------------------ |
+| selection              | <code>Object</code>            | selection                |
+| selection.anchorNode   | <code>Node</code>              | start node               |
+| selection.anchorOffset | <code>number</code>            | start node's text offset |
+| selection.focusNode    | <code>Node</code>              | end node                 |
+| selection.focusOffset  | <code>number</code>            | start node's text offset |
+| [id]                   | <code>\*</code>                | line id                  |
+| [meta]                 | <code>HighlightLineMeta</code> | meta information         |
 
 **Example**
 
@@ -317,7 +319,7 @@ Highlight multiple lines
 | ------------------------------ | --------------------------------- |
 | lines                          | <code>Array.&lt;Object&gt;</code> |
 | [lines[].id]                   | <code>\*</code>                   |
-| [lines[].meta]                 | <code>\*</code>                   |
+| [lines[].meta]                 | <code>HighlightLineMeta</code>    |
 | lines[].selection              | <code>Object</code>               |
 | lines[].selection.anchorNode   | <code>Node</code>                 |
 | lines[].selection.anchorOffset | <code>number</code>               |
@@ -446,12 +448,17 @@ Menu item click handler
 
 **Kind**: inner typedef of [<code>EasyMarker</code>](#EasyMarker)
 
-| Param                  | Type                | Description              |
-| ---------------------- | ------------------- | ------------------------ |
-| id                     | <code>\*</code>     | line ID                  |
-| meta                   | <code>\*</code>     | meta information         |
-| selection              | <code>Object</code> | selection                |
-| selection.anchorNode   | <code>Node</code>   | start node               |
-| selection.anchorOffset | <code>number</code> | start node's text offset |
-| selection.focusNode    | <code>Node</code>   | end node                 |
-| selection.focusOffset  | <code>number</code> | start node's text offset |
+| Param                  | Type                           | Description              |
+| ---------------------- | ------------------------------ | ------------------------ |
+| id                     | <code>\*</code>                | line ID                  |
+| meta                   | <code>HighlightLineMeta</code> | meta information         |
+| selection              | <code>Object</code>            | selection                |
+| selection.anchorNode   | <code>Node</code>              | start node               |
+| selection.anchorOffset | <code>number</code>            | start node's text offset |
+| selection.focusNode    | <code>Node</code>              | end node                 |
+| selection.focusOffset  | <code>number</code>            | start node's text offset |
+
+### [Special Type](./index.d.ts)
+
+- HighlightLineMeta
+- SelectionContent

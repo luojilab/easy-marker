@@ -13,16 +13,26 @@ declare class EasyMarker {
   ): void;
   public highlightLines(HighlightLines: HighlightLine[]): void;
   public cancelHighlightLine(id: string | number): boolean;
-  public onHighlightLineClick(
+  public onHighlightLineClick(// 老
     cb: (
       id: string | number,
       meta: unknown,
       selection: SelectionContent,
     ) => void,
   ): void;
+  public onHighlightLineClick(// 新
+    cb: (
+      hightClickPriorityLine: { id: string | number, line: HighlightLineInfo },
+      clickLines: { id: string | number, line: HighlightLineInfo }[],
+      e: Event
+    ) => void,
+  ): void;
   public onSelectStatusChange(cb: (status: SelectStatus) => void): void;
   public onMenuClick(
-    cb: (id: string | number, selection: SelectionContent) => void,
+    cb: (id: string | number, selection: SelectionContent, options: OldMenuOptions) => void,
+  ): void;
+  public onMenuClick(
+    cb: (id: string | number, selection: SelectionContent, options: NewMenuOptions) => void,
   ): void;
   public registerEventHook(cb: () => void): void;
   public destroy(): void;
@@ -41,13 +51,19 @@ export enum SelectStatus {
   FINISH = 'finish',
 }
 
+export enum NoteType {
+  UNDERLINE = 'underline',
+  HIGHLIGHT = 'highlight',
+  DASH = 'dash'
+}
+
 export interface InitOptions {
   excludeElements?: HTMLElement[];
   includeElements?: HTMLElement[];
 }
 
 export interface EasyMarkerOptions {
-  menuItems?: MenuItem[];
+  menuItems?: MenuItem[] | ((selection: SelectionIdentifier, type: MenuType) => MenuItem[]);
   menuTopOffset?: number | string;
   menuStyle?: MenuStyle;
   disableTapHighlight?: boolean;
@@ -122,7 +138,27 @@ export interface MarkdownOptions {
 export interface HighlightLine {
   selection: SelectionIdentifier;
   id?: string | number;
-  meta?: unknown;
+  meta?: HighlightLineMeta
+}
+
+/** clickAction 与 clickPriority 必须一起使用 */
+export type HighlightLineMeta = {
+  [k: string]: any
+  clickPriority?: number,
+  clickAction?: 'menuPop' | 'custom',
+  type?: NoteType,
+};
+
+export type HighlightLineInfo = Omit<HighlightLine, 'id'>
+
+export type OldMenuOptions = {
+  e: Event,
+  id: string | number,
+  meta: unknown,
+}
+export type NewMenuOptions = {
+  [k: number]: { id: string | number, line: HighlightLineInfo },
+  e: Event,
 }
 
 export default EasyMarker;
