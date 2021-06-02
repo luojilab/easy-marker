@@ -1,6 +1,6 @@
 import BaseElement from './base'
 import TextNode from '../lib/text_node'
-import { getTouchPosition, inRectangle, anyToPx, rectToPointArray, getHightClickPriorityLine } from '../lib/helpers'
+import { getTouchPosition, inRectangle, anyToPx, rectToPointArray, getHighClickPriorityLine } from '../lib/helpers'
 import { EasyMarkerMode, NoteType } from '../lib/types'
 
 /**
@@ -305,7 +305,7 @@ export default class Highlight extends BaseElement {
 
 
     if (clickLines.length > 0 && this.easyMarker) {
-      const hightClickPriorityLine = getHightClickPriorityLine(clickLines)
+      const hightClickPriorityLine = getHighClickPriorityLine(clickLines)
 
       if (hightClickPriorityLine && hightClickPriorityLine.line.meta.clickAction) { // !REMEMBER: clickAction 与 clickPriority 必须成对使用
         if (hightClickPriorityLine.line.meta.clickAction === 'custom') {
