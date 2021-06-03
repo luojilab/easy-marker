@@ -305,13 +305,13 @@ export default class Highlight extends BaseElement {
 
 
     if (clickLines.length > 0 && this.easyMarker) {
-      const hightClickPriorityLine = getHighClickPriorityLine(clickLines)
+      const highClickPriorityLine = getHighClickPriorityLine(clickLines)
 
-      if (hightClickPriorityLine && hightClickPriorityLine.line.meta.clickAction) { // !REMEMBER: clickAction 与 clickPriority 必须成对使用
-        if (hightClickPriorityLine.line.meta.clickAction === 'custom') {
-          this.easyMarker.highlightLineClick(hightClickPriorityLine, clickLines, e)
-        } else if (hightClickPriorityLine.line.meta.clickAction === 'menuPop') {
-          this.easyMarker.showHighlightMenu(hightClickPriorityLine.line.selection, clickLines)
+      if (highClickPriorityLine && highClickPriorityLine.line.meta.clickAction) { // !REMEMBER: clickAction 与 clickPriority 必须成对使用
+        if (highClickPriorityLine.line.meta.clickAction === 'custom') {
+          this.easyMarker.highlightLineClick(highClickPriorityLine, clickLines, e)
+        } else if (highClickPriorityLine.line.meta.clickAction === 'menuPop') {
+          this.easyMarker.showHighlightMenu(highClickPriorityLine.line.selection, clickLines)
         }
       } else if (this.easyMarker.highlightLineClick) {
         const [clickLine] = clickLines // TODO: 兼容老逻辑，确保没影响可以删除

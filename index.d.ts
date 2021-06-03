@@ -22,7 +22,7 @@ declare class EasyMarker {
   ): void;
   public onHighlightLineClick(// 新
     cb: (
-      hightClickPriorityLine: { id: string | number, line: HighlightLineInfo },
+      highClickPriorityLine: { id: string | number, line: HighlightLineInfo },
       clickLines: { id: string | number, line: HighlightLineInfo }[],
       e: Event
     ) => void,
