@@ -4,7 +4,8 @@
   "description": "Easy marker",
   "main": "dist/easy-marker.esm.js",
   "scripts": {
-    "build": "rollup -c build/esm.rollup.config.js && rollup -c build/rollup.config.js",
+    "build": "rollup -c build/rollup.config.js",
+    "watch": "rollup -w -c build/rollup.config.js",
     "testRegion": "rollup -f iife -o test/regionDist.js -i test/testRegion.js -n test -w",
     "testNode": "rollup -f iife -o test/nodeDist.js -i test/testNode.js -n test -w",
     "doc": "jsdoc2md  src/base_easy_marker.js > api.md",

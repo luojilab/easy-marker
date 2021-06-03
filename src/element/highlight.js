@@ -1,6 +1,6 @@
 import BaseElement from './base'
 import TextNode from '../lib/text_node'
-import { getTouchPosition, inRectangle, anyToPx, rectToPointArray } from '../lib/helpers'
+import { getTouchPosition, inRectangle, anyToPx, rectToPointArray, getHighClickPriorityLine } from '../lib/helpers'
 import { EasyMarkerMode, NoteType } from '../lib/types'
 
 /**
@@ -21,6 +21,7 @@ export default class Highlight extends BaseElement {
       tagColor: '#fff',
       opacity: 1,
       type: 'highlight',
+      strokeDasharray: '2, 2',
       // margin: '0.1rem',
     }
     this.container = container
@@ -151,38 +152,44 @@ export default class Highlight extends BaseElement {
     this.lineMap.forEach((line) => {
       const type = line.meta.type || this.type
       line.points.forEach((points, index) => {
-        if (type === NoteType.UNDERLINE) {
-          this.element.appendChild(this.createLine(points))
-        } else {
-          this.element.appendChild(this.createRectangle(points))
-        }
-        if (line.points.length - 1 === index && line.meta && line.meta.tag) {
-          const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
-          text.setAttribute('x', points[2][0] - 5)
-          text.setAttribute('y', points[2][1] + 4)
-          text.setAttribute('dominant-baseline', 'hanging')
-          text.setAttribute('text-anchor', 'end')
-          text.setAttribute('font-size', '10')
-          text.setAttribute('fill', this.option.tagColor)
-          text.textContent = line.meta.tag
-          text.classList.add('em-highlight-tag-text')
-          this.element.appendChild(text)
-          // setTimeout(() => {
-          // 异步获取位置在某些情况无法正常渲染
-          // 同步执行在某些时候无法取到getBox
-          // const textRect = text.getBBox()
-          const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
-          // rect.setAttribute('x', textRect.x - 5)
-          // rect.setAttribute('y', textRect.y - 1)
-          rect.setAttribute('x', points[2][0] - 25 - 5)
-          rect.setAttribute('y', points[2][1] - 0)
-          rect.setAttribute('rx', 2)
-          rect.setAttribute('ry', 2)
-          rect.setAttribute('width', 20 + 10)
-          rect.setAttribute('height', 14 + 2)
-          rect.setAttribute('fill', this.option.tagBackground)
-          this.element.insertBefore(rect, text)
-          // }, 10)
+        try {
+          if (type === NoteType.UNDERLINE) {
+            this.element.appendChild(this.createLine(points))
+          } else if (type === NoteType.DASH) {
+            this.element.appendChild(this.createDash(points))
+          } else {
+            this.element.appendChild(this.createRectangle(points))
+          }
+          if (line.points.length - 1 === index && line.meta && line.meta.tag) {
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+            text.setAttribute('x', points[2][0] - 5)
+            text.setAttribute('y', points[2][1] + 4)
+            text.setAttribute('dominant-baseline', 'hanging')
+            text.setAttribute('text-anchor', 'end')
+            text.setAttribute('font-size', '10')
+            text.setAttribute('fill', this.option.tagColor)
+            text.textContent = line.meta.tag
+            text.classList.add('em-highlight-tag-text')
+            this.element.appendChild(text)
+            // setTimeout(() => {
+            // 异步获取位置在某些情况无法正常渲染
+            // 同步执行在某些时候无法取到getBox
+            // const textRect = text.getBBox()
+            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+            // rect.setAttribute('x', textRect.x - 5)
+            // rect.setAttribute('y', textRect.y - 1)
+            rect.setAttribute('x', points[2][0] - 25 - 5)
+            rect.setAttribute('y', points[2][1] - 0)
+            rect.setAttribute('rx', 2)
+            rect.setAttribute('ry', 2)
+            rect.setAttribute('width', 20 + 10)
+            rect.setAttribute('height', 14 + 2)
+            rect.setAttribute('fill', this.option.tagBackground)
+            this.element.insertBefore(rect, text)
+            // }, 10)
+          }
+        } catch (error) {
+          console.error('easyMarker.render', error)
         }
       })
     })
@@ -191,10 +198,7 @@ export default class Highlight extends BaseElement {
   /**
    *
    *
-   * @param {Object[]} lines
-   * @param {Selection} lines[].selection
-   * @param {any} [lines[].id]
-   * @param {any} [lines[].meta]
+   * @param {import('../..').HighlightLine[]} lines
    * @memberof Highlight
    */
   highlightLines(lines) {
@@ -258,6 +262,22 @@ export default class Highlight extends BaseElement {
     return line
   }
 
+  createDash(pointList) {
+    const x1 = pointList[2][0]
+    const y1 = pointList[2][1] + 1
+    const x2 = pointList[3][0]
+    const y2 = pointList[3][1] + 1
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+    line.style.stroke = this.option.underlineColor
+    line.style.strokeWidth = this.option.underlineWidth
+    line.style.strokeDasharray = this.option.strokeDasharray
+    line.setAttribute('x1', x1)
+    line.setAttribute('y1', y1)
+    line.setAttribute('x2', x2)
+    line.setAttribute('y2', y2)
+    return line
+  }
+
   createRectangle(pointList) {
     const points = pointList.reduce((acc, [x, y]) => (acc === '' ? `${x},${y}` : `${acc} ${x},${y}`), '')
     const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
@@ -272,21 +292,32 @@ export default class Highlight extends BaseElement {
   handleTap(e) {
     const { x, y } = getTouchPosition(e)
     const { top, left } = this.container.getBoundingClientRect()
-    let clickLine
+    const clickLines = []
     this.lineMap.forEach((line, id) => {
       for (let i = 0; i < line.relativeRects.length; i++) {
         const rect = line.relativeRects[i]
         const margin = line.lineHeight ? (line.lineHeight - rect.height) / 2 : 0
         if (inRectangle(x - left, y - top, rect, margin)) {
-          clickLine = { id, line }
-          break
+          clickLines.push({ id, line })
         }
       }
     })
-    if (clickLine && this.easyMarker) {
-      if (this.easyMarker.highlightLineClick) {
+
+
+    if (clickLines.length > 0 && this.easyMarker) {
+      const highClickPriorityLine = getHighClickPriorityLine(clickLines)
+
+      if (highClickPriorityLine && highClickPriorityLine.line.meta.clickAction) { // !REMEMBER: clickAction 与 clickPriority 必须成对使用
+        if (highClickPriorityLine.line.meta.clickAction === 'custom') {
+          this.easyMarker.highlightLineClick(highClickPriorityLine, clickLines, e)
+        } else if (highClickPriorityLine.line.meta.clickAction === 'menuPop') {
+          this.easyMarker.showHighlightMenu(highClickPriorityLine.line.selection, { highClickPriorityLine, clickLines })
+        }
+      } else if (this.easyMarker.highlightLineClick) {
+        const [clickLine] = clickLines // TODO: 兼容老逻辑，确保没影响可以删除
         this.easyMarker.highlightLineClick(clickLine.id, clickLine.line.meta, clickLine.line.selection, e)
       } else {
+        const [clickLine] = clickLines // TODO: 兼容老逻辑，确保没影响可以删除
         this.easyMarker.showHighlightMenu(clickLine.line.selection, { id: clickLine.id, meta: clickLine.line.meta })
       }
       return true

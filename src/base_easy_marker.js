@@ -277,7 +277,12 @@ class EasyMarker {
     if (val === SelectStatus.FINISH) {
       this.menu.setPosition(this.start, this.end)
       this.menu.type = MenuType.SELECT
-      this.menu.show()
+      this.menu.show({
+        start: this.start,
+        end: this.end,
+        content: this.getSelectText(),
+        markdown: this.getSelectMarkdown(),
+      })
     } else {
       this.menu.hide()
     }
@@ -443,14 +448,7 @@ class EasyMarker {
    * };
    * const meta = { someKey: 'someValue' };
    * em.highlightLines([{selection, id, meta}]);
-   * @param {Object[]} lines
-   * @param {*} [lines[].id]
-   * @param {*} [lines[].meta]
-   * @param {Object} lines[].selection
-   * @param {Node} lines[].selection.anchorNode
-   * @param {number} lines[].selection.anchorOffset
-   * @param {Node} lines[].selection.focusNode
-   * @param {number} lines[].selection.focusOffset
+   * @param {import('../').HighlightLine[]} lines
    * @memberof EasyMarker
    */
   highlightLines(lines) {
@@ -748,11 +746,20 @@ class EasyMarker {
     this.menu.setPosition(this.start, this.end)
     this.menu.type = MenuType.HIGHLIGHT
     this.menu.options = options
-    this.menu.show()
+    this.menu.show({
+      start: this.start,
+      end: this.end,
+      content: this.getSelectText(),
+      markdown: this.getSelectMarkdown(),
+    })
   }
 
   // eslint-disable-next-line class-methods-use-this
   setSelection() {}
+  // eslint-disable-next-line class-methods-use-this
+  getSelectText() {}
+  // eslint-disable-next-line class-methods-use-this
+  getSelectMarkdown() {}
 
   getTouchRelativePosition(e) {
     const cursorOffset = this.deviceType === DeviceType.MOBILE ? this.movingCursor.height / 2 : 0

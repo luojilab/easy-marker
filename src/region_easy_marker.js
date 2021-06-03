@@ -41,6 +41,11 @@ class RegionEasyMarker extends BaseEasyMarker {
     return text
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  getSelectMarkdown() {
+    return RegionEasyMarker.getSelectMarkdown()
+  }
+
   /**
    * touchstart event handler
    *
@@ -118,7 +123,7 @@ class RegionEasyMarker extends BaseEasyMarker {
           start: this.selectRegion.start,
           end: this.selectRegion.end,
           content: this.getSelectText(),
-          markdown: RegionEasyMarker.getSelectMarkdown(),
+          markdown: this.getSelectMarkdown(),
         },
         e
       )
@@ -139,7 +144,7 @@ class RegionEasyMarker extends BaseEasyMarker {
         start: this.selectRegion.start,
         end: this.selectRegion.end,
         content: this.getSelectText(),
-        markdown: RegionEasyMarker.getSelectMarkdown(),
+        markdown: this.getSelectMarkdown(),
       })
       const position = this.getTouchRelativePosition(e)
       const startCursorRegion = this.cursor.start.inRegion(position)

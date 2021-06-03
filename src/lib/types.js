@@ -13,6 +13,7 @@ const EasyMarkerMode = {
 const NoteType = {
   UNDERLINE: 'underline',
   HIGHLIGHT: 'highlight',
+  DASH: 'dash',
 }
 
 const DeviceType = {
