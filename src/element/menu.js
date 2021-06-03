@@ -77,7 +77,7 @@ export default class Menu extends BaseElement {
     this.height = 0
     this.width = 0
     this.type = MenuType.SELECT
-    this.options = null // TODO: object or array 存的是点击的Lines，名字起得不好，需要后期改名
+    this.options = null // 缓存selection携带的一些数据信息
     this.createElement()
     this.mount()
     this.hide()
@@ -245,11 +245,7 @@ export default class Menu extends BaseElement {
   }
 
   reset() {
-    if (this.options instanceof Array) {
-      this.options = []
-    } else {
-      this.options = {}
-    }
+    this.options = {}
   }
 
   get isShow() {

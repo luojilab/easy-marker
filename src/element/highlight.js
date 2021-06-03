@@ -311,7 +311,7 @@ export default class Highlight extends BaseElement {
         if (highClickPriorityLine.line.meta.clickAction === 'custom') {
           this.easyMarker.highlightLineClick(highClickPriorityLine, clickLines, e)
         } else if (highClickPriorityLine.line.meta.clickAction === 'menuPop') {
-          this.easyMarker.showHighlightMenu(highClickPriorityLine.line.selection, clickLines)
+          this.easyMarker.showHighlightMenu(highClickPriorityLine.line.selection, { highClickPriorityLine, clickLines })
         }
       } else if (this.easyMarker.highlightLineClick) {
         const [clickLine] = clickLines // TODO: 兼容老逻辑，确保没影响可以删除

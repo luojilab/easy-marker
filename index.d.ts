@@ -144,7 +144,7 @@ export interface HighlightLine {
 /** clickAction 与 clickPriority 必须一起使用 */
 export type HighlightLineMeta = {
   [k: string]: any
-  clickPriority?: number,
+  clickPriority?: number, // >= 0
   clickAction?: 'menuPop' | 'custom',
   type?: NoteType,
 };
@@ -157,7 +157,8 @@ export type OldMenuOptions = {
   meta: unknown,
 }
 export type NewMenuOptions = {
-  [k: number]: { id: string | number, line: HighlightLineInfo },
+  highClickPriorityLine: { id: string | number, line: HighlightLineInfo },
+  clickLines: { id: string | number, line: HighlightLineInfo }[]
   e: Event,
 }
 
