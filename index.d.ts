@@ -153,12 +153,12 @@ export type HighlightLineInfo = Omit<HighlightLine, 'id'>
 
 export type OldMenuOptions = {
   e: Event,
-  id: string | number,
-  meta: unknown,
+  id?: string | number,
+  meta?: unknown,
 }
 export type NewMenuOptions = {
-  highClickPriorityLine: { id: string | number, line: HighlightLineInfo },
-  clickLines: { id: string | number, line: HighlightLineInfo }[]
+  highClickPriorityLine?: { id: string | number, line: HighlightLineInfo },
+  clickLines?: { id: string | number, line: HighlightLineInfo }[]
   e: Event,
 }
 
