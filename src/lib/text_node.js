@@ -97,6 +97,8 @@ export default class TextNode {
             ? lastLineMergedRect.top : rect.top
           lastLineMergedRect.bottom = lastLineMergedRect.bottom - rect.bottom > 0
             ? lastLineMergedRect.bottom : rect.bottom
+          lastLineMergedRect.right = lastLineMergedRect.right - rect.right > 0
+            ? lastLineMergedRect.right : rect.right
         } else {
           lineMergedRects.push(copyRect(rect))
         }
