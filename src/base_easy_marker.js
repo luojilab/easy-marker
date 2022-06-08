@@ -589,7 +589,7 @@ class EasyMarker {
     if (this.options.adjustTextStyleDisabled) return
     const { children } = this.container
     for (let i = 0; i < children.length; i++) {
-      children[i].style.zIndex = '40'
+      children[i].style.zIndex = '10'; // @fix 40 -> 10。理论上要比HighlightLine和Cursor等元素要低的吧
       children[i].style.position = 'relative'
     }
   }
